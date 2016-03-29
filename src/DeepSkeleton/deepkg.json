@@ -1,0 +1,22 @@
+{
+  "identifier": "deep.skeleton",
+  "name": "DeepSkeleton",
+  "description": "This is the skeleton (boilerplate) of DEEP Microservices, built on top of DEEP Framework",
+  "version": "0.0.1",
+  "propertyRoot": false,
+  "author": {
+    "name": "Mitoc Group",
+    "email": "hello@mitocgroup.com",
+    "website": "https://www.mitocgroup.com"
+  },
+  "contributors": [
+    {
+      "name": "DEEP Dev Team",
+      "email": "hello@deep.mg",
+      "website": "https://www.deep.mg"
+    }
+  ],
+  "frontendEngine": ["angular"],
+  "dependencies": {
+  }
+}

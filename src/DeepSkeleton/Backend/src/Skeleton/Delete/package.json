@@ -1,0 +1,37 @@
+{
+  "name": "deep-skeleton-skeleton-delete",
+  "version": "0.0.1",
+  "description": "Delete a skeleton item",
+  "author": {
+    "name": "Mitoc Group",
+    "email": "hello@mitocgroup.com",
+    "website": "https://www.mitocgroup.com"
+  },
+  "contributors": [
+    {
+      "name": "DEEP Dev Team",
+      "email": "hello@deep.mg",
+      "website": "https://www.deep.mg"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/MitocGroup/deep-microservices-skeleton/issues"
+  },
+  "keywords": [
+    "DEEP",
+    "DEEP Microservices",
+    "DEEP Microservices Skeleton"
+  ],
+  "scripts": {
+    "postinstall": "npm run compile",
+    "compile": "deepify compile-es6 `pwd`"
+  },
+  "dependencies": {
+    "deep-framework": "^1.x.x"
+  },
+  "devDependencies": {
+  },
+  "preferGlobal": false,
+  "private": true,
+  "analyze": true
+}
