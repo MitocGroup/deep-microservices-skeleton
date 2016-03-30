@@ -1,5 +1,5 @@
-Contributing to [Placeholder]
-=============================
+Contributing to deep-microservices-skeleton
+===========================================
 
 This project is open source, and we encourage developers to contribute. Here below is the easiest way to do so:
 
