@@ -62,6 +62,11 @@ Interested in contributing to deep-microservices-skeleton?
 - Releases: https://github.com/MitocGroup/deep-microservices-skeleton/releases
 - Roadmap: https://github.com/MitocGroup/deep-microservices-skeleton/blob/master/ROADMAP.md
 
+Examples of Web Applications built on top of DEEP Framework:
+
+- Hello World: https://hello.deep.mg | https://github.com/MitocGroup/deep-microservices-helloworld
+- Todo App: https://todo.deep.mg | https://github.com/MitocGroup/deep-microservices-todo-app
+- Enterprise Software Marketplace: https://www.deep.mg
 
 ## Sponsors
 
