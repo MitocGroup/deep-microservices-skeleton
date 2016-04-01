@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "minimist": "^1.2.x",
-    "prompt": "^1.0.x",
     "fs-extra": "^0.x.x"
   },
   "devDependencies": {
