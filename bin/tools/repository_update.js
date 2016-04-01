@@ -18,7 +18,7 @@ let argv = minimist(process.argv.slice(2));
 let msPath = argv.path || argv._[0];
 
 if (typeof argv.interaction !== 'undefined') { // --no-interaction flag sets argv.interaction to false
-  global.NO_INTERACTION = !argv['interaction'];
+  global.NO_INTERACTION = !argv.interaction;
 }
 
 if (!msPath) {
@@ -45,7 +45,7 @@ new BoolQuestion(
 
   new Question(
     'Microservice name: ',
-    [ValidatorFactory.alphanumerical, ValidatorFactory.notEmpty]
+    [ValidatorFactory.notEmpty, ValidatorFactory.alphanumerical]
   ).ask((microserviceName) => {
       updateMicroservice(microserviceName);
   });
