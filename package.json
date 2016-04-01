@@ -25,9 +25,13 @@
     "coverage": "if [ -f '.travis.yml' ]; then bin/test/coverage.sh; else bin/coverage.sh; fi",
     "build": "npm run build:styles && npm run build:modules",
     "build:modules": "jspm bundle app/angular/index lib/modules_bundle.min.js --minify --skip-source-maps --inject",
-    "build:modules:sfx": "jspm bundle-sfx app/angular/index lib/modules_bundle.sfx.min.js --minify"
+    "build:modules:sfx": "jspm bundle-sfx app/angular/index lib/modules_bundle.sfx.min.js --minify",
+    "repository-update": "babel-node bin/tools/repository_update.js --no-interaction"
   },
   "dependencies": {
+    "minimist": "^1.2.x",
+    "prompt": "^1.0.x",
+    "fs-extra": "^0.x.x"
   },
   "devDependencies": {
     "isparta": "^3.1.x"
