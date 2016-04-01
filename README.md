@@ -8,7 +8,7 @@ deep-microservices-skeleton
 
 ## Getting Started
 
-Install DEEP CLI, also known as deepify:
+### Step 1. Install Pre-requisites
 
 ```bash
 npm install deepify -g
@@ -19,16 +19,17 @@ npm install deepify -g
 before running `npm install deepify -g` and make sure all `npm` and `deepify` commands are executed
 inside Git Bash.
 
-Using deepify, dump locally the deep-microservices-skeleton repository:
+### Step 2. Install Microservice(s) Locally
 
 ```bash
 deepify install github://MitocGroup/deep-microservices-skeleton ~/deep-microservices-skeleton
 ```
 
-> If you first run `mkdir ~/deep-microservices-skeleton && cd ~/deep-microservices-skeleton`,
-then optional path parameter `~/deep-microservices-skeleton` can be skipped in all `deepify` commands
+> If you execute `mkdir ~/deep-microservices-skeleton && cd ~/deep-microservices-skeleton`
+before `deepify install ...`, in this case path parameter is optional and can be skipped (e.g. 
+`~/deep-microservices-skeleton`). It will assume current folder in all `deepify` commands.
 
-Next, run locally the web application in deep-microservices-skeleton:
+### Step 3. Run Microservice(s) in Development
 
 ```bash
 deepify server ~/deep-microservices-skeleton -o
@@ -37,7 +38,7 @@ deepify server ~/deep-microservices-skeleton -o
 > When this step is finished, you can open in your browser the link *http://localhost:8000*
 and enjoy the deep-microservices-skeleton running locally.
 
-Finally, deploy the deep-microservices-skeleton to cloud provider:
+### Step 4. Run Microservice(s) in Production
 
 ```bash
 deepify deploy ~/deep-microservices-skeleton
