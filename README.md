@@ -76,4 +76,4 @@ This repository is being sponsored by:
 - [DEEP Marketplace](https://www.deep.mg)
 
 This code can be used under MIT license:
-> See [LICENSE](https://github.com/MitocGroup/deep-framework/blob/master/LICENSE) for more details.
+> See [LICENSE](https://github.com/MitocGroup/deep-microservices-skeleton/blob/master/LICENSE) for more details.
