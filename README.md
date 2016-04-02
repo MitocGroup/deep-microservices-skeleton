@@ -53,6 +53,15 @@ deepify deploy ~/deep-microservices-helloworld
 > Amazon CloudFront distribution takes up to 20 minutes to provision, therefore don’t worry
 if it returns an HTTP error in the first couple of minutes.
 
+### Step 5. Remove Microservice(s) from Production
+
+```bash
+deepify undeploy ~/deep-microservices-helloworld
+```
+
+> Amazon CloudFront distribution takes up to 20 minutes to unprovision. That's why `deepify`
+command checks every 30 seconds if it's disabled and finally removes it from your account.
+
 
 ## Developer Resources
 
