@@ -28,26 +28,26 @@ inside Git Bash.
 ### Step 2. Install Microservice(s) Locally
 
 ```bash
-deepify install github://MitocGroup/deep-microservices-helloworld ~/deep-microservices-helloworld
+deepify install github://MitocGroup/deep-microservices-skeleton ~/deep-microservices-skeleton
 ```
 
-> If you execute `mkdir ~/deep-microservices-helloworld && cd ~/deep-microservices-helloworld`
-before `deepify install ...`, in this case path parameter is optional and can be skipped (e.g. 
-`~/deep-microservices-helloworld`). It will assume current folder in all `deepify` commands.
+> Path parameter in all `deepify` commands is optional and if not specified, assumes current
+working directory. Therefore you can skip `~/deep-microservices-skeleton` by executing
+`mkdir ~/deep-microservices-skeleton && cd ~/deep-microservices-skeleton` before `deepify install`.
 
 ### Step 3. Run Microservice(s) in Development
 
 ```bash
-deepify server ~/deep-microservices-helloworld -o
+deepify server ~/deep-microservices-skeleton -o
 ```
 
 > When this step is finished, you can open in your browser the link *http://localhost:8000*
-and enjoy the deep-microservices-helloworld running locally.
+and enjoy the deep-microservices-skeleton running locally.
 
 ### Step 4. Run Microservice(s) in Production
 
 ```bash
-deepify deploy ~/deep-microservices-helloworld
+deepify deploy ~/deep-microservices-skeleton
 ```
 
 > Amazon CloudFront distribution takes up to 20 minutes to provision, therefore don’t worry
@@ -56,11 +56,11 @@ if it returns an HTTP error in the first couple of minutes.
 ### Step 5. Remove Microservice(s) from Production
 
 ```bash
-deepify undeploy ~/deep-microservices-helloworld
+deepify undeploy ~/deep-microservices-skeleton
 ```
 
 > Amazon CloudFront distribution takes up to 20 minutes to unprovision. That's why `deepify`
-command checks every 30 seconds if it's disabled and finally removes it from your account.
+command checks every 30 seconds if it's disabled and when successful, removes it from your account.
 
 
 ## Developer Resources
