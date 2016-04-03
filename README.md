@@ -45,7 +45,7 @@ deepify server ~/deep-microservices-skeleton -o
 > When this step is finished, you can open in your browser the link *http://localhost:8000*
 and enjoy the deep-microservices-skeleton running locally.
 
-### Step 4. Run Microservice(s) in Production
+### Step 4. Deploy Microservice(s) to Production
 
 ```bash
 deepify deploy ~/deep-microservices-skeleton
