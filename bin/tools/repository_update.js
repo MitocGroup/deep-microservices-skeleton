@@ -99,8 +99,8 @@ function updateMicroservice(microserviceName, resources) {
 function updateReadme(microserviceName, callback) {
   let readmeTemplate = new Readme(
       microserviceName,
-      path.join(msPath, 'BADGES.md'),
-      path.join(msPath, 'DESCRIPTION.md')
+      path.join(msPath, 'docs/BADGES.md'),
+      path.join(msPath, 'docs/DESCRIPTION.md')
   );
 
   readmeTemplate.writeIntoFile(path.join(msPath, 'README.md'), callback);
