@@ -4,8 +4,6 @@
 
 'use strict';
 
-import {Validator} from './Validator';
-
 /**
  * @todo: cache them?
  *
@@ -13,7 +11,7 @@ import {Validator} from './Validator';
  */
 export class ValidatorFactory {
   /**
-   * @return {Validator}
+   * @return {Function}
    */
   static get alphanumerical() {
     return (value) => {
