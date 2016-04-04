@@ -32,10 +32,10 @@ export class AbstractTemplate {
   }
 
   /**
-   * @param string
-   * @param flags
-   * @param regexpPrefix
-   * @param regexpSuffix
+   * @param {String} string
+   * @param {String} flags
+   * @param {String} regexpPrefix
+   * @param {String} regexpSuffix
    * @returns {RegExp}
    * @private
    */
@@ -49,22 +49,22 @@ export class AbstractTemplate {
   }
 
   /**
-   * @param {*} mixed
+   * @param {String} string
    * @param {Boolean} strict
    * @returns {String}
    * @private
    */
-  _tryToReadFromFile(mixed, strict = false) {
-    if (FS.existsSync(mixed)) {
-      let stat = FS.statSync(mixed);
+  _tryToReadFromFile(string, strict = false) {
+    if (FS.existsSync(string)) {
+      let stat = FS.statSync(string);
 
       if (stat.isFile()) {
-        return FS.readFileSync(mixed).toString();
+        return FS.readFileSync(string).toString();
       }
     }
 
     if (strict) {
-      throw new Error(`${mixed} file does not exit`);
+      throw new Error(`${string} file does not exit`);
     }
 
     return null;
