@@ -4,11 +4,7 @@
 
 'use strict';
 
-import {BoolQuestion} from '../Helper/BoolQuestion';
-import {ValidatorFactory} from '../Helper/ValidatorFactory';
 import FS from 'fs';
-import path from 'path';
-import global from '../Helper/Global';
 
 /**
  * Abstract Template
@@ -80,26 +76,6 @@ export class AbstractTemplate {
    */
   writeIntoFile(file, callback) {
     let readmeContent = this.render();
-
-    if (FS.existsSync(file)) {
-      let stat = FS.statSync(file);
-
-      if (stat.isFile()) {
-        if (!global.NO_INTERACTION) {
-          console.log(`File <info>${path.basename(file)}</info> already exists. `);
-        }
-
-        new BoolQuestion(
-          'Do you want to overwrite it? '
-        ).ask((isYes) => {
-          isYes ?
-            FS.writeFile(file, readmeContent, callback) :
-            callback(null, false);
-        });
-
-        return;
-      }
-    }
 
     FS.writeFile(file, readmeContent, callback);
   }

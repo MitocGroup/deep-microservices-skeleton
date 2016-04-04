@@ -30,7 +30,8 @@
   },
   "dependencies": {
     "minimist": "^1.2.x",
-    "fs-extra": "^0.x.x"
+    "fs-extra": "^0.x.x",
+    "inquirer": "^1.x.x"
   },
   "devDependencies": {
     "isparta": "^3.1.x"

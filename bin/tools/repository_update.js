@@ -5,11 +5,10 @@ import path from 'path';
 import FS from 'fs';
 import fsExtra from 'fs-extra';
 import global from './Helper/Global';
-import {Question} from './Helper/Question';
-import {BoolQuestion} from './Helper/BoolQuestion';
 import {ValidatorFactory} from './Helper/ValidatorFactory';
 import {Readme} from './Templates/Readme';
 import {Output} from './Helper/Output';
+import inquirer from 'inquirer';
 
 Output.overwriteConsole().overwriteStdout();
 
@@ -31,95 +30,91 @@ if (!FS.existsSync(msPath) || !FS.statSync(msPath).isDirectory()) {
   process.exit(1);
 }
 
+let resources = [
+  'README.md', '.travis.yml', '.hound.yml', '.houndignore',
+  '.jscs.json', '.jshintrc', 'bin/e2e', 'bin/test',
+];
+let choiceList = resources.reduce((walker, resource) => {
+  walker.push({
+    name: resource,
+    checked: true
+  });
+
+  return walker;
+}, []);
+
 let basename = path.basename(msPath);
 let guessedMsName = basename.replace(/([a-z])([A-Z])/, '$1_$2').toLowerCase();
-console.log(`Detected microservices name "<info>${guessedMsName}</info>".`);
 
-new BoolQuestion(
-  `Do you want to use it? `
-).ask((isYes) => {
-  if (isYes) {
-    updateMicroservice(guessedMsName);
-    return;
-  }
-
-  new Question(
-    'Microservice name: ',
-    [ValidatorFactory.notEmpty, ValidatorFactory.alphanumerical]
-  ).ask((microserviceName) => {
-      updateMicroservice(microserviceName);
+if (global.NO_INTERACTION) {
+  updateMicroservice(guessedMsName, resources);
+} else {
+  inquirer.prompt([{
+    name: 'microserviceName',
+    message: 'Enter microservice name: ',
+    default: guessedMsName,
+    type: 'input',
+    validate: ValidatorFactory.alphanumerical
+  }, {
+    choices: choiceList,
+    type: 'checkbox',
+    message: 'Select resources you want to update: ',
+    name: 'resources'
+  }], (response) => {
+    updateMicroservice(
+        response.microserviceName,
+        response.resources
+    );
   });
-});
+}
 
 /**
  * @param {String} microserviceName
+ * @param {Array} resources
  */
-function updateMicroservice(microserviceName) {
-  let readmeTemplate = new Readme(
-    microserviceName,
-    path.join(msPath, 'BADGES.md'),
-    path.join(msPath, 'DESCRIPTION.md')
-  );
+function updateMicroservice(microserviceName, resources) {
+  let resource = resources.shift();
+  let callback = updateMicroservice.bind(this, microserviceName, resources);
 
-  readmeTemplate.writeIntoFile(path.join(msPath, 'README.md'), () => {
-    let resources = [
-      '.travis.yml', '.hound.yml', '.houndignore',
-      '.jscs.json', '.jshintrc', 'bin/e2e', 'bin/test',
-    ];
-
-    let updateResources = () => {
-      let resource = resources.shift();
-      if (resource) {
-        askToUpdateResource(resource, updateResources);
-
-        return;
-      }
-
+  switch(resource) {
+    case undefined:
       console.log('<info>Done</info>');
       process.exit(0);
-    };
+      break;
+    case 'README.md':
+      updateReadme(microserviceName, callback);
+      break;
+    default:
+      updateResource(resource, callback);
+      break;
+  }
 
-    updateResources();
-  });
+  console.log(`<info>${resource}</info> has been updated`);
+}
+
+/**
+ * @param {String} microserviceName
+ * @param {Function} callback
+ */
+function updateReadme(microserviceName, callback) {
+  let readmeTemplate = new Readme(
+      microserviceName,
+      path.join(msPath, 'BADGES.md'),
+      path.join(msPath, 'DESCRIPTION.md')
+  );
+
+  readmeTemplate.writeIntoFile(path.join(msPath, 'README.md'), callback);
 }
 
 /**
  * @param {String} resource
  * @param {Function} callback
  */
-function askToUpdateResource(resource, callback) {
-  let resourceFrom = path.join(rootDirectory, resource);
-  let resourceTo = path.join(msPath, resource);
-  let doUpdate = () => {
-    fsExtra.copy(resourceFrom, resourceTo, callback);
+function updateResource(resource, callback) {
+  let pathFrom = path.join(rootDirectory, resource);
+  let pathTo = path.join(msPath, resource);
 
-    console.log(`<info>${resource}</info> has been updated`);
-  };
-
-  new BoolQuestion(
-    `Do you want to update ${resource}? `
-  ).ask((isYes) => {
-    if (isYes) {
-      if (FS.existsSync(resourceTo)) {
-        let stat = FS.statSync(resourceTo);
-        let type = stat.isFile() ? 'File' : 'Directory';
-
-        if (!global.NO_INTERACTION) {
-          console.log(`${type} <info>${path.basename(resourceTo)}</info> already exists. `);
-        }
-
-        new BoolQuestion(
-          'Do you want to overwrite it? '
-        ).ask((isYes) => {
-            (isYes ? doUpdate : callback)();
-        });
-
-        return;
-      }
-    }
-
-    doUpdate();
-  });
+  fsExtra.copy(pathFrom, pathTo, callback);
 }
 
 
