@@ -73,7 +73,7 @@ export class Readme extends AbstractTemplate {
       processedTemplate = processedTemplate.replace(regexpPlaceholder, replacement);
     }
 
-    processedTemplate = this._adjustHeader(processedTemplate);
+    processedTemplate = this._adjustHeaderLine(processedTemplate);
 
     return processedTemplate;
   }
@@ -83,7 +83,7 @@ export class Readme extends AbstractTemplate {
    * @returns {String}
    * @private
    */
-  _adjustHeader(template) {
+  _adjustHeaderLine(template) {
     return template.replace(/\={3,}/, '='.repeat(this._microserviceName.length));
   }
 }
