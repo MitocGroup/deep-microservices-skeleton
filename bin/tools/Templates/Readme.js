@@ -56,9 +56,9 @@ export class Readme extends AbstractTemplate {
    */
   render() {
     let replacementMap = {};
-    replacementMap[Readme.BADGES_PLACEHOLDER] = this._badges;
-    replacementMap[Readme.DESCRIPTION_PLACEHOLDER] = this._description;
-    replacementMap[Readme.MS_NAME_PLACEHOLDER] = this._microserviceName;
+    replacementMap[Readme.BADGES_PLACEHOLDER] = this._badges.trim();
+    replacementMap[Readme.DESCRIPTION_PLACEHOLDER] = this._description.trim();
+    replacementMap[Readme.MS_NAME_PLACEHOLDER] = this._microserviceName.trim();
 
     let processedTemplate = this.template;
 
@@ -73,6 +73,17 @@ export class Readme extends AbstractTemplate {
       processedTemplate = processedTemplate.replace(regexpPlaceholder, replacement);
     }
 
+    processedTemplate = this._adjustHeader(processedTemplate);
+
     return processedTemplate;
+  }
+
+  /**
+   * @param {String} template
+   * @returns {String}
+   * @private
+   */
+  _adjustHeader(template) {
+    return template.replace(/\={3,}/, '='.repeat(this._microserviceName.length));
   }
 }

@@ -105,8 +105,8 @@ function updateMicroservice(microserviceName, resources) {
 function updateReadme(microserviceName, callback) {
   let readmeTemplate = new Readme(
       microserviceName,
-      path.join(msPath, 'docs/BADGES.md'),
-      path.join(msPath, 'docs/DESCRIPTION.md')
+      path.join(msPath, 'docs/badges.md'),
+      path.join(msPath, 'docs/description.md')
   );
 
   readmeTemplate.writeIntoFile(path.join(msPath, 'README.md'), callback);
@@ -116,25 +116,11 @@ function updateReadme(microserviceName, callback) {
  * @param {Function} callback
  */
 function updateTravis(callback) {
-  let travisTemplate = new TravisConfig();
-  
-  if (global.NO_INTERACTION) {
-    travisTemplate.writeIntoFile(path.join(msPath, '.travis.yml'), callback);
-    return ;
-  }
-  
-  let question = {
-    type: 'confirm',
-    message: 'Do you want to enable frontend related tests? ',
-    default: true, // @todo: set to false?
-    name: 'doEnable'
-  };
+  let travisTemplate = new TravisConfig(
+    path.join(msPath, 'docs/.travis.yml')
+  );
 
-  inquirer.prompt([question], function(response) {
-    travisTemplate
-      .enableFrontendTests(response.doEnable)
-      .writeIntoFile(path.join(msPath, '.travis.yml'), callback);
-  })
+  travisTemplate.writeIntoFile(path.join(msPath, '.travis.yml'), callback);
 }
 
 /**
@@ -147,5 +133,3 @@ function updateResource(resource, callback) {
 
   fsExtra.copy(pathFrom, pathTo, callback);
 }
-
-
