@@ -21,8 +21,8 @@ export class Readme extends AbstractTemplate {
   /**
    * @returns {String}
    */
-  static get DETAILS_PLACEHOLDER() {
-    return '[Repository_Details_Placeholder]';
+  static get DESCRIPTION_PLACEHOLDER() {
+    return '[Repository_Description_Placeholder]';
   }
   /**
    * @returns {String}
@@ -34,14 +34,14 @@ export class Readme extends AbstractTemplate {
   /**
    * @param {String} microserviceName
    * @param {String} badges
-   * @param {String} details
+   * @param {String} description
    */
-  constructor(microserviceName, badges, details) {
+  constructor(microserviceName, badges, description) {
     super();
 
     this._microserviceName = microserviceName;
     this._badges = this._tryToReadFromFile(badges) || Readme.BADGES_PLACEHOLDER;
-    this._details = this._tryToReadFromFile(details) || Readme.DETAILS_PLACEHOLDER;
+    this._description = this._tryToReadFromFile(description) || Readme.DESCRIPTION_PLACEHOLDER;
   }
 
   /**
@@ -57,7 +57,7 @@ export class Readme extends AbstractTemplate {
   render() {
     let replacementMap = {};
     replacementMap[Readme.BADGES_PLACEHOLDER] = this._badges;
-    replacementMap[Readme.DETAILS_PLACEHOLDER] = this._details;
+    replacementMap[Readme.DESCRIPTION_PLACEHOLDER] = this._description;
     replacementMap[Readme.MS_NAME_PLACEHOLDER] = this._microserviceName;
 
     let processedTemplate = this.template;
