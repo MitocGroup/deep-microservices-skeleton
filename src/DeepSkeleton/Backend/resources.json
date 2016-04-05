@@ -1,28 +1,28 @@
 {
   "skeleton": {
-    "create": {
-      "description": "Lambda function that creates skeleton item",
-      "type": "lambda",
-      "methods": ["POST"],
-      "source": "src/Skeleton/Create"
-    },
     "retrieve": {
       "description": "Lambda function that retrieves skeleton item",
       "type": "lambda",
       "methods": ["GET"],
       "source": "src/Skeleton/Retrieve"
     },
-    "delete": {
-      "description": "Lambda function that deletes skeleton item",
+    "create": {
+      "description": "Lambda function that creates skeleton item",
       "type": "lambda",
-      "methods": ["DELETE"],
-      "source": "src/Skeleton/Delete"
+      "methods": ["POST"],
+      "source": "src/Skeleton/Create"
     },
     "update": {
       "description": "Lambda function that updates skeleton item",
       "type": "lambda",
       "methods": ["PUT"],
       "source": "src/Skeleton/Update"
+    },
+    "delete": {
+      "description": "Lambda function that deletes skeleton item",
+      "type": "lambda",
+      "methods": ["DELETE"],
+      "source": "src/Skeleton/Delete"
     }
   }
 }
