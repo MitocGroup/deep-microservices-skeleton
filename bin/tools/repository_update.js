@@ -4,11 +4,12 @@ import minimist from 'minimist';
 import path from 'path';
 import FS from 'fs';
 import fsExtra from 'fs-extra';
+import inquirer from 'inquirer';
 import global from './Helper/Global';
 import {ValidatorFactory} from './Helper/ValidatorFactory';
 import {Readme} from './Templates/Readme';
 import {Output} from './Helper/Output';
-import inquirer from 'inquirer';
+import {TravisConfig} from './Templates/TravisConfig';
 
 Output.overwriteConsole().overwriteStdout();
 
@@ -74,7 +75,11 @@ if (global.NO_INTERACTION) {
  */
 function updateMicroservice(microserviceName, resources) {
   let resource = resources.shift();
-  let callback = updateMicroservice.bind(this, microserviceName, resources);
+  let callback = () => {
+    console.log(`<info>${resource}</info> has been updated`);
+
+    updateMicroservice(microserviceName, resources);
+  };
 
   switch(resource) {
     case undefined:
@@ -84,12 +89,13 @@ function updateMicroservice(microserviceName, resources) {
     case 'README.md':
       updateReadme(microserviceName, callback);
       break;
+    case '.travis.yml':
+      updateTravis(callback);
+      break;
     default:
       updateResource(resource, callback);
       break;
   }
-
-  console.log(`<info>${resource}</info> has been updated`);
 }
 
 /**
@@ -104,6 +110,31 @@ function updateReadme(microserviceName, callback) {
   );
 
   readmeTemplate.writeIntoFile(path.join(msPath, 'README.md'), callback);
+}
+
+/**
+ * @param {Function} callback
+ */
+function updateTravis(callback) {
+  let travisTemplate = new TravisConfig();
+  
+  if (global.NO_INTERACTION) {
+    travisTemplate.writeIntoFile(path.join(msPath, '.travis.yml'), callback);
+    return ;
+  }
+  
+  let question = {
+    type: 'confirm',
+    message: 'Do you want to enable frontend related tests? ',
+    default: true, // @todo: set to false?
+    name: 'doEnable'
+  };
+
+  inquirer.prompt([question], function(response) {
+    travisTemplate
+      .enableFrontendTests(response.doEnable)
+      .writeIntoFile(path.join(msPath, '.travis.yml'), callback);
+  })
 }
 
 /**

@@ -37,7 +37,7 @@ export class AbstractTemplate {
    * @param {String} regexpPrefix
    * @param {String} regexpSuffix
    * @returns {RegExp}
-   * @private
+   * @protected
    */
   _strToRegexp(string, flags = 'ig', regexpPrefix = '', regexpSuffix = '') {
     let escapedString = string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -52,7 +52,7 @@ export class AbstractTemplate {
    * @param {String} string
    * @param {Boolean} strict
    * @returns {String}
-   * @private
+   * @protected
    */
   _tryToReadFromFile(string, strict = false) {
     if (FS.existsSync(string)) {

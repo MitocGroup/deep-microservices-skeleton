@@ -36,8 +36,8 @@ before_install:
   - npm install -g karma-verbose-reporter@0.0.3
   - npm install -g karma-phantomjs-launcher@0.2.1
   - npm install -g karma-ng-html2js-preprocessor@0.2.0
-  - npm run protractor-install
-  - npm run protractor-prepare
+  # - npm run protractor-install
+  # - npm run protractor-prepare
 
 after_success:
   - npm run coverage
