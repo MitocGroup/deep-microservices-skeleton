@@ -6,6 +6,7 @@ node_js:
 cache:
   directories:
     - $(npm root -g)
+    - node_modules
 
 branches:
   only:
