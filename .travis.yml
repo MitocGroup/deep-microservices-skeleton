@@ -16,6 +16,7 @@ branches:
     - test
 
 before_install:
+  - cp bin/test/package.json .
   - npm run prepare
 
 after_success:

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-cp bin/test/package.json .
-
 npm install -g deepify &&\
 npm install -g jspm@0.16.15 &&\
 npm install -g babel@5.8.x &&\
