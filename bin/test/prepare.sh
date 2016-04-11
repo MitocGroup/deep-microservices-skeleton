@@ -20,7 +20,6 @@ npm install -g karma-coverage@douglasduteil/karma-coverage#next &&\
 npm install -g karma-verbose-reporter@0.0.x &&\
 npm install -g karma-phantomjs-launcher@0.2.x &&\
 npm install -g karma-ng-html2js-preprocessor@0.2.x &&\
-npm install isparta@3.1.x &&\
 # npm run protractor-install &&\
 # npm run protractor-prepare &&\
 
