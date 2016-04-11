@@ -17,7 +17,9 @@ branches:
     - dev
     - stage
     - test
-
+env:
+  global:
+    - e2e=no
 before_install:
   - cp bin/test/package.json .
   - npm run prepare

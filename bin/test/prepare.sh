@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
+npm install -g babel@5.8.x &&\
 npm install -g deepify &&\
 npm install -g jspm@0.16.15 &&\
-npm install -g babel@5.8.x &&\
 npm install -g browserify@11.2.x &&\
 npm install -g jscs@2.1.x &&\
 npm install -g mocha@2.3.x &&\
