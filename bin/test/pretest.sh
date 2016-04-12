@@ -6,7 +6,7 @@
 source $(dirname $0)/_head.sh
 
 checkStatus () {
-	curl -sL -w "%{http_code}\\n" "$1" -o /dev/null
+  curl -sL -w "%{http_code}\\n" "$1" -o /dev/null
 }
 
 isLocalServerUp () {
@@ -41,10 +41,8 @@ isLocalServerUp () {
 ##########################################################
 ### launch local server and check if it up and running ###
 ##########################################################
-if [ ${e2e} != 'no' ]; then
-    if [ ${TRAVIS_NODE_VERSION} != '5.9' ]; then
-        deepify server ${__SRC_PATH} -s & sleep 15 & isLocalServerUp
-    fi
+if [ ${TRAVIS_NODE_VERSION} != 5.* ] && [ ${__E2E_WITH_PUBLIC_REPO} == ${E2E_TESTING} ]; then
+  deepify server ${__SRC_PATH} -s & sleep 15 & isLocalServerUp
 else
-     echo "E2E is NO. Skipping pretest..."
+  echo "Skipping launching deepify server"
 fi

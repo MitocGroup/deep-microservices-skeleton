@@ -1,6 +1,9 @@
 language: node_js
 sudo: false
 node_js:
+  - '0.10'
+  - '0.11'
+  - '0.12'
   - '4.3'
   - '5.0'
   - '5.1'
@@ -18,9 +21,7 @@ branches:
     - dev
     - stage
     - test
-env:
-  global:
-    - e2e=no
+
 before_install:
   - cp bin/test/package.json .
   - npm run prepare
