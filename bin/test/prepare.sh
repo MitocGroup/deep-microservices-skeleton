@@ -26,7 +26,7 @@ time npm install isparta@3.1.x &&\
 time jspm config registries.github.auth $JSPM_GITHUB_AUTH_TOKEN
 
  #open sauce connection
-time sauce_connect:true
+addons:sauce_connect:true
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE_REPO}" = "${E2E_TESTING}" ]; then
   time npm run protractor-install
 fi
