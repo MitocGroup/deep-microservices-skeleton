@@ -25,10 +25,10 @@ time npm install -g karma-ng-html2js-preprocessor@0.2.x &&\
 time npm install isparta@3.1.x &&\
 time jspm config registries.github.auth $JSPM_GITHUB_AUTH_TOKEN
 
- #open sauce connection
-time sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE_REPO}" = "${E2E_TESTING}" ]; then
   time npm run protractor-install
+  time npm install sauce-connect
+  time sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY
 fi
 
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ]; then
