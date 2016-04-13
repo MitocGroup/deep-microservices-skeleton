@@ -1,0 +1,3 @@
+env:
+  global:
+    - E2E_TESTING=none
