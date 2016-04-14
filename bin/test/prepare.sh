@@ -27,8 +27,6 @@ jspm config registries.github.auth $JSPM_GITHUB_AUTH_TOKEN
 
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE_REPO}" = "${E2E_TESTING}" ]; then
   npm run protractor-install
-  npm install sauce-connect
-  sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY
 fi
 
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ]; then
