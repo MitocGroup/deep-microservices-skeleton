@@ -25,11 +25,11 @@ npm install -g karma-ng-html2js-preprocessor@0.2.x &&\
 npm install isparta@3.1.x &&\
 jspm config registries.github.auth $JSPM_GITHUB_AUTH_TOKEN
 
+
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE_REPO}" = "${E2E_TESTING}" ]; then
-  npm run protractor-install
+  bash `dirname $0`/protractor/install.sh
 fi
 
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ]; then
-  #this one only for public repos
-  npm run protractor-prepare
+  bash `dirname $0`/protractor/prepare.sh
 fi
