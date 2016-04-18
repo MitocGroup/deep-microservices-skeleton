@@ -8,7 +8,7 @@
 echo "TRAVIS_NODE_VERSION: ${TRAVIS_NODE_VERSION}"
 
 # Fix for issue: https://github.com/Medium/phantomjs/issues/430#issuecomment-174038299
-npm config set unsafe-perm false
+npm config set unsafe-perm true
 
 #if [ "${__TRAVIS_NODE_MAJOR_VERSION}" = "5" ]; then
 #  echo "My version: ${TRAVIS_NODE_VERSION}"
@@ -18,4 +18,4 @@ npm config set unsafe-perm false
 #fi
 npm install -g phantomjs@1.9.18
 
-npm config set unsafe-perm true
+npm config set unsafe-perm false
