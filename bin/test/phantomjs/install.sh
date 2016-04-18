@@ -15,7 +15,7 @@ npm config set unsafe-perm false
 #  npm install -g phantomjs@2.1.3
 #else
 #  echo "My version: ${TRAVIS_NODE_VERSION}"
-
+#fi
 npm install -g phantomjs@1.9.18
 
 npm config set unsafe-perm true
