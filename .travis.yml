@@ -38,7 +38,3 @@ before_install:
 
 after_success:
   - npm run coverage
-
-env:
-  global:
-    - E2E_TESTING=none
