@@ -33,7 +33,7 @@ if (!FS.existsSync(msPath) || !FS.statSync(msPath).isDirectory()) {
 
 let resources = [
   'README.md', '.travis.yml', '.hound.yml', '.houndignore',
-  '.jscsrc', '.jshintrc', 'bin/e2e', 'bin/test',
+  '.jscsrc', '.jshintrc', 'bin/test',
 ];
 let choiceList = resources.reduce((walker, resource) => {
   walker.push({
