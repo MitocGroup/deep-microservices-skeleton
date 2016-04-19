@@ -3,19 +3,23 @@
 # Created by vcernomschi on 10/06/2015
 #
 
-#source $(dirname $0)/../_head.sh
+source $(dirname $0)/../_head.sh
 
 echo "TRAVIS_NODE_VERSION: ${TRAVIS_NODE_VERSION}"
 
 # Fix for issue: https://github.com/Medium/phantomjs/issues/430#issuecomment-174038299
-npm config set unsafe-perm false
 
-#if [ "${__TRAVIS_NODE_MAJOR_VERSION}" = "5" ]; then
-#  echo "My version: ${TRAVIS_NODE_VERSION}"
-#  npm install -g phantomjs@2.1.3
-#else
-#  echo "My version: ${TRAVIS_NODE_VERSION}"
+#Initial PhantomJS CDNs
+Phantomjs_bitbucket_CDN="https://bitbucket.org/ariya/phantomjs/downloads"
+Phantomjs_cnpmjs_CDN="https://cnpmjs.org/downloads"
 
-npm install -g phantomjs@1.9.18
+#Returned code of CDN
+HTTP_CODE=`curl -o /dev/null --silent --head --write-out '%{http_code}\n' ${Phantomjs_bitbucket_CDN}`
 
-npm config set unsafe-perm true
+if [ "${HTTP_CODE}"="200" ]; then
+  echo "Using bitbucket source to download PhantomJS"
+  npm install -g phantomjs@1.9.18 --phantomjs_cdnurl=${Phantomjs_bitbucket_CDN}
+else
+  echo "Using cnmpjs source to download PhantomJS"
+  npm install -g phantomjs@1.9.18 --phantomjs_cdnurl=${Phantomjs_cnpmjs_CDN}
+fi
