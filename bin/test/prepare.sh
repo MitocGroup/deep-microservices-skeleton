@@ -28,6 +28,9 @@ jspm config registries.github.auth $JSPM_GITHUB_AUTH_TOKEN
 
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE_REPO}" = "${E2E_TESTING}" ]; then
   bash `dirname $0`/protractor/install.sh
+
+  npm install babel@5.8.19
+  npm install jasmine2-custom-message@0.8.x
 fi
 
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ]; then
