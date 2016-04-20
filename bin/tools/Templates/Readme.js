@@ -27,7 +27,7 @@ export class Readme extends AbstractTemplate {
   /**
    * @returns {String}
    */
-  static get MS_NAME_PLACEHOLDER() {
+  static get NAME_PLACEHOLDER() {
     return 'deep-microservices-skeleton';
   }
 
@@ -58,7 +58,7 @@ export class Readme extends AbstractTemplate {
     let replacementMap = {};
     replacementMap[Readme.BADGES_PLACEHOLDER] = this._badges.trim();
     replacementMap[Readme.DESCRIPTION_PLACEHOLDER] = this._description.trim();
-    replacementMap[Readme.MS_NAME_PLACEHOLDER] = this._microserviceName;
+    replacementMap[Readme.NAME_PLACEHOLDER] = this._microserviceName;
 
     let processedTemplate = this.template;
 
