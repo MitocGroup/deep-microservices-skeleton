@@ -24,6 +24,8 @@ npm link karma-phantomjs-launcher &&\
 npm link karma-ng-html2js-preprocessor &&\
 npm link isparta &&\
 
+bash `dirname $0`/phantomjs/install.sh
+
 ######################
 ### Run unit tests ###
 ######################
