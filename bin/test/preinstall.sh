@@ -25,10 +25,11 @@ npm install -g karma-phantomjs-launcher@0.2.x &&\
 npm install -g karma-ng-html2js-preprocessor@0.2.x &&\
 npm install isparta@3.1.x
 
-if [ -v $TRAVIS_BUILD_ID ]; then
-    jspm config registries.github.auth $JSPM_GITHUB_AUTH_TOKEN
-else
+if [ -z $TRAVIS_BUILD_NUMBER ]; then
     echo "Running locally - no need to jspm config"
+else
+    echo "Running in CI - configuring jspm registries"
+    jspm config registries.github.auth $JSPM_GITHUB_AUTH_TOKEN
 fi
 
 bash `dirname $0`/phantomjs/install.sh
