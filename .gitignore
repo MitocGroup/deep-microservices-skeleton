@@ -111,4 +111,4 @@ lib.compiled
 **/compile
 
 # Special for Trevor package.json
-package.json
+/package.json
