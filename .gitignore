@@ -108,3 +108,7 @@ npm-debug.log
 #####=== Proprietary ===#####
 lib.compiled
 /tests/*
+**/compile
+
+# Special for Trevor package.json
+package.json
