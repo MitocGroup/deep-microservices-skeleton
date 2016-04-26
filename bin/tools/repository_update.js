@@ -10,6 +10,7 @@ import {ValidatorFactory} from './Helper/ValidatorFactory';
 import {Readme} from './Templates/Readme';
 import {Output} from './Helper/Output';
 import {TravisConfig} from './Templates/TravisConfig';
+import {BackendUnitTest} from './Templates/BackendUnitTest';
 
 /**
  * @param {String} resource
@@ -28,9 +29,9 @@ function updateResource(resource, callback) {
  */
 function updateReadme(microserviceName, callback) {
   let readmeTemplate = new Readme(
-      microserviceName,
-      path.join(msPath, 'docs/badges.md'),
-      path.join(msPath, 'docs/description.md')
+    microserviceName,
+    path.join(msPath, 'docs/badges.md'),
+    path.join(msPath, 'docs/description.md')
   );
 
   readmeTemplate.writeIntoFile(path.join(msPath, 'README.md'), callback);
@@ -48,6 +49,17 @@ function updateTravis(callback) {
 }
 
 /**
+ * @param {Function} callback
+ */
+function updateBackendUnitTests(callback) {
+  console.log('in updateBackendUnitTests');
+
+  let backendUnitTest = new BackendUnitTest(msPath, function() {
+    backendUnitTest.generateMissingTests(callback);
+  });
+}
+
+/**
  * @param {String} microserviceName
  * @param {Array} resources
  */
@@ -59,7 +71,7 @@ function updateMicroservice(microserviceName, resources) {
     updateMicroservice(microserviceName, resources);
   };
 
-  switch(resource) {
+  switch (resource) {
     case undefined:
       console.log('<info>Done</info>');
       process.exit(0);
@@ -70,6 +82,11 @@ function updateMicroservice(microserviceName, resources) {
     case '.travis.yml':
       updateTravis(callback);
       break;
+
+    case 'backend unit test':
+      updateBackendUnitTests(callback);
+      break;
+
     default:
       updateResource(resource, callback);
       break;
@@ -99,7 +116,7 @@ if (!FS.existsSync(msPath) || !FS.statSync(msPath).isDirectory()) {
 
 let resources = [
   'README.md', '.travis.yml', '.hound.yml', '.houndignore',
-  '.jscsrc', '.jshintrc', 'bin/test'
+  '.jscsrc', '.jshintrc', 'bin/test', 'backend unit test',
 ];
 let choiceList = resources.reduce((walker, resource) => {
   walker.push({
@@ -129,8 +146,8 @@ if (global.NO_INTERACTION) {
     name: 'resources'
   }], (response) => {
     updateMicroservice(
-        response.microserviceName,
-        response.resources
+      response.microserviceName,
+      response.resources
     );
   });
 }
