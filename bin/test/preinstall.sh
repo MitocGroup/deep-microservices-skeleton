@@ -42,6 +42,7 @@ if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE
   npm install babel-preset-es2015 &&\
   npm install babel-plugin-add-module-exports &&\
   npm install jasmine2-custom-message@0.8.x
+  npm install jasmine-utils@0.2.x
 fi
 
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ]; then
