@@ -322,7 +322,7 @@ export class BackendUnitTest extends AbstractTemplate {
   updatePackageJson(name, lambdasDepsString) {
     return BackendUnitTest.PACKAGE_JSON_TPL_STRING
       .replace(/\{name\}/g, name + 'BackendTest')
-      .replace(/\{path\}/g, 'npm link chai '.concat(lambdasDepsString));
+      .replace(/\{path\}/g, 'npm link chai aws-sdk '.concat(lambdasDepsString));
   }
 
   /**
