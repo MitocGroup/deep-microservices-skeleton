@@ -421,7 +421,7 @@ export class BackendUnitTest extends AbstractTemplate {
       name: '{name}',
       version: '0.0.0',
       description: '{name}',
-      script: {
+      scripts: {
         postinstall: '{path}',
         test: 'node-bin/test.sh',
       },
