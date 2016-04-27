@@ -22,7 +22,7 @@ export class BackendUnitTest extends AbstractTemplate {
   constructor(path, callback) {
     super();
 
-    this.microservicesPath = path;
+    this.microAppsPath = path;
 
     this.getBackendInfo(callback);
   }
@@ -30,15 +30,15 @@ export class BackendUnitTest extends AbstractTemplate {
   /**
    * @param {String} mPath
    */
-  set microservicesPath(mPath) {
-    this._microservicePath = path.join(mPath, BackendUnitTest.SOURCE);
+  set microAppsPath(mPath) {
+    this._microAppPath = path.join(mPath, BackendUnitTest.SOURCE);
   }
 
   /**
    * @returns {String}
    */
-  get microservicesPath() {
-    return this._microservicePath;
+  get microAppsPath() {
+    return this._microAppPath;
   }
 
   /**
@@ -46,14 +46,14 @@ export class BackendUnitTest extends AbstractTemplate {
    */
   getBackendInfo(callback) {
 
-    var microserviceBackendContent = [];
-    var microserviceBackendPaths = [];
-    var microserviceBackend = [];
+    var microAppBackendContent = [];
+    var microAppBackendPaths = [];
+    var microAppBackend = [];
 
     var _this = this;
 
     // match only filenames with a .txt extension and that don't start with a `.´
-    dir.readFiles(this.microservicesPath, {
+    dir.readFiles(this.microAppsPath, {
         match: /resources\.json$/,
         exclude: /^\./,
       }, function (err, content, next) {
@@ -77,25 +77,25 @@ export class BackendUnitTest extends AbstractTemplate {
           }
         }
 
-        microserviceBackendContent.push(resources);
+        microAppBackendContent.push(resources);
 
         next();
       },
       function (err, files) {
         if (err) throw err;
 
-        microserviceBackendPaths = files.map(function (file) {
+        microAppBackendPaths = files.map(function (file) {
           return file.replace(BackendUnitTest.BACKEND_RESOURCES, '');
         });
 
-        for (var i = 0; i < microserviceBackendPaths.length; i++) {
-          microserviceBackend.push({
-            path: microserviceBackendPaths[i],
-            resources: microserviceBackendContent[i],
+        for (var i = 0; i < microAppBackendPaths.length; i++) {
+          microAppBackend.push({
+            path: microAppBackendPaths[i],
+            resources: microAppBackendContent[i],
           });
         }
 
-        _this._microserviceBackend = microserviceBackend;
+        _this._microAppBackend = microAppBackend;
 
         callback();
       }
@@ -109,20 +109,20 @@ export class BackendUnitTest extends AbstractTemplate {
   getLambdaPaths() {
     var lambdaPaths = [];
 
-    for (var i = 0; i < this._microserviceBackend.length; i++) {
+    for (var i = 0; i < this._microAppBackend.length; i++) {
 
-      for (var resourceName in this._microserviceBackend[i].resources) {
+      for (var resourceName in this._microAppBackend[i].resources) {
 
-        if (this._microserviceBackend[i].resources.hasOwnProperty(resourceName)) {
+        if (this._microAppBackend[i].resources.hasOwnProperty(resourceName)) {
 
-          for (var lambdaName in this._microserviceBackend[i].resources[resourceName]) {
+          for (var lambdaName in this._microAppBackend[i].resources[resourceName]) {
 
-            if (this._microserviceBackend[i].resources[resourceName].hasOwnProperty(lambdaName)) {
+            if (this._microAppBackend[i].resources[resourceName].hasOwnProperty(lambdaName)) {
 
               lambdaPaths.push(path.join(
-                this._microserviceBackend[i].path,
+                this._microAppBackend[i].path,
                 BackendUnitTest.BACKEND,
-                this._microserviceBackend[i].resources[resourceName][lambdaName]
+                this._microAppBackend[i].resources[resourceName][lambdaName]
               ));
 
             }
@@ -142,7 +142,7 @@ export class BackendUnitTest extends AbstractTemplate {
     var paths = [];
 
     paths = this.getLambdaPaths().map(function (item) {
-      return item.replace(BackendUnitTest.BACKEND_SOURCE, BackendUnitTest.TESTS_BACKEND);
+      return item.replace(BackendUnitTest.BACKEND_SOURCE, BackendUnitTest.BACKEND_UNIT_TEST_FOLDER);
     });
 
     return paths;
@@ -187,13 +187,13 @@ export class BackendUnitTest extends AbstractTemplate {
    */
   generateMissingTests(callback) {
     let lambdasPathArray = this.getLambdaPaths();
-    let toGenerateTests = this.getLambdaTestPaths();
+    let toUpdateTests = this.getLambdaTestPaths();
     let generatedTests = [];
 
-    for (let i = 0; i < toGenerateTests.length; i++) {
+    for (let i = 0; i < toUpdateTests.length; i++) {
 
-      let bootstrapTestFilePath = path.join(toGenerateTests[i], BackendUnitTest.BOOTSTRAP_TEST_FILENAME);
-      let handlerTestFilePath = path.join(toGenerateTests[i], BackendUnitTest.HANDLER_TEST_FILENAME);
+      let bootstrapTestFilePath = path.join(toUpdateTests[i], BackendUnitTest.BOOTSTRAP_TEST_FILENAME);
+      let handlerTestFilePath = path.join(toUpdateTests[i], BackendUnitTest.HANDLER_TEST_FILENAME);
 
       if (!fs.existsSync(bootstrapTestFilePath)) {
 
@@ -216,9 +216,113 @@ export class BackendUnitTest extends AbstractTemplate {
       }
     }
 
+    let pathsToUpdate = this.getPathsToUpdate(generatedTests);
+
+    this.copyNodeBins(pathsToUpdate);
+    this.updatePackageJsons(pathsToUpdate);
+
+    //todo - move in other place
     callback();
 
     return generatedTests;
+  }
+
+  /**
+   * @param {String[]} lambdas
+   */
+  getPathsToUpdate(lambdas) {
+    var microAppsArray = lambdas.map(function (element, index, arr) {
+      return element.replace(/.*\/src\/(.*)\/Tests\/.*/g, '$1');
+    });
+
+    var uniqueArray = microAppsArray.filter(function (item, pos) {
+      return microAppsArray.indexOf(item) == pos;
+    });
+
+    for (var i = 0; i < uniqueArray.length; i++) {
+      uniqueArray[i] = path.join(this.microAppsPath, uniqueArray[i], BackendUnitTest.BACKEND_TEST_FOLDER);
+    }
+
+    return uniqueArray;
+  }
+
+  /**
+   * @param {String[]} destinations
+   */
+  copyNodeBins(destinations) {
+
+    for (let destination of destinations) {
+
+      let dest = path.join(destination, BackendUnitTest.NODE_BIN);
+
+      if (!fs.existsSync(dest)) {
+        fsExtra.copySync(BackendUnitTest.NODE_BIN_PATH, dest);
+      }
+    }
+
+  }
+
+  /**
+   * @param {String[]} destinations
+   */
+  updatePackageJsons(destinations) {
+    
+    for (let destination of destinations) {
+
+      let dest = path.join(destination, BackendUnitTest.PACKAGE_JSON);
+      let name = dest.replace(/.*\/src\/(.*)\/Tests\/.*/g, '$1');
+      let resources = this.getResourcesByMicroAppName(name)
+
+      fsExtra.writeJsonSync(dest, JSON.parse(this.updatePackageJson(name, this.getLambdaDeps(resources).join(' '))));
+    }
+  }
+
+
+  /**
+   * Returns all resources with lambda paths by microApp name
+   * @param {String} name
+   * @returns {Object|null}
+   */
+  getResourcesByMicroAppName(name) {
+    for (let i = 0; i < this._microAppBackend.length; i++) {
+      if (this._microAppBackend[i].path === path.join(this.microAppsPath, name)) {
+        return this._microAppBackend[i].resources;
+      }
+
+    }
+
+    return null;
+  }
+
+  /**
+   * @param {Object} resources
+   * @returns {Array}
+   */
+  getLambdaDeps(resources) {
+    let result = []
+
+    for (let resource in resources) {
+
+      for (let lambda in resources[resource]) {
+
+        result.push(path.join(BackendUnitTest.RELATIVE_BACKEND, resources[resource][lambda]))
+      }
+
+    }
+
+    return result;
+  }
+
+  /**
+   *
+   * @param {String} name
+   * @param {String} lambdasDepsString
+   * @returns {string}
+   */
+  updatePackageJson(name, lambdasDepsString) {
+    return BackendUnitTest.PACKAGE_JSON_TPL_STRING
+      .replace(/\{name\}/g, name + 'BackendTest')
+      .replace(/\{path\}/g, 'npm link chai '.concat(lambdasDepsString));
   }
 
   /**
@@ -238,8 +342,29 @@ export class BackendUnitTest extends AbstractTemplate {
   /**
    * @returns {string}
    */
+  static get NODE_BIN() {
+    return '/node-bin';
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get NODE_BIN_PATH() {
+    return path.join(__dirname, '../', BackendUnitTest.NODE_BIN);
+  }
+
+  /**
+   * @returns {string}
+   */
   static get BACKEND() {
     return '/Backend';
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get RELATIVE_BACKEND() {
+    return '../../Backend';
   }
 
   /**
@@ -252,8 +377,15 @@ export class BackendUnitTest extends AbstractTemplate {
   /**
    * @returns {string}
    */
-  static get TESTS_BACKEND() {
+  static get BACKEND_UNIT_TEST_FOLDER() {
     return '/Tests/Backend/test';
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get BACKEND_TEST_FOLDER() {
+    return '/Tests/Backend';
   }
 
   /**
@@ -282,6 +414,22 @@ export class BackendUnitTest extends AbstractTemplate {
    */
   static get BACKEND_SOURCE() {
     return BackendUnitTest.BACKEND + BackendUnitTest.SOURCE;
+  }
+
+  static get PACKAGE_JSON_TPL_STRING() {
+    let contentObj = {
+      name: '{name}',
+      version: '0.0.0',
+      description: '{name}',
+      script: {
+        postinstall: '{path}',
+        test: 'node-bin/test.sh',
+      },
+      dependencies: {},
+      devDependencies: {},
+    };
+
+    return JSON.stringify(contentObj).concat(os.EOL);
   }
 
   static get HANDLER_TEST_TPL() {

@@ -52,11 +52,11 @@ function updateTravis(callback) {
  * @param {Function} callback
  */
 function updateBackendUnitTests(callback) {
-  console.log('in updateBackendUnitTests');
 
   let backendUnitTest = new BackendUnitTest(msPath, function() {
     backendUnitTest.generateMissingTests(callback);
   });
+
 }
 
 /**
