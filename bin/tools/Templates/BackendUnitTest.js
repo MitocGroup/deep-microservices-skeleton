@@ -421,7 +421,7 @@ export class BackendUnitTest extends AbstractTemplate {
       name: '{name}',
       version: '0.0.0',
       description: '{name}',
-      script: {
+      scripts: {
         postinstall: '{path}',
         test: 'node-bin/test.sh',
       },
@@ -445,7 +445,7 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('// @todo: Add more advanced tests');
     content.push('suite(\'Handlers\', function() {');
     content.push('  test(\'Class Handler exists in {lambdaName} modules\', () => {');
-    content.push('    chai.expect(typeof Handler).to.be.an(\'function\');');
+    content.push('    chai.expect(Handler).to.be.an(\'function\');');
     content.push('  });');
     content.push('});');
     content.push('');
@@ -466,7 +466,7 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('// @todo: Add more advanced tests');
     content.push('suite(\'Bootstraps\', function() {');
     content.push('  test(\' bootstrap exists in {lambdaName} modules\', () => {');
-    content.push('    chai.expect(typeof bootstrap).to.be.an(\'object\');');
+    content.push('    chai.expect(bootstrap).to.be.an(\'object\');');
     content.push('  });');
     content.push('});');
     content.push('');
