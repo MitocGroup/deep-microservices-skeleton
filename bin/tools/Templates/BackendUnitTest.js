@@ -279,11 +279,19 @@ export class BackendUnitTest extends AbstractTemplate {
 
     for (let destination of destinations) {
 
-      let dest = path.join(destination, BackendUnitTest.NODE_BIN);
+      let nodeBinDestination = path.join(destination, BackendUnitTest.NODE_BIN);
+      let postinstallDestination = path.join(nodeBinDestination, BackendUnitTest.POSTINSTALL_FILENAME);
+      let name = nodeBinDestination.replace(/.*\/src\/(.*)\/Tests\/.*/g, '$1');
+      let resources = this.getResourcesByMicroAppName(name);
 
-      if (!fs.existsSync(dest)) {
-        fsExtra.copySync(BackendUnitTest.NODE_BIN_PATH, dest);
+      if (!fs.existsSync(nodeBinDestination)) {
+        fsExtra.copySync(BackendUnitTest.NODE_BIN_PATH, nodeBinDestination);
       }
+
+      fsExtra.writeFileSync(
+        postinstallDestination, this.updateShellScriptPath(name, this.getLambdaDeps(resources).join(' '), 'utf8')
+      );
+      fs.chmodSync(postinstallDestination, 493);
     }
 
   }
@@ -361,8 +369,15 @@ export class BackendUnitTest extends AbstractTemplate {
     }).replace(/^-/, '');
 
     return BackendUnitTest.PACKAGE_JSON_TPL_STRING
-      .replace(/\{name\}/g, packageName)
-      .replace(/\{path\}/g, 'npm link chai aws-sdk deepify node-dir '.concat(lambdasDepsString));
+      .replace(/\{name\}/g, packageName);
+  }
+
+  updateShellScriptPath(name, lambdasDepsString) {
+
+    let result = lambdasDepsString.replace(/(\s)/g, '\nnpm link ').replace(/^/, 'npm link ');
+
+    return BackendUnitTest.POSTINSTALL_TPL
+      .replace(/\{path\}/g, result);
   }
 
   /**
@@ -389,15 +404,15 @@ export class BackendUnitTest extends AbstractTemplate {
   /**
    * @returns {string}
    */
-  static get NODE_BIN() {
-    return '/node-bin';
+  static get POSTINSTALL_FILENAME() {
+    return 'postinstall.sh';
   }
 
   /**
    * @returns {string}
    */
-  static get POSTINSTALL() {
-    return 'postinstall.sh';
+  static get NODE_BIN() {
+    return '/node-bin';
   }
 
   /**
@@ -497,7 +512,7 @@ export class BackendUnitTest extends AbstractTemplate {
       version: '0.0.1',
       description: '{name}',
       scripts: {
-        postinstall: '{path}',
+        postinstall: 'node-bin/postinstall.sh',
         test: 'node-bin/test.sh',
       },
       dependencies: {},
@@ -511,6 +526,19 @@ export class BackendUnitTest extends AbstractTemplate {
     };
 
     return JSON.stringify(contentObj).concat(os.EOL);
+  }
+
+  static get POSTINSTALL_TPL() {
+    let content = [];
+
+    content.push('#!\/bin\/bash');
+    content.push('');
+    content.push('npm link chai');
+    content.push('npm link aws-sdk deepify node-dir');
+    content.push('{path}');
+    content.push('');
+
+    return content.join(os.EOL);
   }
 
   static get HANDLER_TEST_TPL() {
