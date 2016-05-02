@@ -24,7 +24,7 @@ PREPARE() {
 if [ "$OSTYPE" != "msys" ] && [ "$OSTYPE" != "win32" ] && [ "$OSTYPE" != "win64" ]; then
     PREPARE;
 
-    node `which istanbul` cover --report lcov _mocha -- --ui tdd --recursive --reporter spec compile/test/**/*.spec.js
+    node `which istanbul` cover --report lcov _mocha -- --ui tdd --recursive --reporter spec compile/test/**/*.spec.js --timeout 100s
 
 elif [ "$OSTYPE" == "win32" ] || [ "$OSTYPE" == "win64" ]; then
     echo "You should have installed and configured http://git-scm.com/ and run all bash command by using git-bash.exe"
