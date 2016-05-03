@@ -1,6 +1,6 @@
 {
-  "identifier": "deep.skeleton",
-  "name": "DeepSkeleton",
+  "identifier": "deep-skeleton",
+  "name": "deep-skeleton",
   "description": "This is the skeleton (boilerplate) of DEEP Microservices, built on top of DEEP Framework",
   "version": "0.0.1",
   "propertyRoot": false,
