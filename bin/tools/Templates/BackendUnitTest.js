@@ -687,12 +687,10 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('import chai from \'chai\';');
     content.push('{import}');
     content.push('');
-    content.push('let expect = chai.expect;');
-    content.push('');
     content.push('// @todo: Add more advanced tests');
     content.push('suite(\'Handlers\', () => {');
     content.push('  test(\'Class Handler exists in {lambdaName} module\', () => {');
-    content.push('    expect(Handler).to.be.an(\'function\');');
+    content.push('    chai.expect(Handler).to.be.an(\'function\');');
     content.push('  });');
     content.push('});');
     content.push('');
@@ -714,12 +712,10 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('import chai from \'chai\';');
     content.push('{import}');
     content.push('');
-    content.push('let expect = chai.expect;');
-    content.push('');
     content.push('// @todo: Add more advanced tests');
     content.push('suite(\'Bootstraps\', () => {');
     content.push('  test(\' bootstrap exists in {lambdaName} module\', () => {');
-    content.push('    expect(bootstrap).to.be.an(\'object\');');
+    content.push('    chai.expect(bootstrap).to.be.an(\'object\');');
     content.push('  });');
     content.push('});');
     content.push('');
@@ -740,8 +736,6 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('import dir from \'node-dir\';');
     content.push('import path from \'path\';');
     content.push('import {Exec} from \'../../../node_modules/deepify/lib.compiled/Helpers/Exec\';');
-    content.push('');
-    content.push('let expect = chai.expect;');
     content.push('');
     content.push('suite(\'Functional tests\', () => {');
     content.push('');
@@ -786,7 +780,7 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('');
     content.push('  test(\'Check relevant of data\', () => {');
     content.push('    for (i = 0; i < inputEventsFilesArray.length; i++) {');
-    content.push('      expect(inputEventsFilesArray[i].replace(\'payload.json\', \'\')).to.equal(');
+    content.push('      chai.expect(inputEventsFilesArray[i].replace(\'payload.json\', \'\')).to.equal(');
     content.push('        expectedResultsFilesArray[i].replace(\'result.json\', \'\')');
     content.push('      );');
     content.push('    }');
@@ -805,7 +799,7 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('      let expectedResult = JSON.parse(expectedResultsArray[i]);');
     content.push('      let actualResult = (lambdaResult.failed) ? JSON.parse(lambdaResult.error) : JSON.parse(lambdaResult.result);');
     content.push('');
-    content.push('      expect(actualResult).to.eql(expectedResult, `for payload from: ${inputEventsFilesArray[i]}`);');
+    content.push('      chai.expect(actualResult).to.eql(expectedResult, `for payload from: ${inputEventsFilesArray[i]}`);');
     content.push('    }');
     content.push('');
     content.push('  });');
