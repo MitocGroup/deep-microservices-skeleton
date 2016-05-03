@@ -57,7 +57,9 @@ export class BackendUnitTest extends AbstractTemplate {
         match: /resources\.json$/,
         exclude: /^\./,
       }, (err, content, next) => {
-        if (err) throw err;
+        if (err) {
+          throw err;
+        }
 
         var contentObj = JSON.parse(content);
         var lambdas = {};
@@ -754,12 +756,18 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('        match: /result.json$/,');
     content.push('        exclude: /^\\./,');
     content.push('      }, (err, content, next) => {');
-    content.push('        if (err) throw err;');
+    content.push('        if (err) {');
+    content.push('          throw err;');
+    content.push('        }');
+    content.push('');
     content.push('        expectedResultsArray.push(content);');
     content.push('        next();');
     content.push('      },');
     content.push('      (err, files) => {');
-    content.push('        if (err) throw err;');
+    content.push('        if (err) {');
+    content.push('          throw err;');
+    content.push('        }');
+    content.push('');
     content.push('        expectedResultsFilesArray = files;');
     content.push('      });');
     content.push('');
@@ -767,12 +775,18 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('        match: /payload.json$/,');
     content.push('        exclude: /^\\./,');
     content.push('      }, (err, content, next) => {');
-    content.push('        if (err) throw err;');
+    content.push('        if (err) {');
+    content.push('          throw err;');
+    content.push('        }');
+    content.push('');
     content.push('        inputEventsArray.push(content);');
     content.push('        next();');
     content.push('      },');
     content.push('      (err, files) => {');
-    content.push('        if (err) throw err;');
+    content.push('        if (err) {');
+    content.push('          throw err;');
+    content.push('        }');
+    content.push('');
     content.push('        inputEventsFilesArray = files;');
     content.push('        done();');
     content.push('      });');
