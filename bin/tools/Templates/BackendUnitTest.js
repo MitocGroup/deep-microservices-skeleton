@@ -156,20 +156,29 @@ export class BackendUnitTest extends AbstractTemplate {
   _genTestSuite(filePath, name) {
 
     console.log(`Test <info>${filePath}/${name}</info> for lambda has been added`);
+    let sourcePath = filePath.replace(/.*Backend\/src\/(.*)$/, '$1');
+    let codeSource = '';
 
     switch (name) {
       case BackendUnitTest.HANDLER_TEST_FILENAME:
+        codeSource = (sourcePath.indexOf(path.sep) !== -1) ?
+          `import ${BackendUnitTest.HANDLER} from \'../../../node_modules/${sourcePath}/${BackendUnitTest.HANDLER}\';` :
+          `import ${BackendUnitTest.HANDLER} from \'../../node_modules/${sourcePath}/${BackendUnitTest.HANDLER}\';`;
+
         return BackendUnitTest.HANDLER_TEST_TPL
-          .replace(/\{import\}/g, `import Handler from \'../../../node_modules/${this.getLambdaName(filePath)}/Handler\';`)
+          .replace(/\{import\}/g, codeSource)
           .replace(/\{lambdaName\}/g, this.getLambdaName(filePath));
 
       case BackendUnitTest.BOOTSTRAP_TEST_FILENAME:
+        codeSource = (sourcePath.indexOf(path.sep) !== -1) ?
+          `import ${BackendUnitTest.BOOTSTRAP} from \'../../../node_modules/${sourcePath}/${BackendUnitTest.BOOTSTRAP}\';` :
+          `import ${BackendUnitTest.BOOTSTRAP} from \'../../node_modules/${sourcePath}/${BackendUnitTest.BOOTSTRAP}\';`;
+
         return BackendUnitTest.BOOTSTRAP_TEST_TPL
-          .replace(/\{import\}/g, `import bootstrap from \'../../../node_modules/${this.getLambdaName(filePath)}/bootstrap\';`)
+          .replace(/\{import\}/g, codeSource)
           .replace(/\{lambdaName\}/g, this.getLambdaName(filePath));
 
       case BackendUnitTest.FUNCTIONAL_TEST_FILENAME:
-        let sourcePath = filePath.replace(/.*Backend\/src\/(.*)$/, '$1');
         let assertsPath = (sourcePath.indexOf(path.sep) !== -1) ? `../../../../test/${sourcePath}/test-asserts` : `../../../test/${sourcePath}/test-asserts`;
 
         return BackendUnitTest.FUNCTIONAL_TEST_TPL
@@ -280,7 +289,8 @@ export class BackendUnitTest extends AbstractTemplate {
     for (let destination of destinations) {
 
       let nodeBinDestination = path.join(destination, BackendUnitTest.NODE_BIN);
-      let postinstallDestination = path.join(nodeBinDestination, BackendUnitTest.POSTINSTALL_FILENAME);
+      let preinstallScriptDestination = path.join(nodeBinDestination, BackendUnitTest.PREINSTALL_FILENAME);
+      let installScriptDestination = path.join(nodeBinDestination, BackendUnitTest.INSTALL_FILENAME);
       let name = nodeBinDestination.replace(/.*\/src\/(.*)\/Tests\/.*/g, '$1');
       let resources = this.getResourcesByMicroAppName(name);
 
@@ -289,9 +299,14 @@ export class BackendUnitTest extends AbstractTemplate {
       }
 
       fsExtra.writeFileSync(
-        postinstallDestination, this.updateShellScriptPath(name, this.getLambdaDeps(resources).join(' '), 'utf8')
+        preinstallScriptDestination, this.updatePreinstallScriptPaths(name, this.getResourcesDeps(resources).join(' '), 'utf8')
       );
-      fs.chmodSync(postinstallDestination, 493);
+      fs.chmodSync(preinstallScriptDestination, 493);
+
+      fsExtra.writeFileSync(
+        installScriptDestination, this.updateInstallScriptPaths(name, this.getResourcesDeps(resources).join(' '), 'utf8')
+      );
+      fs.chmodSync(installScriptDestination, 493);
     }
 
   }
@@ -358,7 +373,30 @@ export class BackendUnitTest extends AbstractTemplate {
   }
 
   /**
-   *
+   * @param {Object} resources
+   * @returns {Array}
+   */
+  getResourcesDeps(resources) {
+    let result = [];
+
+    for (let resource in resources) {
+      for (let lambda in resources[resource]) {
+        if (resources[resource][lambda].split(path.sep).length < 3) {
+          console.log(`Invalid path in resource.json:  <error>${resources[resource][lambda]}</error>`);
+          result.push(path.join(BackendUnitTest.RELATIVE_BACKEND, resources[resource][lambda]));
+        } else {
+          let lastIndex = resources[resource][lambda].lastIndexOf(path.sep);
+          let resPath = resources[resource][lambda].substring(0, lastIndex);
+          result.push(path.join(BackendUnitTest.RELATIVE_BACKEND, resPath));
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
    * @param {String} name
    * @param {String} lambdasDepsString
    * @returns {string}
@@ -372,12 +410,48 @@ export class BackendUnitTest extends AbstractTemplate {
       .replace(/\{name\}/g, packageName);
   }
 
-  updateShellScriptPath(name, lambdasDepsString) {
+  /**
+   * @param {String} name
+   * @param {String} lambdasDepsString
+   * @returns {string}
+   */
+  updatePreinstallScriptPaths(name, lambdasDepsString) {
 
-    let result = lambdasDepsString.replace(/(\s)/g, '\nnpm link ').replace(/^/, 'npm link ');
+    let lambdasDepsArray = lambdasDepsString.split('../../Backend/src/');
+    let result = '';
 
-    return BackendUnitTest.POSTINSTALL_TPL
+    for (let lambdaDeps of lambdasDepsArray) {
+      lambdaDeps = lambdaDeps.trim();
+      if (typeof lambdaDeps !== undefined && lambdaDeps !== '') {
+        result = result + `[ -e "./node_modules/${lambdaDeps}" ] && rm -f "./node_modules/${lambdaDeps}";\n\n`;
+      }
+    }
+
+    return BackendUnitTest.PREINSTALL_TPL
+      .replace(/\{resources\}/g, result);
+  }
+
+  /**
+   * @param {String} name
+   * @param {String} lambdasDepsString
+   * @returns {string}
+   */
+  updateInstallScriptPaths(name, lambdasDepsString) {
+    let result = lambdasDepsString
+      .replace(/(\s)/g, '\nln -s ../')
+      .replace(/^/, 'ln -s ../')
+      .replace(/\n/g, ' ./node_modules &&\\\n')
+      .replace(/$/g, ' ./node_modules');
+
+    return BackendUnitTest.INSTALL_TPL
       .replace(/\{path\}/g, result);
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get BOOTSTRAP() {
+    return 'bootstrap';
   }
 
   /**
@@ -385,6 +459,13 @@ export class BackendUnitTest extends AbstractTemplate {
    */
   static get BOOTSTRAP_TEST_FILENAME() {
     return 'bootstrap.spec.js';
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get HANDLER() {
+    return 'Handler';
   }
 
   /**
@@ -404,8 +485,15 @@ export class BackendUnitTest extends AbstractTemplate {
   /**
    * @returns {string}
    */
-  static get POSTINSTALL_FILENAME() {
-    return 'postinstall.sh';
+  static get INSTALL_FILENAME() {
+    return 'install.sh';
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get PREINSTALL_FILENAME() {
+    return 'preinstall.sh';
   }
 
   /**
@@ -510,8 +598,10 @@ export class BackendUnitTest extends AbstractTemplate {
     let contentObj = {
       name: '{name}',
       version: '0.0.1',
-      description: '{name}',
+      description: 'Description of {name}',
       scripts: {
+        preinstall: 'node-bin/preinstall.sh',
+        install: 'node-bin/install.sh',
         postinstall: 'node-bin/postinstall.sh',
         test: 'node-bin/test.sh',
       },
@@ -528,14 +618,30 @@ export class BackendUnitTest extends AbstractTemplate {
     return JSON.stringify(contentObj).concat(os.EOL);
   }
 
-  static get POSTINSTALL_TPL() {
+  static get INSTALL_TPL() {
     let content = [];
 
     content.push('#!\/bin\/bash');
     content.push('');
-    content.push('npm link chai');
-    content.push('npm link aws-sdk deepify node-dir');
+    content.push('npm link chai &&\\');
+    content.push('npm link aws-sdk &&\\');
+    content.push('npm link node-dir &&\\');
+    content.push('npm link deepify &&\\');
     content.push('{path}');
+    content.push('');
+
+    return content.join(os.EOL);
+  }
+
+  static get PREINSTALL_TPL() {
+    let content = [];
+
+    content.push('#!\/bin\/bash');
+    content.push('');
+    content.push('[ -e "./node_modules/deepify" ] && rm -f "./node_modules/deepify";');
+    content.push('');
+    content.push('{resources}');
+    content.push('exit 0');
     content.push('');
 
     return content.join(os.EOL);
@@ -553,7 +659,7 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('');
     content.push('// @todo: Add more advanced tests');
     content.push('suite(\'Handlers\', () => {');
-    content.push('  test(\'Class Handler exists in {lambdaName} modules\', () => {');
+    content.push('  test(\'Class Handler exists in {lambdaName} module\', () => {');
     content.push('    chai.expect(Handler).to.be.an(\'function\');');
     content.push('  });');
     content.push('});');
@@ -574,7 +680,7 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('');
     content.push('// @todo: Add more advanced tests');
     content.push('suite(\'Bootstraps\', () => {');
-    content.push('  test(\' bootstrap exists in {lambdaName} modules\', () => {');
+    content.push('  test(\' bootstrap exists in {lambdaName} module\', () => {');
     content.push('    chai.expect(bootstrap).to.be.an(\'object\');');
     content.push('  });');
     content.push('});');
