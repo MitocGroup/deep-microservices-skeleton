@@ -27,9 +27,3 @@ before_install:
 
 after_success:
   - npm run coverage
-
-env:
-  matrix:
-    # Paralize backend and fronted test
-    - TEST_SUITE=backend
-    - TEST_SUITE=frontend
