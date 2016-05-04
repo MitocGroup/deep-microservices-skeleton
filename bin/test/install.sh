@@ -13,6 +13,8 @@ __CMD="npm install"
 subpath_run_cmd "${__SRC_PATH}" "$__CMD" "$__CMD" ${0}
 
 if [ -z "${0}" ] && [ "${0}"="backend" ]; then
+  subpath_run_cmd "${__SRC_PATH}" "$__CMD" "$__CMD" "frontend"
+
   echo "Initializing backend"
   cp src/deeploy.example.json src/deeploy.json &&\
   deepify init-backend ./src
