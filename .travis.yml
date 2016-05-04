@@ -15,11 +15,6 @@ cache:
     - $(npm config get prefix)/bin/_mocha
     - $(npm config get prefix)/bin/istanbul
 
-env:
-  # Paralize backend and fronted test
-  - TEST_SUITE=backend
-  - TEST_SUITE=frontend
-
 branches:
   only:
     - master
@@ -32,3 +27,9 @@ before_install:
 
 after_success:
   - npm run coverage
+
+env:
+  matrix:
+    # Paralize backend and fronted test
+    - TEST_SUITE=backend
+    - TEST_SUITE=frontend
