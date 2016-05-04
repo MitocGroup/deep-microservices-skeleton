@@ -49,9 +49,9 @@ getGitUrl() {
 }
 
 GIT_URL=$(getGitUrl)
-SCELETON_URL="https://github.com/MitocGroup/deep-microservices-skeleton"
+SKELETON_URL="https://github.com/MitocGroup/deep-microservices-skeleton"
 
-if [ "${GIT_URL}" = "${SCELETON_URL}" ]; then
+if [ "${GIT_URL}" = "${SKELETON_URL}" ]; then
   (npm list inquirer --depth=0 --production=false || npm install inquirer@0.12.x) &&\
   (npm list minimist --depth=0 --production=false || npm install minimist@1.2.x) &&\
   (npm list fs-extra --depth=0 --production=false || npm install fs-extra@0.x.x) &&\
