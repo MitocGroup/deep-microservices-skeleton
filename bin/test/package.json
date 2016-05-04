@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "preinstall": "bin/test/preinstall.sh",
-    "install": "bin/test/install.sh",
+    "install": "bin/test/install.sh ${TEST_SUITE}",
     "pretest": "bin/test/pretest.sh",
     "test": "bin/test/test.sh ${TEST_SUITE}",
     "posttest": "bin/test/posttest.sh",

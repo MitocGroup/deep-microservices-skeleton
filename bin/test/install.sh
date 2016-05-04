@@ -10,6 +10,8 @@ source $(dirname $0)/_head.sh
 ########################
 __CMD="npm install"
 
+echo "Running install dependecies for: ${0}"
+
 subpath_run_cmd "${__SRC_PATH}" "$__CMD" "$__CMD" ${0}
 
 if [ -z "${0}" ] && [ "${0}"="backend" ]; then

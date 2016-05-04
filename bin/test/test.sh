@@ -9,4 +9,7 @@ source $(dirname $0)/_head.sh
 ### Run unit tests ###
 ######################
 __CMD="npm run test"
+
+echo "Running install dependecies for: ${0}"
+
 subpath_run_cmd "${__SRC_PATH}" "${__CMD}" "${__CMD}" ${0}
