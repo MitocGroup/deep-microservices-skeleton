@@ -319,10 +319,12 @@ export class BackendUnitTest extends AbstractTemplate {
     let assertSampleDestination = path.join(destination, BackendUnitTest.TEST_ASSERTS_SAMPlE);
     let assertDestination = path.join(destination, BackendUnitTest.TEST_ASSERTS);
 
-    fsExtra.ensureDirSync(assertDestination);
-
     if (!fs.existsSync(assertSampleDestination)) {
-      fsExtra.copySync(BackendUnitTest.TEST_ASSERTS_SOURCE, assertSampleDestination);
+      fsExtra.copySync(BackendUnitTest.TEST_ASSERTS_SAMPLE_SOURCE, assertSampleDestination);
+    }
+
+    if (!fs.existsSync(assertDestination)) {
+      fsExtra.copySync(BackendUnitTest.TEST_ASSERTS_SOURCE, assertDestination);
     }
   }
 
@@ -578,8 +580,15 @@ export class BackendUnitTest extends AbstractTemplate {
   /**
    * @returns {string}
    */
-  static get TEST_ASSERTS_SOURCE() {
+  static get TEST_ASSERTS_SAMPLE_SOURCE() {
     return path.join(__dirname, '../', BackendUnitTest.TEST_ASSERTS_SAMPlE);
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get TEST_ASSERTS_SOURCE() {
+    return path.join(__dirname, '../', BackendUnitTest.TEST_ASSERTS);
   }
 
   /**
