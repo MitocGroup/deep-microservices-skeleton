@@ -13,6 +13,10 @@ __CMD="npm install"
 subpath_run_cmd "${__SRC_PATH}" "$__CMD" "$__CMD" ${0}
 
 if [ -z "${0}" ] && [ "${0}"="backend" ]; then
+
+  # To disable interactive user interaction like prompts in terminal (an default value is always chosen)
+  export DEEP_NO_INTERACTION=1
+
   subpath_run_cmd "${__SRC_PATH}" "$__CMD" "$__CMD" "frontend"
 
   echo "Initializing backend"
