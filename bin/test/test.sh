@@ -10,6 +10,10 @@ source $(dirname $0)/_head.sh
 ######################
 __CMD="npm run test"
 
-echo "Running tests for: ${1}"
+if [ -z "${1}" ]; then
+  __IS_CONCURRENT_SCRIPT=${__NONE};
+else
+  __IS_CONCURRENT_SCRIPT=${1}
+fi
 
-subpath_run_cmd "${__SRC_PATH}" "${__CMD}" "${__CMD}" ${1}
+subpath_run_cmd "${__SRC_PATH}" "${__CMD}" "${__CMD}" "$__IS_CONCURRENT_SCRIPT"

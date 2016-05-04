@@ -8,5 +8,7 @@
     "coverage": "echo \"No coverage specified\" && exit 0"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {},
+  "private": true,
+  "license": "MIT"
 }

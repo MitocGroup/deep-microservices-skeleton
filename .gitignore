@@ -99,7 +99,8 @@ build/Release
 
 # Dependency directory
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git-
-node_modules
+**/node_modules
+**/src/deep-root-angular
 
 # Debug log from npm
 npm-debug.log
@@ -110,5 +111,21 @@ lib.compiled
 /tests/*
 **/compile
 
-# Special for Trevor package.json
 /package.json
+
+#Vendor
+vendor/
+
+.sass-cache/
+
+.cfg.deeploy.json
+.cfg.deeploy.json.production
+.cfg.deeploy.json.local
+
+deeploy.json
+deeploy.json.production
+deeploy.json.local
+
+.parameters.json
+
+_test/
