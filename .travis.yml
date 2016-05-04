@@ -16,11 +16,12 @@ cache:
     - $(npm config get prefix)/bin/istanbul
 
 env:
-  # To disable interactive user interaction like prompts in terminal (an default value is always chosen)
-  - DEEP_NO_INTERACTION=1
   # Paralize backend and fronted test
   - TEST_SUITE=backend
   - TEST_SUITE=frontend
+  global:
+    # To disable interactive user interaction like prompts in terminal (an default value is always chosen)
+    - DEEP_NO_INTERACTION=1
 
 branches:
   only:
