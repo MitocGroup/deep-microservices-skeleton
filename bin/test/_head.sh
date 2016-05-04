@@ -31,9 +31,10 @@ subpath_run_cmd () {
 
     BACKEND_CMD=$2
 
+    echo "TEST_SUITE: {4}"
 
     if [ -z "${4}" ]; then
-        PARALIZE_SCRIPT="${3}"
+        PARALIZE_SCRIPT="${4}"
         echo "PARALIZING ENABLED"
     else
         PARALIZE_SCRIPT="none"
@@ -45,7 +46,7 @@ subpath_run_cmd () {
         FRONTEND_CMD="${3}"
     fi
 
-    if [ "${PARALIZE_SCRIPT}"="none" ] && [ "${PARALIZE_SCRIPT}"="frontend" ]; then
+    if [ "${PARALIZE_SCRIPT}"="none" ] || [ "${PARALIZE_SCRIPT}"="frontend" ]; then
 
       #run tests for frontend
       for subpath in $DIR/$EXPR_FRONTEND
@@ -70,7 +71,7 @@ subpath_run_cmd () {
       done
     fi
 
-    if [ "${PARALIZE_SCRIPT}"="none" ] && [ "${PARALIZE_SCRIPT}"="backend" ]; then
+    if [ "${PARALIZE_SCRIPT}"="none" ] || [ "${PARALIZE_SCRIPT}"="backend" ]; then
 
       #run tests for backend
       for subpath in $DIR/$EXPR_BACKEND
