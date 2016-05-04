@@ -10,6 +10,6 @@ source $(dirname $0)/_head.sh
 ######################
 __CMD="npm run test"
 
-echo "Running install dependecies for: ${0}"
+echo "Running tests for: ${1}"
 
-subpath_run_cmd "${__SRC_PATH}" "${__CMD}" "${__CMD}" ${0}
+subpath_run_cmd "${__SRC_PATH}" "${__CMD}" "${__CMD}" ${1}

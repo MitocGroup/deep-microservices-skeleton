@@ -10,11 +10,11 @@ source $(dirname $0)/_head.sh
 ########################
 __CMD="npm install"
 
-echo "Running install dependecies for: ${0}"
+echo "Running install dependecies for: ${1}"
 
-subpath_run_cmd "${__SRC_PATH}" "$__CMD" "$__CMD" ${0}
+subpath_run_cmd "${__SRC_PATH}" "$__CMD" "$__CMD" ${1}
 
-if [ -z "${0}" ] && [ "${0}"="backend" ]; then
+if [ "${1}"="backend" ]; then
 
   # To disable interactive user interaction like prompts in terminal (an default value is always chosen)
   export DEEP_NO_INTERACTION=1
