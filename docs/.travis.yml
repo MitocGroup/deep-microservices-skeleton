@@ -1,7 +1,3 @@
 env:
-  matrix:
-    # Paralize backend and fronted test
-    - TEST_SUITE=backend
-    - TEST_SUITE=frontend
   global:
     - E2E_TESTING=none
