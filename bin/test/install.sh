@@ -31,5 +31,5 @@ if [ "$__IS_CONCURRENT_SCRIPT" == "$__NONE" ] || [ "$__IS_CONCURRENT_SCRIPT" == 
 
   echo "Initializing backend"
   cp ${__SRC_PATH}deeploy.example.json ${__SRC_PATH}deeploy.json &&\
-  deepify init-backend ./src
+  deepify init-backend "${__SRC_PATH}"
 fi
