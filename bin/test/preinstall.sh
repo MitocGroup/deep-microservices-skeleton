@@ -52,7 +52,7 @@ GIT_URL=$(getGitUrl)
 SCELETON_URL="https://github.com/MitocGroup/deep-microservices-skeleton"
 
 if [ "${GIT_URL}" == "${SCELETON_URL}" ]; then
-  sh $(dirname $0)/sceleton-install.sh
+  sh $(dirname $0)/skeleton-install.sh
 fi
 
 bash `dirname $0`/phantomjs/install.sh
