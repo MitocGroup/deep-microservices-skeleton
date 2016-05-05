@@ -59,7 +59,7 @@ subpath_run_cmd () {
 
         #replace ./Frontend to real path to file
         # to fix karma issue after combine
-        if [ "${FRONTEND_CMD}"="npm run test" ]; then
+        if [ "${FRONTEND_CMD}" == "npm run test" ]; then
           SEARCH_VALUE='.\/Frontend\/'
           subpath=${subpath/Tests\/Frontend/Frontend}
 
