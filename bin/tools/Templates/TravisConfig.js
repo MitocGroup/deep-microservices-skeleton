@@ -42,6 +42,8 @@ export class TravisConfig extends AbstractConfigTemplate {
       processedTemplate = yml.safeDump(jsonConfig);
     }
 
+    processedTemplate = processedTemplate.replace(/>\-/g, '');
+
     return processedTemplate;
   }
 }
