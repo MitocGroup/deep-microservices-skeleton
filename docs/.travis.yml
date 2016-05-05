@@ -1,3 +1,8 @@
 env:
   global:
     - E2E_TESTING=none
+
+notifications:
+  # Send notifications to Slack
+  slack: mitocgroup:4ZPhXmOpgk5QK6bvZdhL9r2x
+
