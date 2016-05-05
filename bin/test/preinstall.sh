@@ -52,6 +52,7 @@ GIT_URL=$(getGitUrl)
 SCELETON_URL="https://github.com/MitocGroup/deep-microservices-skeleton"
 
 if [ "${GIT_URL}" == "${SCELETON_URL}" ]; then
+  (if [ -d "node_modules/js-yaml" ]; then echo "js-yaml"; else npm install js-yaml; fi) &&\
   (if [ -d "node_modules/inquirer" ]; then echo "inquirer"; else npm install inquirer@0.12.x; fi) &&\
   (if [ -d "node_modules/minimist" ]; then echo "minimist"; else npm install minimist@1.2.x; fi) &&\
   (if [ -d "node_modules/fs-extra" ]; then echo "fs-extra"; else npm install fs-extra@0.x.x; fi) &&\
