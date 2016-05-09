@@ -5,6 +5,7 @@ node_js:
   - '4.4'
 
 cache:
+  edge: true
   directories:
     - $(npm root -g)
     - node_modules
@@ -14,6 +15,8 @@ cache:
     - $(npm config get prefix)/bin/karma
     - $(npm config get prefix)/bin/_mocha
     - $(npm config get prefix)/bin/istanbul
+    - $(npm config get prefix)/bin/istanbul-combine
+    - $(npm config get prefix)/bin/codacy-coverage
     - $(npm config get prefix)/bin/protractor
 
 branches:
