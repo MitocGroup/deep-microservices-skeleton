@@ -34,6 +34,6 @@ after_success:
 
 env:
   matrix:
-    # Paralize backend and fronted test
+    # Parallelize backend and fronted test
     - TEST_SUITE=backend
     - TEST_SUITE=frontend
