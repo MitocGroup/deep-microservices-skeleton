@@ -1,0 +1,13 @@
+{
+  "identifier": "{{ identifier }}",
+  "name": "{{ name }}",
+  "description": "This is the description of {{ name }} microapp, built on top of DEEP Framework",
+  "version": "0.0.1",
+  "propertyRoot": false,
+  "frontendEngine": [
+    {%- for engine in engines -%}
+      "{{ engine }}"{%  if not loop.last %}, {% endif %}
+    {%- endfor  -%}
+  ],
+  "dependencies": {}
+}
