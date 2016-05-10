@@ -52,56 +52,60 @@ export class BackendUnitTest extends AbstractTemplate {
 
     var _this = this;
 
-    // match only filenames with a .txt extension and that don't start with a `.´
-    dir.readFiles(this.microAppsPath, {
-        match: /resources\.json$/,
-        exclude: /^\./,
-      }, (err, content, next) => {
-        if (err) {
-          throw err;
-        }
+    if (fs.existsSync(this.microAppsPath)) {
 
-        var contentObj = JSON.parse(content);
-        var lambdas = {};
-        var resources = {};
-
-        for (var resourceName in contentObj) {
-          if (contentObj.hasOwnProperty(resourceName)) {
-            lambdas = {};
-
-            for (var lambdaName in contentObj[resourceName]) {
-              if (contentObj[resourceName].hasOwnProperty(lambdaName)) {
-                lambdas[lambdaName] = contentObj[resourceName][lambdaName].source;
-              }
-            }
-
-            resources[resourceName] = lambdas;
+      // match only filenames with a .txt extension and that don't start with a `.´
+      dir.readFiles(this.microAppsPath, {
+          match: /resources\.json$/,
+          exclude: /^\./,
+        }, (err, content, next) => {
+          if (err) {
+            throw err;
           }
-        }
 
-        microAppBackendContent.push(resources);
+          var contentObj = JSON.parse(content);
+          var lambdas = {};
+          var resources = {};
 
-        next();
-      },
-      (err, files) => {
-        if (err) throw err;
+          for (var resourceName in contentObj) {
+            if (contentObj.hasOwnProperty(resourceName)) {
+              lambdas = {};
 
-        microAppBackendPaths = files.map((file) => {
-          return file.replace(BackendUnitTest.BACKEND_RESOURCES, '');
-        });
+              for (var lambdaName in contentObj[resourceName]) {
+                if (contentObj[resourceName].hasOwnProperty(lambdaName)) {
+                  lambdas[lambdaName] = contentObj[resourceName][lambdaName].source;
+                }
+              }
 
-        for (var i = 0; i < microAppBackendPaths.length; i++) {
-          microAppBackend.push({
-            path: microAppBackendPaths[i],
-            resources: microAppBackendContent[i],
+              resources[resourceName] = lambdas;
+            }
+          }
+
+          microAppBackendContent.push(resources);
+
+          next();
+        },
+        (err, files) => {
+          if (err) throw err;
+
+          microAppBackendPaths = files.map((file) => {
+            return file.replace(BackendUnitTest.BACKEND_RESOURCES, '');
           });
+
+          for (var i = 0; i < microAppBackendPaths.length; i++) {
+            microAppBackend.push({
+              path: microAppBackendPaths[i],
+              resources: microAppBackendContent[i],
+            });
+          }
+
+          _this._microAppBackend = microAppBackend;
+
+          callback();
         }
+      );
 
-        _this._microAppBackend = microAppBackend;
-
-        callback();
-      }
-    );
+    }
   }
 
   /**
