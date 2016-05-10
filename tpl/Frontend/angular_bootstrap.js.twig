@@ -1,0 +1,15 @@
+/**
+ * Runs before the deafult function
+ * @returns {Promise}
+ */
+export function configLoad() {
+  return Promise.all([]);
+}
+
+/**
+ * Returns promise which resolver micro-app bootstrap
+ * @returns {Promise}
+ */
+export default function() {
+  return System.import('/{{ identifier }}/js/app/angular/index.js');
+}
