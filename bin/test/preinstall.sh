@@ -31,6 +31,7 @@ if [ -z $TRAVIS_BUILD_NUMBER ]; then
 else
     echo "Running in CI - configuring jspm registries"
     jspm config registries.github.auth $JSPM_GITHUB_AUTH_TOKEN
+    git config --local url.https://github.com/.insteadOf git://github.com/
 fi
 
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE_REPO}" = "${E2E_TESTING}" ]; then
