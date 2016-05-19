@@ -161,7 +161,6 @@ export class GitDiffWalker {
   }
 
 
-
   /**
    * @returns {String[]}
    */
@@ -180,7 +179,7 @@ export class GitDiffWalker {
    * @returns {boolean}
    */
   get isSkipTests() {
-    let re = /^(?!src\/).+|(.+\/Docs\/.+)/;
+    let re = /^(?!src\/).+|(.+\/Docs\/.+)/i;
 
     for (let file of this.files) {
 
@@ -196,8 +195,8 @@ export class GitDiffWalker {
    * @returns {boolean}
    */
   get isFrontedCodeChanged() {
-    let testsRe = /^src\/(.+)\/Tests\/Frontend\/.+$/;
-    let re = /^src\/(.+)\/Frontend\/.+$/;
+    let testsRe = /^src\/(.+)\/Tests\/Frontend\/.+$/i;
+    let re = /^src\/(.+)\/Frontend\/.+$/i;
 
     for (let file of this.files) {
 
@@ -213,7 +212,7 @@ export class GitDiffWalker {
    * @returns {boolean}
    */
   get isFrontendTestsChanged() {
-    let re = /^src\/(.+)\/Tests\/Frontend\/.+$/;
+    let re = /^src\/(.+)\/Tests\/Frontend\/.+$/i;
 
     for (let file of this.files) {
 
@@ -229,7 +228,7 @@ export class GitDiffWalker {
    * @returns {boolean}
    */
   get isBackendTestsChanged() {
-    let re = /^src\/(.+)\/Tests\/Backend\/.+$/;
+    let re = /^src\/(.+)\/Tests\/Backend\/.+$/i;
 
     for (let file of this.files) {
 
@@ -245,8 +244,8 @@ export class GitDiffWalker {
    * @returns {boolean}
    */
   get isBackendCodeChanged() {
-    let testsRe = /^src\/(.+)\/Tests\/Backend\/.+$/;
-    let re = /^src\/(.+)\/(Backend|Data)\/.+$/;
+    let testsRe = /^src\/(.+)\/Tests\/Backend\/.+$/i;
+    let re = /^src\/(.+)\/(Backend|Data)\/.+$/i;
 
     for (let file of this.files) {
 
@@ -263,7 +262,7 @@ export class GitDiffWalker {
    * @returns {String[]}
    */
   getFrontendMicroAppPaths() {
-    let re = /^src\/(.+)\/Frontend\/.+$/;
+    let re = /^src\/(.+)\/Frontend\/.+$/i;
     let paths = [];
 
     for (let file of this.files) {
@@ -305,7 +304,7 @@ export class GitDiffWalker {
    * @returns {String[]}
    */
   getBackendMicroAppPaths() {
-    let re = /^src\/(.+)\/(Backend|Data)\/.+$/;
+    let re = /^src\/(.+)\/(Backend|Data)\/.+$/i;
     let paths = [];
 
     for (let file of this.files) {
@@ -330,7 +329,7 @@ export class GitDiffWalker {
    * @returns {String[]}
    */
   getBackendTestMicroAppPaths() {
-    let re = /^src\/(.+)\/Tests\/Backend\/.+$/;
+    let re = /^src\/(.+)\/Tests\/Backend\/.+$/i;
     let paths = [];
 
     for (let file of this.files) {
@@ -355,8 +354,8 @@ export class GitDiffWalker {
    * @returns {String[]}
    */
   getBackendCodeMicroAppPaths() {
-    let testsRe = /^src\/(.+)\/Tests\/Backend\/.+$/;
-    let re = /^src\/(.+)\/(Backend|Data)\/.+$/;
+    let testsRe = /^src\/(.+)\/Tests\/Backend\/.+$/i;
+    let re = /^src\/(.+)\/(Backend|Data)\/.+$/i;
 
     let paths = [];
 
