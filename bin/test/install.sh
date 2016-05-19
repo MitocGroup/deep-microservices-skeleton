@@ -24,8 +24,9 @@ if [ "$__IS_CONCURRENT_SCRIPT" == "$__NONE" ] || [ "$__IS_CONCURRENT_SCRIPT" == 
   export DEEP_NO_INTERACTION=1
 
   #install also frontend for repos with e2e enabled
-  if [ "$__IS_CONCURRENT_SCRIPT" != "$__NONE" ] && [ "${__TRAVIS_NODE_MAJOR_VERSION}" != "5" ] && [ "${__TRAVIS_NODE_MAJOR_VERSION}" != "6" ] && \
-   ([ "${__E2E_WITH_PUBLIC_REPO}" == "${E2E_TESTING}" ] || ([ "${__E2E_WITH_PRIVATE_REPO}" == "${E2E_TESTING}" ] && [ "${TRAVIS_BRANCH}" == 'stage' ])); then
+  if [ "$__IS_CONCURRENT_SCRIPT" != "$__NONE" ] && \
+   ([ "${__E2E_WITH_PUBLIC_REPO}" == "${E2E_TESTING}" ] || \
+   ([ "${__E2E_WITH_PRIVATE_REPO}" == "${E2E_TESTING}" ] && [ "${TRAVIS_BRANCH}" == 'stage' ])); then
     subpath_run_cmd "${__SRC_PATH}" "$__CMD" "$__CMD" "${__IS_CONCURRENT_SCRIPT}"
   fi
 
