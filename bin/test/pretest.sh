@@ -44,6 +44,7 @@ isLocalServerUp () {
 if [ "${TEST_SUITE}" != "frontend" ] &&\
  [ "${__TRAVIS_NODE_MAJOR_VERSION}" != "5" ] &&\
  [ "${__TRAVIS_NODE_MAJOR_VERSION}" != "6" ] &&\
+ ([ "BACKEND_MICROAPP_PATHS" != "$__NONE" ] || [ "FRONTEND_MICROAPP_PATHS" != "$__NONE" ]) && \
  [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ]; then
   deepify server ${__SRC_PATH} -s & sleep 15 & isLocalServerUp
 else
