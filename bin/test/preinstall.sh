@@ -35,9 +35,9 @@ if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE
   bash `dirname $0`/protractor/install.sh
 
   #install locally, protractor doesn't find babel globally
-  (if [ -d "node_modules/babel-cli" ]; then echo "babel-cli"; else npm link babel-cli; fi) &&\
-  (if [ -d "node_modules/babel-preset-es2015" ]; then echo "babel-preset-es2015"; else npm link babel-preset-es2015; fi) &&\
-  (if [ -d "node_modules/babel-plugin-add-module-exports" ]; then echo "babel-plugin-add-module-exports"; else npm link babel-plugin-add-module-exports; fi) &&\
+  (if [ -d "node_modules/babel-cli" ]; then echo "babel-cli"; else npm install babel-cli; fi) &&\
+  (if [ -d "node_modules/babel-preset-es2015" ]; then echo "babel-preset-es2015"; else npm install babel-preset-es2015; fi) &&\
+  (if [ -d "node_modules/babel-plugin-add-module-exports" ]; then echo "babel-plugin-add-module-exports"; else npm install babel-plugin-add-module-exports; fi) &&\
   (if [ -d "node_modules/jasmine2-custom-message" ]; then echo "jasmine2-custom-message"; else npm install jasmine2-custom-message@0.8.x; fi) &&\
   (if [ -d "node_modules/jasmine-utils" ]; then echo "jasmine-utils"; else npm install jasmine-utils@0.2.x; fi)
 fi
