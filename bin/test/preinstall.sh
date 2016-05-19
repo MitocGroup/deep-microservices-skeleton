@@ -2,10 +2,7 @@
 
 source $(dirname $0)/_head.sh
 
-(npm list -g babel-cli --depth=0 || npm install -g babel-cli@6.x.x) &&\
-(npm list -g babel-preset-es2015 --depth=0 || npm install -g babel-preset-es2015) &&\
-(npm list -g babel-plugin-add-module-exports --depth=0 || npm install -g babel-plugin-add-module-exports) &&\
-(npm list -g deepify --depth=0 || npm install -g deepify) &&\
+(npm list -g deepify@$(npm show deepify version) --depth=0 || npm install -g deepify) &&\
 (npm list -g jspm --depth=0 || npm install -g jspm@0.16.15)  &&\
 (npm list -g browserify --depth=0 || npm install -g browserify@11.2.x) &&\
 (npm list -g jscs --depth=0 || npm install -g jscs@2.1.x) &&\
@@ -50,6 +47,7 @@ getGitUrl() {
 }
 
 GIT_URL=$(getGitUrl)
+
 SCELETON_URL="https://github.com/MitocGroup/deep-microservices-skeleton"
 
 if [ "${GIT_URL}" == "${SCELETON_URL}" ]; then
@@ -57,3 +55,26 @@ if [ "${GIT_URL}" == "${SCELETON_URL}" ]; then
 fi
 
 bash `dirname $0`/phantomjs/install.sh
+
+
+if [ "$TRAVIS" == "true" ]; then
+  #resolving `detached HEAD` by attaching HEAD to the `TRAVIS_FROM_BRANCH` branch
+  TRAVIS_FROM_BRANCH="travis_from_branch"
+  git branch $TRAVIS_FROM_BRANCH
+  git checkout $TRAVIS_FROM_BRANCH
+
+  #fetching `TRAVIS_BRANCH` branch
+  git fetch origin $TRAVIS_BRANCH
+  git checkout -qf FETCH_HEAD
+  git branch $TRAVIS_BRANCH
+  git checkout $TRAVIS_BRANCH
+
+  #switch to `TRAVIS_FROM_BRANCH`
+  git checkout $TRAVIS_FROM_BRANCH
+fi
+
+(if [ -d "node_modules/sync-exec" ]; then echo "sync-exec"; else npm install sync-exec@^0.6.x; fi) &&\
+(if [ -d "node_modules/fs-extra" ]; then echo "fs-extra"; else npm install fs-extra@0.x.x; fi)
+
+deepify compile es6 $(dirname $0)/gitDiffWalker/GitDiffWalker.es6 --source > $(dirname $0)/gitDiffWalker/GitDiffWalker.js
+node $(dirname $0)/gitDiffWalker/GitDiffWalker.js

@@ -110,6 +110,8 @@ npm-debug.log
 lib.compiled
 /tests/*
 **/compile
+_vars.sh
+GitDiffWalker.js
 
 /package.json
 
