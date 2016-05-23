@@ -20,8 +20,10 @@ export class GitDiffWalker {
    * @constructor
    */
   static get TARGET_BRANCH() {
-    console.log('TRAVIS_BRANCH: ', process.env['TRAVIS_BRANCH'])
-    return process.env['TRAVIS_BRANCH'];
+    //@todo - uncomment
+    //console.log('TRAVIS_BRANCH: ', process.env['TRAVIS_BRANCH'])
+    //return process.env['TRAVIS_BRANCH'];
+    return 'dev'
   }
 
   /**
@@ -85,7 +87,7 @@ export class GitDiffWalker {
    * @constructor
    */
   static get CWD() {
-    return path.join(__dirname, '../../..');
+    return path.join(__dirname, '../..');
   }
 
   /**
@@ -93,7 +95,7 @@ export class GitDiffWalker {
    * @constructor
    */
   static get VARS_SHELL_PATH() {
-    return path.join(__dirname, '../_vars.sh');
+    return path.join(__dirname, '_vars.sh');
   }
 
   static removeDuplicates() {
@@ -148,11 +150,20 @@ export class GitDiffWalker {
       result.stdout.toString().trim();
   }
 
+  static getAllMicroAppPath(srcpath) {
+    return fs.readdirSync(srcpath).filter(function (file) {
+      return fs.statSync(path.join(srcpath, file)).isDirectory();
+    });
+  }
+
   /**
    *
    */
   constructor() {
     this._files = GitDiffWalker.getAllChangedFiles().split('\n');
+
+    //this._allMicroAppPaths = GitDiffWalker.getAllMicroAppPath();
+    //console.log("SUBFOLDERS: ", this._allMicroAppPaths);
 
     this.getBackendMicroAppPaths();
     this.getBackendTestMicroAppPaths();
@@ -172,7 +183,7 @@ export class GitDiffWalker {
    * @returns {String[]}
    */
   getFullPath(name) {
-    return path.join(__dirname, '../../..', GitDiffWalker.SRC, name);
+    return path.join(__dirname, '../..', GitDiffWalker.SRC, name);
   }
 
   /**
@@ -469,6 +480,8 @@ export class GitDiffWalker {
     let backendMicroAppPaths = GitDiffWalker.NONE;
     let frontendMicroAppPaths = GitDiffWalker.NONE;
     let backendMicroAppIdentifiers = GitDiffWalker.NONE;
+
+    //@todo - Implement [ci full] to be able to collect whole coverage report
 
     if (this.isFrontedCodeChanged || this.isFrontendTestsChanged) {
       frontendMicroAppPaths = this.getFrontendMicroAppNames();

@@ -68,8 +68,7 @@ fi
 ### Install skeleton dependecies if we are in skeleton ###
 ##########################################################
 if [ $(git config --get remote.origin.url) == "https://github.com/MitocGroup/deep-microservices-skeleton" ]; then
-  echo "FROM SKELETON"
-  sh $(dirname $0)/skeleton-install.sh
+  sh $(dirname $0)/../tools/skeleton-install.sh
 fi
 
 ###################################################
