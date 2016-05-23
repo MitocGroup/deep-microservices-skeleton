@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
+#
+# Created by vcernomschi on 10/06/2015
+#
 
 source $(dirname $0)/_head.sh
 
+#####################
+### To be updated ###
+#####################
 (npm list -g deepify@$(npm show deepify version) --depth=0 || npm install -g deepify) &&\
 (npm list -g jspm --depth=0 || npm install -g jspm@0.16.15)  &&\
 (npm list -g browserify --depth=0 || npm install -g browserify@11.2.x) &&\
@@ -21,8 +27,17 @@ source $(dirname $0)/_head.sh
 (npm list -g karma-phantomjs-launcher --depth=0 || npm install -g karma-phantomjs-launcher@0.2.x) &&\
 (npm list -g karma-ng-html2js-preprocessor --depth=0 || npm install -g karma-ng-html2js-preprocessor@0.2.x) &&\
 (npm list -g node-dir --depth=0 || npm install -g node-dir) &&\
-(if [ -d "node_modules/isparta" ]; then echo "isparta"; else npm install isparta@3.1.x; fi)
+#######################################
+### TODO: Get rid of echo 'isparta' ###
+#######################################
+(if [ -d "node_modules/isparta" ]; then echo "isparta"; else npm install isparta@3.1.x; fi) &&\
+(if [ -d "node_modules/sync-exec" ]; then echo "sync-exec"; else npm install sync-exec@^0.6.x; fi) &&\
+(if [ -d "node_modules/fs-extra" ]; then echo "fs-extra"; else npm install fs-extra@0.x.x; fi)
 
+
+#####################
+### To be updated ###
+#####################
 if [ -z $TRAVIS_BUILD_NUMBER ]; then
     echo "Running locally - no need to jspm config"
 else
@@ -31,10 +46,15 @@ else
     git config --local url.https://github.com/.insteadOf git://github.com/
 fi
 
+###################################
+### TODO: Refactor and simplify ###
+###################################
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE_REPO}" = "${E2E_TESTING}" ]; then
-  bash `dirname $0`/protractor/install.sh
+  bash `dirname $0`/protractor.sh
 
-  #install locally, protractor doesn't find babel globally
+  ###############################################################
+  ### Install locally, protractor doesn't find babel globally ###
+  ###############################################################
   (if [ -d "node_modules/babel-cli" ]; then echo "babel-cli"; else npm install babel-cli; fi) &&\
   (if [ -d "node_modules/babel-preset-es2015" ]; then echo "babel-preset-es2015"; else npm install babel-preset-es2015; fi) &&\
   (if [ -d "node_modules/babel-plugin-add-module-exports" ]; then echo "babel-plugin-add-module-exports"; else npm install babel-plugin-add-module-exports; fi) &&\
@@ -42,39 +62,36 @@ if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE
   (if [ -d "node_modules/jasmine-utils" ]; then echo "jasmine-utils"; else npm install jasmine-utils@0.2.x; fi)
 fi
 
-getGitUrl() {
-  git config --get remote.origin.url
-}
-
-GIT_URL=$(getGitUrl)
-
-SCELETON_URL="https://github.com/MitocGroup/deep-microservices-skeleton"
-
-if [ "${GIT_URL}" == "${SCELETON_URL}" ]; then
+###################################
+### TODO: Refactor and simplify ###
+###################################
+GIT_URL=`git config --get remote.origin.url`
+SKELETON_URL="https://github.com/MitocGroup/deep-microservices-skeleton"
+if [ "${GIT_URL}" == "${SKELETON_URL}" ]; then
   sh $(dirname $0)/skeleton-install.sh
 fi
 
-bash `dirname $0`/phantomjs/install.sh
-
+#####################
+### To be updated ###
+#####################
+bash `dirname $0`/phantomjs.sh
 
 if [ "$TRAVIS" == "true" ]; then
-  #resolving `detached HEAD` by attaching HEAD to the `TRAVIS_FROM_BRANCH` branch
+  ##########################################################################################
+  ### Resolving detached HEAD error by attaching HEAD to the `TRAVIS_FROM_BRANCH` branch ###
+  ##########################################################################################
   TRAVIS_FROM_BRANCH="travis_from_branch"
   git branch $TRAVIS_FROM_BRANCH
   git checkout $TRAVIS_FROM_BRANCH
-
-  #fetching `TRAVIS_BRANCH` branch
   git fetch origin $TRAVIS_BRANCH
   git checkout -qf FETCH_HEAD
   git branch $TRAVIS_BRANCH
   git checkout $TRAVIS_BRANCH
-
-  #switch to `TRAVIS_FROM_BRANCH`
   git checkout $TRAVIS_FROM_BRANCH
 fi
 
-(if [ -d "node_modules/sync-exec" ]; then echo "sync-exec"; else npm install sync-exec@^0.6.x; fi) &&\
-(if [ -d "node_modules/fs-extra" ]; then echo "fs-extra"; else npm install fs-extra@0.x.x; fi)
-
-deepify compile es6 $(dirname $0)/gitDiffWalker/GitDiffWalker.es6 --source > $(dirname $0)/gitDiffWalker/GitDiffWalker.js
-node $(dirname $0)/gitDiffWalker/GitDiffWalker.js
+#####################
+### To be updated ###
+#####################
+deepify compile es6 $(dirname $0)/GitDiffWalker.es6 --source > $(dirname $0)/GitDiffWalker.js
+node $(dirname $0)/GitDiffWalker.js

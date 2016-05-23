@@ -20,10 +20,14 @@ fi
 
 if [ "$__IS_CONCURRENT_SCRIPT" == "$__NONE" ] || [ "$__IS_CONCURRENT_SCRIPT" == "$__BACKEND" ]; then
 
-  # To disable interactive user interaction like prompts in terminal (an default value is always chosen)
+  #####################################
+  ### Disable interactive user mode ###
+  #####################################
   export DEEP_NO_INTERACTION=1
 
-  #install also frontend for repos with e2e enabled
+  ##################################################
+  ### install frontend deps where e2e is enabled ###
+  ##################################################
   if [ "$__IS_CONCURRENT_SCRIPT" != "$__NONE" ] && \
    ([ "${__E2E_WITH_PUBLIC_REPO}" == "${E2E_TESTING}" ] || \
    ([ "${__E2E_WITH_PRIVATE_REPO}" == "${E2E_TESTING}" ] && [ "${TRAVIS_BRANCH}" == 'stage' ])); then
@@ -32,6 +36,9 @@ if [ "$__IS_CONCURRENT_SCRIPT" == "$__NONE" ] || [ "$__IS_CONCURRENT_SCRIPT" == 
 
   echo "Start initializing backend"
 
+  ######################################################
+  ### TODO: Check if file exists, otherwise exit (?) ###
+  ######################################################
   cp ${__SRC_PATH}deeploy.example.json ${__SRC_PATH}deeploy.json
 
   if [ "${TRAVIS}" == "true" ] && [ "$BACKEND_MICROAPP_IDENTIFIERS" == "none" ]; then

@@ -13,6 +13,9 @@ if [ "${TEST_SUITE}" == "$__BACKEND" ] && \
    ([ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || ([ "${__E2E_WITH_PRIVATE_REPO}" = "${E2E_TESTING}" ] && \
    [ ${TRAVIS_BRANCH} = 'stage' ])); then
 
+  ######################################################
+  ### TODO: Check if file exists, otherwise exit (?) ###
+  ######################################################
   __PROTRACTOR_CONFIG_PATH=$(find ${__SRC_PATH} -name protractor.config.js -type f -maxdepth 4)
 
   echo "Running E2E tests with protractor config: ${__PROTRACTOR_CONFIG_PATH}"
