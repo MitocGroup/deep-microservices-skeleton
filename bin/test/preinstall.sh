@@ -84,9 +84,9 @@ if [ "$TRAVIS" == "true" ]; then
   IFS=$'\n' TRAVIS_COMMIT_MESSAGES=($(git log -2 --pretty=%s))
 
   echo "commit 1: ${TRAVIS_COMMIT_MESSAGES[1]}"
-  echo "commit 2: ${TRAVIS_COMMIT_MESSAGES[1]}"
+  echo "commit 2: ${TRAVIS_COMMIT_MESSAGES[2]}"
 
-  TRAVIS_COMMIT_MESSAGE="${TRAVIS_COMMIT_MESSAGES[1]}"
+  export TRAVIS_COMMIT_MESSAGE=${TRAVIS_COMMIT_MESSAGES[1]}
 
   TRAVIS_FROM_BRANCH="travis_from_branch"
   git branch $TRAVIS_FROM_BRANCH
