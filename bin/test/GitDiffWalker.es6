@@ -20,10 +20,8 @@ export class GitDiffWalker {
    * @constructor
    */
   static get TARGET_BRANCH() {
-    //@todo - uncomment
-    //console.log('TRAVIS_BRANCH: ', process.env['TRAVIS_BRANCH'])
-    //return process.env['TRAVIS_BRANCH'];
-    return 'dev'
+    console.log('TRAVIS_BRANCH: ', process.env['TRAVIS_BRANCH'])
+    return process.env['TRAVIS_BRANCH'];
   }
 
   /**
@@ -132,6 +130,10 @@ export class GitDiffWalker {
     return content.join(os.EOL);
   }
 
+  static get commitMessage() {
+    return process.env['TRAVIS_COMMIT']
+  }
+
   /**
    * @returns {String}
    */
@@ -150,9 +152,9 @@ export class GitDiffWalker {
       result.stdout.toString().trim();
   }
 
-  static getAllMicroAppPath(srcpath) {
+  getAllMicroAppPath(srcpath) {
     return fs.readdirSync(srcpath).filter(function (file) {
-      return fs.statSync(path.join(srcpath, file)).isDirectory();
+      return GitDiffWalker.getFullPath(fs.statSync(path.join(srcpath, file)).isDirectory());
     });
   }
 
@@ -162,8 +164,11 @@ export class GitDiffWalker {
   constructor() {
     this._files = GitDiffWalker.getAllChangedFiles().split('\n');
 
-    //this._allMicroAppPaths = GitDiffWalker.getAllMicroAppPath();
-    //console.log("SUBFOLDERS: ", this._allMicroAppPaths);
+    this._allMicroAppPaths = this.getAllMicroAppPaths(path.join(__dirname, '../..', GitDiffWalker.SRC));
+    this._allMicroAppIdentifiers = this.getAllMicroAppIdentifiers();
+
+    console.log('this._allMicroAppPaths: ', this._allMicroAppPaths)
+    console.log('this._allMicroAppIdentifiers: ', this._allMicroAppIdentifiers)
 
     this.getBackendMicroAppPaths();
     this.getBackendTestMicroAppPaths();
@@ -184,6 +189,36 @@ export class GitDiffWalker {
    */
   getFullPath(name) {
     return path.join(__dirname, '../..', GitDiffWalker.SRC, name);
+  }
+
+  /**
+   * @param srcpath
+   * @returns {String[]}
+   */
+  getAllMicroAppPaths(srcpath) {
+    return fs.readdirSync(srcpath).filter((file) => {
+      return fs.statSync(path.join(srcpath, file)).isDirectory();
+    });
+  }
+
+  /**
+   * Get changed microapplication identifiers from deepkg.json where were changed code or backend tests
+   * @returns {String[]}
+   */
+  getAllMicroAppIdentifiers() {
+    let indentifiers = [];
+
+    for (let microAppPath of this._allMicroAppPaths) {
+
+      console.log('microAppPath: ', this.getFullPath(microAppPath))
+      let content = fsExtra.readJsonSync(
+        path.join(this.getFullPath(microAppPath), GitDiffWalker.DEEPKG_JSON), {throws: false}
+      );
+
+      indentifiers.push(content.identifier);
+    }
+
+    return indentifiers;
   }
 
   /**
@@ -496,6 +531,8 @@ export class GitDiffWalker {
 
       backendMicroAppIdentifiers = this.getBackendMicroAppIdentifiers();
     }
+
+    console.log("Commit message: ", GitDiffWalker.commitMessage)
 
     let varsContent = GitDiffWalker.TEST_PATHS_TPL
       .replace(/\{frontendMicroAppPaths\}/g, frontendMicroAppPaths)
