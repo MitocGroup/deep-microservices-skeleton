@@ -80,13 +80,12 @@ if [ "$TRAVIS" == "true" ]; then
   ##########################################################################################
   ### Resolving detached HEAD error by attaching HEAD to the `TRAVIS_FROM_BRANCH` branch ###
   ##########################################################################################
-  echo "${commit_message}"
-  echo "${TRAVIS_COMMIT}"
-  echo "${TRAVIS_COMMIT_MESSAGE}"
-  echo "${TRAVIS_COMMIT_RANGE}"
 
-  git log -1 --pretty=%B
-  git log -2 --pretty=%B
+  TRAVIS_COMMIT_MESSAGE1=$(git log -1 --pretty=%B)
+  TRAVIS_COMMIT_MESSAGE2=$(git log -2 --pretty=%B)
+
+  echo "TRAVIS_COMMIT_MESSAGE1: ${TRAVIS_COMMIT_MESSAGE1}"
+  echo "TRAVIS_COMMIT_MESSAGE2: ${TRAVIS_COMMIT_MESSAGE2}"
 
   TRAVIS_FROM_BRANCH="travis_from_branch"
   git branch $TRAVIS_FROM_BRANCH
