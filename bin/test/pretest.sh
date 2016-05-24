@@ -5,16 +5,24 @@
 
 source $(dirname $0)/_head.sh
 
-#####################
-### To be updated ###
-#####################
+############################################
+### Gets HTTP status code for passed URL ###
+### Arguments:                           ###
+###   URL                                ###
+### Returns:                             ###
+###   HTTP_STATUS_CODE                   ###
+############################################
 checkStatus () {
   curl -sL -w "%{http_code}\\n" "$1" -o /dev/null
 }
 
-#####################
-### To be updated ###
-#####################
+#####################################################################
+### Checks local server availability with 3s timeout during 3000s ###
+### Arguments:                                                    ###
+###   None                                                        ###
+### Returns:                                                      ###
+###   0 or 1                                                      ###
+#####################################################################
 isLocalServerUp () {
   NEXT_WAIT_INDEX=0
   CHECK_STATUS_TIMEOUT=3

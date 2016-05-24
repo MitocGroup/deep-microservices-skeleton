@@ -3,25 +3,13 @@
 # Created by vcernomschi on 10/06/2015
 #
 
-#####################
-### To be updated ###
-#####################
+#####################################
+### Initializing global variables ###
+#####################################
 __SCRIPT_PATH=$(cd $(dirname $0); pwd -P)
 __SRC_PATH="${__SCRIPT_PATH}/../../src/"
 __COVERAGE_PATH="${__SCRIPT_PATH}/../coverage"
 __VARS_FILE_PATH="${__SCRIPT_PATH}/_vars.sh"
-
-
-#####################
-### To be updated ###
-#####################
-if [ "$TRAVIS" == "true" ] && [ -e "$__VARS_FILE_PATH" ]; then
-  source "$__VARS_FILE_PATH"
-fi
-
-#####################
-### To be updated ###
-#####################
 __NONE="none"
 __BACKEND="backend"
 __FRONTEND="frontend"
@@ -30,9 +18,25 @@ __E2E_WITH_PUBLIC_REPO="public"
 __E2E_WITH_PRIVATE_REPO="private"
 __TRAVIS_NODE_MAJOR_VERSION="${TRAVIS_NODE_VERSION:0:1}"
 
-#####################
-### To be updated ###
-#####################
+
+######################################################
+### Import the initialized vars with changed stuff ###
+######################################################
+if [ "$TRAVIS" == "true" ] && [ -e "$__VARS_FILE_PATH" ]; then
+  source "$__VARS_FILE_PATH"
+fi
+
+
+#######################################################################################
+### Executes frontend/backend commands for subpaths with/without parallelizing mode ###
+### Arguments:                                                                      ###
+###   DIR                                                                           ###
+###   BACKEND_CMD                                                                   ###
+###   FRONTEND_CMD                                                                  ###
+###   IS_CONCURRENT_SCRIPT                                                          ###
+### Returns:                                                                        ###
+###   None                                                                          ###
+#######################################################################################
 subpath_run_cmd () {
   local DIR
   local BACKEND_CMD
@@ -88,9 +92,9 @@ subpath_run_cmd () {
     done
   fi
 
-  #####################
-  ### To be updated ###
-  #####################
+  ##############################
+  ### Set paralellizing mode ###
+  ##############################
   if [ -z "${4}" ]; then
     echo "PARALLELIZING DISABLED"
     __IS_CONCURRENT_SCRIPT=${__NONE}
@@ -99,6 +103,9 @@ subpath_run_cmd () {
     echo "PARALLELIZING ENABLED FOR: ${__IS_CONCURRENT_SCRIPT}"
   fi
 
+  ###########################################################
+  ### Set command for frontend if didn't pass as agrument ###
+  ###########################################################
   if [ -z "${3}" ]; then
     FRONTEND_CMD="${BACKEND_CMD}"
   else
@@ -116,13 +123,16 @@ subpath_run_cmd () {
       if [ -d ${subpath} ]; then
         cd ${subpath} && eval_or_exit "${FRONTEND_CMD}"
 
-        #replace ./Frontend to real path to file
-        # to fix karma issue after combine
+        ####################################################################################################
+        ### replace ./Frontend to absolute file path to fix karma issue after combining coverage reports ###
+        ####################################################################################################
         if [ "${FRONTEND_CMD}" == "npm run test" ]; then
           SEARCH_VALUE='.\/Frontend\/'
           subpath=${subpath/Tests\/Frontend/Frontend}
 
-          ## Escape path for sed using bash find and replace
+          #######################################################
+          ### Escape path for sed using bash find and replace ###
+          #######################################################
           REPLACE_VALUE="${subpath//\//\\/}"
 
           export PATH_TO_TEST_TDF_FILE="$(find ./coverage -name 'coverage-final.json')"
@@ -147,9 +157,13 @@ subpath_run_cmd () {
   fi
 }
 
-#####################
-### To be updated ###
-#####################
+########################################
+### Executes command and show result ###
+### Arguments:                       ###
+###   CMD                            ###
+### Returns:                         ###
+###   0 or 1                         ###
+########################################
 eval_or_exit() {
   local RET_CODE
 
