@@ -529,8 +529,6 @@ export class GitDiffWalker {
       backendMicroAppIdentifiers = this.getBackendMicroAppIdentifiers();
     }
 
-    console.log("TRAVIS_COMMIT_MESSAGE: ", GitDiffWalker.commitMessage);
-
     if(this.isFullCIRun) {
       frontendMicroAppPaths = backendMicroAppPaths = this._allMicroAppPaths;
       backendMicroAppIdentifiers = this._allMicroAppIdentifiers;
@@ -543,6 +541,7 @@ export class GitDiffWalker {
 
     fsExtra.writeFileSync(GitDiffWalker.VARS_SHELL_PATH, varsContent, 'utf8');
 
+    console.log("TRAVIS_COMMIT_MESSAGE: ", GitDiffWalker.commitMessage);
     console.log(`isFullCIRun: ${this.isFullCIRun}`);
     console.log(`isSkipTests: ${this.isSkipTests}`);
     console.log(`isFrontedCodeChanged: ${this.isFrontedCodeChanged}`);
