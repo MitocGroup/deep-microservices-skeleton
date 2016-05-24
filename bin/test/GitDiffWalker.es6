@@ -131,7 +131,7 @@ export class GitDiffWalker {
   }
 
   static get commitMessage() {
-    let CMD = 'git log -1 --pretty=%B'
+    let CMD = 'git log -2 --pretty=%B'
 
     let result = syncExec(CMD, {
       cwd: GitDiffWalker.CWD,
@@ -542,6 +542,10 @@ export class GitDiffWalker {
       backendMicroAppIdentifiers = this.getBackendMicroAppIdentifiers();
     }
 
+    console.log("commit_message: ", process.env['commit_message'])
+    console.log("TRAVIS_COMMIT: ", process.env['TRAVIS_COMMIT'])
+    console.log("$TRAVIS_COMMIT_MESSAGE: ", process.env['TRAVIS_COMMIT_MESSAGE'])
+    console.log("TRAVIS_COMMIT_RANGE: ", process.env['TRAVIS_COMMIT_RANGE'])
     console.log("Commit message: ", GitDiffWalker.commitMessage)
 
     let varsContent = GitDiffWalker.TEST_PATHS_TPL
