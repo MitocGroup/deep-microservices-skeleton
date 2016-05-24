@@ -131,7 +131,17 @@ export class GitDiffWalker {
   }
 
   static get commitMessage() {
-    return process.env['TRAVIS_COMMIT']
+    let CMD = 'git log -1 --pretty=%B'
+
+    let result = syncExec(CMD, {
+      cwd: GitDiffWalker.CWD,
+    });
+
+    console.log('Commit message: ', result.stdout.toString().trim());
+
+    return (parseInt(result.status) !== 0) ?
+      `Command '${CMD}' failed in '${GitDiffWalker.CWD}' with exit code ${result.status}` :
+      result.stdout.toString().trim();
   }
 
   /**
