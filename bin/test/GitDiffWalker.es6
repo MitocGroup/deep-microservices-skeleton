@@ -510,22 +510,6 @@ export class GitDiffWalker {
   }
 
   setTestPaths() {
-    console.log(`isSkipTests: ${this.isSkipTests}`);
-    console.log(`isFrontedCodeChanged: ${this.isFrontedCodeChanged}`);
-    console.log(`isFrontendTestsChanged: ${this.isFrontendTestsChanged}`);
-    console.log(`isBackendCodeChanged: ${this.isBackendCodeChanged}`);
-    console.log(`isBackendTestsChanged: ${this.isBackendTestsChanged}`);
-
-    console.log(`frontend paths: ${this.getFrontendMicroAppPaths()}`);
-    console.log(`frontend names: ${this.getFrontendMicroAppNames()}`);
-
-    console.log(`backend all paths: ${this.getBackendMicroAppPaths()}`);
-    console.log(`backend tests paths: ${this.getBackendTestMicroAppPaths()}`);
-    console.log(`backend code paths: ${this.getBackendCodeMicroAppPaths()}`);
-    console.log(`backend identifiers: ${this.getBackendMicroAppIdentifiers()}`);
-    console.log(`backend all names: ${this.getBackendMicroAppNames()}`);
-    console.log(`backend tests names: ${this.getBackendTestMicroAppNames()}`);
-    console.log(`backend code names: ${this.getBackendCodeMicroAppNames()}`);
 
     let backendMicroAppPaths = GitDiffWalker.NONE;
     let frontendMicroAppPaths = GitDiffWalker.NONE;
@@ -558,6 +542,24 @@ export class GitDiffWalker {
       .replace(/\{backendMicroAppIdentifiers\}/g, backendMicroAppIdentifiers);
 
     fsExtra.writeFileSync(GitDiffWalker.VARS_SHELL_PATH, varsContent, 'utf8');
+
+    console.log(`isFullCIRun: ${this.isFullCIRun}`);
+    console.log(`isSkipTests: ${this.isSkipTests}`);
+    console.log(`isFrontedCodeChanged: ${this.isFrontedCodeChanged}`);
+    console.log(`isFrontendTestsChanged: ${this.isFrontendTestsChanged}`);
+    console.log(`isBackendCodeChanged: ${this.isBackendCodeChanged}`);
+    console.log(`isBackendTestsChanged: ${this.isBackendTestsChanged}`);
+
+    console.log(`frontend paths: ${this.getFrontendMicroAppPaths()}`);
+    console.log(`frontend names: ${this.getFrontendMicroAppNames()}`);
+
+    console.log(`backend all paths: ${this.getBackendMicroAppPaths()}`);
+    console.log(`backend tests paths: ${this.getBackendTestMicroAppPaths()}`);
+    console.log(`backend code paths: ${this.getBackendCodeMicroAppPaths()}`);
+    console.log(`backend identifiers: ${this.getBackendMicroAppIdentifiers()}`);
+    console.log(`backend all names: ${this.getBackendMicroAppNames()}`);
+    console.log(`backend tests names: ${this.getBackendTestMicroAppNames()}`);
+    console.log(`backend code names: ${this.getBackendCodeMicroAppNames()}`);
   }
 }
 
