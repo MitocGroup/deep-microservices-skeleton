@@ -58,10 +58,10 @@ if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE
   ### Install locally, protractor doesn't find babel globally ###
   ###############################################################
   (if [ ! -d "node_modules/babel-cli" ]; then npm install babel-cli; fi) &&\
-  (if [ -d "node_modules/babel-preset-es2015" ]; then npm install babel-preset-es2015; fi) &&\
-  (if [ -d "node_modules/babel-plugin-add-module-exports" ]; then npm install babel-plugin-add-module-exports; fi) &&\
-  (if [ -d "node_modules/jasmine2-custom-message" ]; then npm install jasmine2-custom-message@0.8.x; fi) &&\
-  (if [ -d "node_modules/jasmine-utils" ]; then npm install jasmine-utils@0.2.x; fi)
+  (if [ ! -d "node_modules/babel-preset-es2015" ]; then npm install babel-preset-es2015; fi) &&\
+  (if [ ! -d "node_modules/babel-plugin-add-module-exports" ]; then npm install babel-plugin-add-module-exports; fi) &&\
+  (if [ ! -d "node_modules/jasmine2-custom-message" ]; then npm install jasmine2-custom-message@0.8.x; fi) &&\
+  (if [ ! -d "node_modules/jasmine-utils" ]; then npm install jasmine-utils@0.2.x; fi)
 fi
 
 ##########################################################
@@ -81,18 +81,8 @@ if [ "$TRAVIS" == "true" ]; then
   ### Resolving detached HEAD error by attaching HEAD to the `TRAVIS_FROM_BRANCH` branch ###
   ##########################################################################################
 
-  echo "commit_message: ${commit_message}"
-  echo "TRAVIS_COMMIT: ${TRAVIS_COMMIT}"
-  echo "TRAVIS_COMMIT_MESSAGE: ${TRAVIS_COMMIT_MESSAGE}"
-  echo "TRAVIS_COMMIT_RANGE: ${TRAVIS_COMMIT_RANGE}"
-
-  git log -1 --pretty=%B
-
-  TRAVIS_COMMIT_MESSAGE1=$(git log -1 --pretty=%B)
-  TRAVIS_COMMIT_MESSAGE2=$(git log -2 --pretty=%B)
-
-  echo "TRAVIS_COMMIT_MESSAGE1: ${TRAVIS_COMMIT_MESSAGE1}"
-  echo "TRAVIS_COMMIT_MESSAGE2: ${TRAVIS_COMMIT_MESSAGE2}"
+  IFS=$'\n' TRAVIS_COMMIT_MESSAGES=($(git log -2 --pretty=%s))
+  TRAVIS_COMMIT_MESSAGE=$TRAVIS_COMMIT_MESSAGES[1]
 
   TRAVIS_FROM_BRANCH="travis_from_branch"
   git branch $TRAVIS_FROM_BRANCH

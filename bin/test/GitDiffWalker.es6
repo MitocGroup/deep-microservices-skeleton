@@ -44,6 +44,14 @@ export class GitDiffWalker {
    * @returns {string}
    * @constructor
    */
+  static get FULL_CI_RUN() {
+    return '[ci full]';
+  }
+
+  /**
+   * @returns {string}
+   * @constructor
+   */
   static get SRC() {
     return 'src';
   }
@@ -130,18 +138,11 @@ export class GitDiffWalker {
     return content.join(os.EOL);
   }
 
+  /**
+   * @returns {String}
+   */
   static get commitMessage() {
-    let CMD = 'git log -2 --pretty=%B'
-
-    let result = syncExec(CMD, {
-      cwd: GitDiffWalker.CWD,
-    });
-
-    console.log('Commit message: ', result.stdout.toString().trim());
-
-    return (parseInt(result.status) !== 0) ?
-      `Command '${CMD}' failed in '${GitDiffWalker.CWD}' with exit code ${result.status}` :
-      result.stdout.toString().trim();
+    return process.env['TRAVIS_COMMIT_MESSAGE'];
   }
 
   /**
@@ -176,9 +177,6 @@ export class GitDiffWalker {
 
     this._allMicroAppPaths = this.getAllMicroAppPaths(path.join(__dirname, '../..', GitDiffWalker.SRC));
     this._allMicroAppIdentifiers = this.getAllMicroAppIdentifiers();
-
-    console.log('this._allMicroAppPaths: ', this._allMicroAppPaths)
-    console.log('this._allMicroAppIdentifiers: ', this._allMicroAppIdentifiers)
 
     this.getBackendMicroAppPaths();
     this.getBackendTestMicroAppPaths();
@@ -245,6 +243,13 @@ export class GitDiffWalker {
     }
 
     return true;
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  get isFullCIRun() {
+    return GitDiffWalker.commitMessage.indexOf(GitDiffWalker.FULL_CI_RUN) > -1;
   }
 
   /**
@@ -526,8 +531,6 @@ export class GitDiffWalker {
     let frontendMicroAppPaths = GitDiffWalker.NONE;
     let backendMicroAppIdentifiers = GitDiffWalker.NONE;
 
-    //@todo - Implement [ci full] to be able to collect whole coverage report
-
     if (this.isFrontedCodeChanged || this.isFrontendTestsChanged) {
       frontendMicroAppPaths = this.getFrontendMicroAppNames();
     }
@@ -542,11 +545,12 @@ export class GitDiffWalker {
       backendMicroAppIdentifiers = this.getBackendMicroAppIdentifiers();
     }
 
-    console.log("commit_message: ", process.env['commit_message'])
-    console.log("TRAVIS_COMMIT: ", process.env['TRAVIS_COMMIT'])
-    console.log("$TRAVIS_COMMIT_MESSAGE: ", process.env['TRAVIS_COMMIT_MESSAGE'])
-    console.log("TRAVIS_COMMIT_RANGE: ", process.env['TRAVIS_COMMIT_RANGE'])
-    console.log("Commit message: ", GitDiffWalker.commitMessage)
+    console.log("TRAVIS_COMMIT_MESSAGE: ", GitDiffWalker.commitMessage);
+
+    if(this.isFullCIRun) {
+      frontendMicroAppPaths = backendMicroAppPaths = this._allMicroAppPaths;
+      backendMicroAppIdentifiers = this._allMicroAppIdentifiers;
+    }
 
     let varsContent = GitDiffWalker.TEST_PATHS_TPL
       .replace(/\{frontendMicroAppPaths\}/g, frontendMicroAppPaths)
