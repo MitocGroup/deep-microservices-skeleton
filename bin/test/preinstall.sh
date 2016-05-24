@@ -85,6 +85,7 @@ if [ "$TRAVIS" == "true" ]; then
   echo "${TRAVIS_COMMIT_MESSAGE}"
   echo "${TRAVIS_COMMIT_RANGE}"
 
+  git log -1 --pretty=%B
   git log -2 --pretty=%B
 
   TRAVIS_FROM_BRANCH="travis_from_branch"
