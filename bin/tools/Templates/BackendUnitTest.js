@@ -162,7 +162,7 @@ export class BackendUnitTest extends AbstractTemplate {
   _genTestSuite(filePath, name) {
 
     console.log(`Test <info>${filePath}/${name}</info> for lambda has been added`);
-    let sourcePath = filePath.replace(/.*Backend\/src\/(.*)$/, '$1');
+    let sourcePath = filePath.replace(/.*backend\/src\/(.*)$/, '$1');
     let codeSource = '';
 
     switch (name) {
@@ -427,7 +427,7 @@ export class BackendUnitTest extends AbstractTemplate {
    */
   updatePreinstallScriptPaths(name, lambdasDepsString) {
 
-    let lambdasDepsArray = lambdasDepsString.split('../../Backend/src/');
+    let lambdasDepsArray = lambdasDepsString.split('../../backend/src/');
     let result = '';
 
     for (let lambdaDeps of lambdasDepsArray) {
@@ -536,14 +536,14 @@ export class BackendUnitTest extends AbstractTemplate {
    * @returns {string}
    */
   static get BACKEND() {
-    return '/Backend';
+    return '/backend';
   }
 
   /**
    * @returns {string}
    */
   static get RELATIVE_BACKEND() {
-    return '../../Backend';
+    return '../../backend';
   }
 
   /**
@@ -557,14 +557,14 @@ export class BackendUnitTest extends AbstractTemplate {
    * @returns {string}
    */
   static get BACKEND_UNIT_TEST_FOLDER() {
-    return '/Tests/Backend/test';
+    return '/tests/backend/test';
   }
 
   /**
    * @returns {string}
    */
   static get BACKEND_TEST_FOLDER() {
-    return '/Tests/Backend';
+    return '/tests/backend';
   }
 
   /**
