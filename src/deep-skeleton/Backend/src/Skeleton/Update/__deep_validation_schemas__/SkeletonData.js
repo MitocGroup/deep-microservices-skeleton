@@ -1,1 +1,0 @@
-/Library/WebServer/Documents/NEW/deep-microservices-skeleton/src/deep-skeleton/Data/Validation/SkeletonData.js

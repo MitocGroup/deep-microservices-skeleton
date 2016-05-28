@@ -100,34 +100,38 @@ build/Release
 # Dependency directory
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git-
 **/node_modules
-**/src/deep-root-angular
 
 # Debug log from npm
 npm-debug.log
 
 
-#####=== Proprietary ===#####
-lib.compiled
-/tests/*
-**/compile
+#####=== DEEP ===#####
+**/src/deep-root-*
+
+# Compiled libraries
+**/compile/
+**/lib.compiled/
+
+# Deployment configs
+.cfg.deeploy.json*
+deeploy.json*
+
+# Transpiled Lambdas
+**/backend/src/**/*.js
+
+# Lambda archives and checksums
+**/backend/src/**/*.zip
+**/backend/src/**/*.sfv
+**/backend/src/**/_config.json
+
+# Frontend dependencies
+**/js/vendor/
+**/frontend/vendor/
+
+# Unit testing
 _vars.sh
 GitDiffWalker.js
-
 /package.json
+**/.sass-cache/
+**/coverage/
 
-#Vendor
-vendor/
-
-.sass-cache/
-
-.cfg.deeploy.json
-.cfg.deeploy.json.production
-.cfg.deeploy.json.local
-
-deeploy.json
-deeploy.json.production
-deeploy.json.local
-
-.parameters.json
-
-_test/
