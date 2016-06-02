@@ -15,7 +15,7 @@ export default class extends DeepFramework.Core.AWS.Lambda.Runtime {
    */
   handle(request) {
     let modelId = request.getParam('Id');
-    let Model = this.kernel.get('db').get('{{ resource }}');
+    let Model = this.kernel.get('db').get('{{ resource|lispCase }}');
 
     Model.deleteById(modelId, (err) => {
       if (err) {

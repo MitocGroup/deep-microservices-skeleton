@@ -15,14 +15,46 @@ export default class extends DeepFramework.Core.AWS.Lambda.Runtime {
    */
   handle(request) {
     let itemId = request.getParam('Id');
-    let Model = this.kernel.get('db').get('{{ resource }}');
 
-    Model.updateItem(itemId, request.data, (err, item) => {
+    if (itemId) {
+      this.retrieve(itemId, (item) => {
+        return this.createResponse(item).send();
+      });
+    } else {
+      this.retrieveAll((result) => {
+        return this.createResponse(result).send();
+      });
+    }
+  }
+
+  /**
+   * @param {Function} callback
+   */
+  retrieveAll(callback) {
+    let Model = this.kernel.get('db').get('{{ resource|lispCase }}');
+
+    Model.findAll((err, item) => {
       if (err) {
         throw new DeepFramework.Core.Exception.DatabaseOperationException(err);
       }
 
-      return this.createResponse(item.get()).send();
+      return callback(item.Items);
+    });
+  }
+
+  /**
+   * @param {String} itemId
+   * @param {Function} callback
+   */
+  retrieve(itemId, callback) {
+    let Model = this.kernel.get('db').get('{{ resource|lispCase }}');
+
+    Model.findOneById(itemId, (err, item) => {
+      if (err) {
+        throw new DeepFramework.Core.Exception.DatabaseOperationException(err);
+      }
+
+      return callback(item ? item.get() : null);
     });
   }
 
