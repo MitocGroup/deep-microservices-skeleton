@@ -31,7 +31,7 @@ export default class extends DeepFramework.Core.AWS.Lambda.Runtime {
    * @param {Function} callback
    */
   retrieveAll(callback) {
-    let Model = this.kernel.get('db').get('{{ modelName }}');
+    let Model = this.kernel.get('db').get('{{ resource|lispCase }}');
 
     Model.findAll((err, item) => {
       if (err) {
@@ -47,7 +47,7 @@ export default class extends DeepFramework.Core.AWS.Lambda.Runtime {
    * @param {Function} callback
    */
   retrieve(itemId, callback) {
-    let Model = this.kernel.get('db').get('{{ resource }}');
+    let Model = this.kernel.get('db').get('{{ resource|lispCase }}');
 
     Model.findOneById(itemId, (err, item) => {
       if (err) {
