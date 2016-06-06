@@ -1,6 +1,7 @@
 env:
   global:
     - E2E_TESTING=none
+    - DEEP_NO_INTERACTION=1
 
 notifications:
   # Send notifications to Slack
