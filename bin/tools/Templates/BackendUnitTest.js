@@ -275,7 +275,7 @@ export class BackendUnitTest extends AbstractTemplate {
    */
   getPathsToUpdate(lambdas) {
     var microAppsArray = lambdas.map((element, index, arr) => {
-      return element.replace(/.*\/src\/(.*)\/Tests\/.*/g, '$1');
+      return element.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
     });
 
     var uniqueArray = microAppsArray.filter((item, pos) => {
@@ -299,7 +299,7 @@ export class BackendUnitTest extends AbstractTemplate {
       let nodeBinDestination = path.join(destination, BackendUnitTest.NODE_BIN);
       let preinstallScriptDestination = path.join(nodeBinDestination, BackendUnitTest.PREINSTALL_FILENAME);
       let installScriptDestination = path.join(nodeBinDestination, BackendUnitTest.INSTALL_FILENAME);
-      let name = nodeBinDestination.replace(/.*\/src\/(.*)\/Tests\/.*/g, '$1');
+      let name = nodeBinDestination.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
       let resources = this.getResourcesByMicroAppName(name);
 
       if (!fs.existsSync(nodeBinDestination)) {
@@ -340,7 +340,7 @@ export class BackendUnitTest extends AbstractTemplate {
     for (let destination of destinations) {
 
       let dest = path.join(destination, BackendUnitTest.PACKAGE_JSON);
-      let name = dest.replace(/.*\/src\/(.*)\/Tests\/.*/g, '$1');
+      let name = dest.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
       let resources = this.getResourcesByMicroAppName(name);
 
       fsExtra.writeJsonSync(dest, JSON.parse(this.updatePackageJson(name, this.getLambdaDeps(resources).join(' '))));
@@ -412,7 +412,7 @@ export class BackendUnitTest extends AbstractTemplate {
    * @returns {string}
    */
   updatePackageJson(name, lambdasDepsString) {
-    let packageName = `${name}BackendTest`.replace(/([A-Z]+)/g, (x, y) => {
+    let packageName = `${name}BackendTest`.replace(/([A-Z]+)/gi, (x, y) => {
       return '-' + y.toLowerCase();
     }).replace(/^-/, '');
 
@@ -454,7 +454,7 @@ export class BackendUnitTest extends AbstractTemplate {
       .replace(/$/g, ' ./node_modules');
 
     return BackendUnitTest.INSTALL_TPL
-      .replace(/\{path\}/g, result);
+      .replace(/\{path\}/gi, result);
   }
 
   /**
@@ -469,7 +469,7 @@ export class BackendUnitTest extends AbstractTemplate {
     let result = lambdasDepsString.replace(/(\s)/g, '\nnpm link ').replace(/^/, 'npm link ');
 
     return BackendUnitTest.POSTINSTALL_TPL
-      .replace(/\{path\}/g, result);
+      .replace(/\{path\}/gi, result);
   }
 
   /**
