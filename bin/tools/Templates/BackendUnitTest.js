@@ -412,7 +412,7 @@ export class BackendUnitTest extends AbstractTemplate {
    * @returns {string}
    */
   updatePackageJson(name, lambdasDepsString) {
-    let packageName = `${name}BackendTest`.replace(/([A-Z]+)/gi, (x, y) => {
+    let packageName = `${name}BackendTest`.replace(/([A-Z]+)/g, (x, y) => {
       return '-' + y.toLowerCase();
     }).replace(/^-/, '');
 
