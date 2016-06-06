@@ -320,7 +320,7 @@ export class BackendUnitTest extends AbstractTemplate {
   }
 
   copyTestAsserts(destination) {
-    let assertSampleDestination = path.join(destination, BackendUnitTest.TEST_ASSERTS_SAMPlE);
+    let assertSampleDestination = path.join(destination, BackendUnitTest.TEST_ASSERTS_SAMPLE);
     let assertDestination = path.join(destination, BackendUnitTest.TEST_ASSERTS);
 
     if (!fs.existsSync(assertSampleDestination)) {
@@ -490,7 +490,7 @@ export class BackendUnitTest extends AbstractTemplate {
    * @returns {string}
    */
   static get HANDLER_TEST_FILENAME() {
-    return 'Handler.spec.js';
+    return 'handler.spec.js';
   }
 
   /**
@@ -570,7 +570,7 @@ export class BackendUnitTest extends AbstractTemplate {
   /**
    * @returns {string}
    */
-  static get TEST_ASSERTS_SAMPlE() {
+  static get TEST_ASSERTS_SAMPLE() {
     return 'test-asserts-sample';
   }
 
@@ -585,7 +585,7 @@ export class BackendUnitTest extends AbstractTemplate {
    * @returns {string}
    */
   static get TEST_ASSERTS_SAMPLE_SOURCE() {
-    return path.join(__dirname, '../', BackendUnitTest.TEST_ASSERTS_SAMPlE);
+    return path.join(__dirname, '../', BackendUnitTest.TEST_ASSERTS_SAMPLE);
   }
 
   /**
