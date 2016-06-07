@@ -89,7 +89,7 @@ export class BackendUnitTest extends AbstractTemplate {
           if (err) throw err;
 
           microAppBackendPaths = files.map((file) => {
-            return file.replace(BackendUnitTest.BACKEND_RESOURCES, '');
+            return file.replace(RegExp(BackendUnitTest.BACKEND_RESOURCES, 'i'), '');
           });
 
           for (var i = 0; i < microAppBackendPaths.length; i++) {
