@@ -11,10 +11,10 @@ export default class extends DeepFramework.Core.AWS.Lambda.Runtime {
   }
 
   /**
-   * @param {Object} request
+   * @param {Object} requestData
    */
-  handle(request) {
-    let itemId = request.getParam('Id');
+  handle(requestData) {
+    let itemId = requestData.Id;
 
     if (itemId) {
       this.retrieve(itemId, (item) => {
