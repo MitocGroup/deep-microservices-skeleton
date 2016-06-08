@@ -11,10 +11,10 @@ export default class extends DeepFramework.Core.AWS.Lambda.Runtime {
   }
 
   /**
-   * @param {Object} request
+   * @param {Object} requestData
    */
-  handle(request) {
-    let modelId = request.getParam('Id');
+  handle(requestData) {
+    let modelId = requestData.Id;
     let Model = this.kernel.get('db').get('{{ resource|lispCase }}');
 
     Model.deleteById(modelId, (err) => {

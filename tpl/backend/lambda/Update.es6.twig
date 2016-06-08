@@ -11,13 +11,13 @@ export default class extends DeepFramework.Core.AWS.Lambda.Runtime {
   }
 
   /**
-   * @param {Object} request
+   * @param {Object} requestData
    */
-  handle(request) {
-    let itemId = request.getParam('Id');
+  handle(requestData) {
+    let itemId = requestData.Id;
     let Model = this.kernel.get('db').get('{{ resource|lispCase }}');
 
-    Model.updateItem(itemId, request.data, (err, item) => {
+    Model.updateItem(itemId, requestData, (err, item) => {
       if (err) {
         throw new DeepFramework.Core.Exception.DatabaseOperationException(err);
       }
