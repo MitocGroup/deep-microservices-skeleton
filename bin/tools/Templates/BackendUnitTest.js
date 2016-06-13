@@ -189,8 +189,10 @@ export class BackendUnitTest extends AbstractTemplate {
           `../../../../test/${sourcePath}/test-asserts` :
           `../../../test/${sourcePath}/test-asserts`;
 
+        let lambdaPath = filePath.replace(/.+\/backend\/src\//i, '');
+
         return BackendUnitTest.FUNCTIONAL_TEST_TPL
-          .replace(/\{nodeDirectory\}/g, `../../../node_modules/${this.getLambdaName(filePath)}/`)
+          .replace(/\{nodeDirectory\}/g, `../../../node_modules/${lambdaPath}/`)
           .replace(/\{assertDirectory\}/g, assertsPath);
 
       default:
