@@ -263,6 +263,7 @@ export class BackendUnitTest extends AbstractTemplate {
 
     this.copyNodeBins(pathsToUpdate);
     this.updatePackageJsons(pathsToUpdate);
+    this.updateCoverageConfigurationFiles(pathsToUpdate);
 
     //todo - move in other place
     callback();
@@ -344,6 +345,26 @@ export class BackendUnitTest extends AbstractTemplate {
       let resources = this.getResourcesByMicroAppName(name);
 
       fsExtra.writeJsonSync(dest, JSON.parse(this.updatePackageJson(name, this.getLambdaDeps(resources).join(' '))));
+    }
+  }
+
+  /**
+   * @param {String[]} destinations
+   */
+  updateCoverageConfigurationFiles(destinations) {
+
+    for (let destination of destinations) {
+
+      let istanbulDestination = path.join(destination, BackendUnitTest.ISTANBUL_CONFIG);
+      let babelRCDestination = path.join(destination, BackendUnitTest.BABEL_RC);
+
+      if (!fs.existsSync(istanbulDestination)) {
+        fsExtra.copySync(BackendUnitTest.ISTANBUL_CONFIG_SOURCE, istanbulDestination);
+      }
+
+      if (!fs.existsSync(babelRCDestination)) {
+        fsExtra.copySync(BackendUnitTest.BABEL_RC_SOURCE, babelRCDestination);
+      }
     }
   }
 
@@ -612,6 +633,41 @@ export class BackendUnitTest extends AbstractTemplate {
   /**
    * @returns {string}
    */
+  static get CONFIGURATION_FILES_FOLDER() {
+    return 'coverage-configuration-files';
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get ISTANBUL_CONFIG() {
+    return '.istanbul.yml';
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get ISTANBUL_CONFIG_SOURCE() {
+    return path.join(__dirname, '../', BackendUnitTest.CONFIGURATION_FILES_FOLDER, BackendUnitTest.ISTANBUL_CONFIG);
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get BABEL_RC() {
+    return '.babelrc';
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get BABEL_RC_SOURCE() {
+    return path.join(__dirname, '../', BackendUnitTest.CONFIGURATION_FILES_FOLDER, BackendUnitTest.BABEL_RC);
+  }
+
+  /**
+   * @returns {string}
+   */
   static get BACKEND_RESOURCES() {
     return BackendUnitTest.BACKEND + BackendUnitTest.RESOURCES_JSON;
   }
@@ -635,8 +691,8 @@ export class BackendUnitTest extends AbstractTemplate {
       scripts: {
         preinstall: 'bash node-bin/preinstall.sh',
         install: 'bash node-bin/install.sh',
-        postinstall: 'bash node-bin/postinstall.sh',
         test: 'bash node-bin/test.sh',
+        posttest: 'bash node-bin/posttest.sh'
       },
       dependencies: {},
       devDependencies: {},
@@ -664,6 +720,7 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('npm link aws-sdk &&\\');
     content.push('npm link node-dir &&\\');
     content.push('npm link deepify &&\\');
+    content.push('npm link babel-preset-es2015 &&\\');
     content.push('{path}');
     content.push('');
 
@@ -762,7 +819,7 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('');
     content.push('  suiteSetup((done) => {');
     content.push('');
-    content.push('    const TEST_ASSERTS_DIR = \'{assertDirectory}\';');
+    content.push('    const TEST_ASSERTS_DIR = \'./test-asserts\';');
     content.push('    let dirPath = path.join(__dirname, TEST_ASSERTS_DIR);');
     content.push('');
     content.push('    dir.readFiles(dirPath, {');
