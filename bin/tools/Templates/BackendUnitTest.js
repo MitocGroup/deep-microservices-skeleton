@@ -874,7 +874,7 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('');
     content.push('    for (i = 0; i < inputEventsArray.length; i++) {');
     content.push('      let eventStr = \'\\\'\' + inputEventsArray[i].replace(/(\\r\\n|\\n|\\r)/gm, \'\') + \'\\\'\';');
-    content.push('      let cmd = `deepify run-lambda {nodeDirectory} -e=${eventStr} -p`;');
+    content.push('      let cmd = `deepify lambda {nodeDirectory} -e=${eventStr} -p`;');
     content.push('      let runLambdaCmd = new Exec(cmd);');
     content.push('');
     content.push('      runLambdaCmd.cwd = __dirname;');
