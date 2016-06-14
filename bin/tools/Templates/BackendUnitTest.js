@@ -168,8 +168,8 @@ export class BackendUnitTest extends AbstractTemplate {
     switch (name) {
       case BackendUnitTest.HANDLER_TEST_FILENAME:
         codeSource = (sourcePath.indexOf(path.sep) !== -1) ?
-          `import ${BackendUnitTest.HANDLER} from \'../../../node_modules/${sourcePath}/${BackendUnitTest.HANDLER}\';` :
-          `import ${BackendUnitTest.HANDLER} from \'../../node_modules/${sourcePath}/${BackendUnitTest.HANDLER}\';`;
+          `import ${BackendUnitTest.HANDLER} from \'../../../../../backend/src/${sourcePath}/${BackendUnitTest.HANDLER}\';` :
+          `import ${BackendUnitTest.HANDLER} from \'../../../../backend/src/${sourcePath}/${BackendUnitTest.HANDLER}\';`;
 
         return BackendUnitTest.HANDLER_TEST_TPL
           .replace(/\{import\}/g, codeSource)
@@ -177,8 +177,8 @@ export class BackendUnitTest extends AbstractTemplate {
 
       case BackendUnitTest.BOOTSTRAP_TEST_FILENAME:
         codeSource = (sourcePath.indexOf(path.sep) !== -1) ?
-          `import ${BackendUnitTest.BOOTSTRAP} from \'../../../node_modules/${sourcePath}/${BackendUnitTest.BOOTSTRAP}\';` :
-          `import ${BackendUnitTest.BOOTSTRAP} from \'../../node_modules/${sourcePath}/${BackendUnitTest.BOOTSTRAP}\';`;
+          `import ${BackendUnitTest.BOOTSTRAP} from \'../../../../../backend/src/${sourcePath}/${BackendUnitTest.BOOTSTRAP}\';` :
+          `import ${BackendUnitTest.BOOTSTRAP} from \'../../../../backend/src/${sourcePath}/${BackendUnitTest.BOOTSTRAP}\';`;
 
         return BackendUnitTest.BOOTSTRAP_TEST_TPL
           .replace(/\{import\}/g, codeSource)
@@ -191,8 +191,12 @@ export class BackendUnitTest extends AbstractTemplate {
 
         let lambdaPath = filePath.replace(/.+\/backend\/src\//i, '');
 
+        codeSource = (sourcePath.indexOf(path.sep) !== -1) ?
+          `../../../../../backend/src/${lambdaPath}/` :
+          `../../../../backend/src/${lambdaPath}/`;
+
         return BackendUnitTest.FUNCTIONAL_TEST_TPL
-          .replace(/\{nodeDirectory\}/g, `../../../node_modules/${lambdaPath}/`)
+          .replace(/\{nodeDirectory\}/g, codeSource)
           .replace(/\{assertDirectory\}/g, assertsPath);
 
       default:
@@ -300,24 +304,10 @@ export class BackendUnitTest extends AbstractTemplate {
     for (let destination of destinations) {
 
       let nodeBinDestination = path.join(destination, BackendUnitTest.NODE_BIN);
-      let preinstallScriptDestination = path.join(nodeBinDestination, BackendUnitTest.PREINSTALL_FILENAME);
-      let installScriptDestination = path.join(nodeBinDestination, BackendUnitTest.INSTALL_FILENAME);
-      let name = nodeBinDestination.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
-      let resources = this.getResourcesByMicroAppName(name);
 
       if (!fs.existsSync(nodeBinDestination)) {
         fsExtra.copySync(BackendUnitTest.NODE_BIN_PATH, nodeBinDestination);
       }
-
-      fsExtra.writeFileSync(
-        preinstallScriptDestination, this.updatePreinstallScriptPaths(name, this.getResourcesDeps(resources).join(' '), 'utf8')
-      );
-      fs.chmodSync(preinstallScriptDestination, 493);
-
-      fsExtra.writeFileSync(
-        installScriptDestination, this.updateInstallScriptPaths(name, this.getResourcesDeps(resources).join(' '), 'utf8')
-      );
-      fs.chmodSync(installScriptDestination, 493);
     }
 
   }
@@ -804,6 +794,8 @@ export class BackendUnitTest extends AbstractTemplate {
   static get FUNCTIONAL_TEST_TPL() {
     let content = [];
 
+    content.push('/*jshint evil:true */');
+    content.push('');
     content.push('\'use strict\';');
     content.push('');
     content.push('import chai from \'chai\';');
@@ -883,7 +875,27 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('');
     content.push('      let lambdaResult = runLambdaCmd.runSync();');
     content.push('      let expectedResult = JSON.parse(expectedResultsArray[i]);');
-    content.push('      let actualResult = (lambdaResult.failed) ? JSON.parse(lambdaResult.error) : JSON.parse(lambdaResult.result);');
+    content.push('      let actualResult = (lambdaResult.failed) ?');
+    content.push('        JSON.parse(lambdaResult.error)');
+    content.push('        : ( typeof JSON.parse(lambdaResult.result) === \'string\') ?');
+    content.push('        JSON.parse(JSON.parse(lambdaResult.result))');
+    content.push('        : JSON.parse(lambdaResult.result);');
+    content.push('');
+    content.push('      if (expectedResult._ignore) {');
+    content.push('');
+    content.push('        var ignoreKeys = (result, ignoreKeysArray) => {');
+    content.push('');
+    content.push('          for(let ignoreKey of ignoreKeysArray) {');
+    content.push('            eval(`delete result.${ignoreKey}`);');
+    content.push('          }');
+    content.push('');
+    content.push('          return result;');
+    content.push('        };');
+    content.push('');
+    content.push('        ignoreKeys(actualResult, expectedResult._ignore);');
+    content.push('');
+    content.push('        delete expectedResult._ignore;');
+    content.push('      }');
     content.push('');
     content.push('      chai.expect(actualResult).to.eql(expectedResult, `for payload from: ${inputEventsFilesArray[i]}`);');
     content.push('    }');
