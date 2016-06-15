@@ -1,7 +1,7 @@
 Testing
 ========
 
-> Before testing please read about  [Testing Use Cases](https://github.com/MitocGroup/deep-microservices-skeleton/blob/master/docs/testing_use_cases.md.md)
+> Before testing please read about  [Testing Use Cases](https://github.com/MitocGroup/deep-microservices-skeleton/blob/master/docs/testing_use_cases.md)
          
 ## Getting Started
 
@@ -41,21 +41,21 @@ Generated tests consist from below files:
 executes `run lambda` and checks if lambda result equals to expected result (file name convention: *.result.json)
 
 Q1. How to ignore some keys/nested key?
+
 A1. In *.result.json you can specify output result keys to ignore. 
 	
 For example:
 
 ```json
-  {
-    "_ignore": [ "db.fs", "validationErrors"],
-		"db": {
-    	"Name": "Input Value"
-  	}
-	} 
+{
+  "_ignore": [ "db.fs", "validationErrors"],
+	"db": {
+    "Name": "Input Value"
+  }
+} 
 ```
 
 > Checks if lambda response equals to { "db": { "Name": "Input Value" } } and ignores 'validationErrors' key and 'fs' key from db object.
-
 
 	
 ### Step 2. Prepare lambdas and backend tests. 
@@ -66,13 +66,13 @@ For example:
 
 > To prepare lambdas and install backend test dependencies for specific micro application)
 
-1. Run `deepify compile dev`:  
+Install lambda dependencies and transpile ES6:  
 
 ```bash
 deepify compile dev ./src
 ```
 
-2. Install backend tests dependencies  for specific micro application: 
+Install backend tests dependencies for specific micro application: 
 
 ```bash
 cd src/deep-hello-world/tests/backend/ && npm install
@@ -111,4 +111,4 @@ git commit -m "Gather coverage [ci full]"
 ```
 
 > Backend coverage report is located in `micro-app-name/tests/frontend/coverage`
-Frontend coverage report is located in `micro-app-name/tests/backend/coverage`
+> Frontend coverage report is located in `micro-app-name/tests/backend/coverage`

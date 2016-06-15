@@ -14,20 +14,20 @@ Testing Use Cases
 			
 ###Changed frontend:
 
-> Run only frontend tests for the changed micro-application
+> Run only frontend tests for the changed micro-application:
 
 - [x] `project/src/micro-application/frontend` folder
 - [x] `project/src/micro-application/tests/frontend` folder
 
 ###Changed backend tests files:
 
-> Run backend tests for the changed micro-application 
+> Run backend tests for the changed micro-application:
 
 - [x] `project/src/micro-application/tests/backend` folder
 	
 ###Changed backend related files:
 
-> Run frontend & backend tests for the changed micro-application
+> Run frontend & backend tests for the changed micro-application:
 
 - [x] `project/src/micro-application/backend` folder
 - [x] `project/src/micro-application/data` folder
