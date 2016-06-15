@@ -37,12 +37,12 @@ Generated tests consist from below files:
 - [x] `bootstrap.spec.js` - no need to add unit tests (LoC - 100 %)
 - [x] `functional.spec.js` - used by Devs or QAs as black box testing
 
-> Takes input payload from test-asserts folder (file name convention: *.payload.json) , 
-executes `run lambda` and checks if lambda result equals to expected result (file name convention: *.result.json)
+> Takes input payload from test-asserts folder (file name convention: `*.payload.json`) , 
+executes `deepify run lambda` and checks if lambda result equals to expected result (file name convention: `*.result.json`)
 
 Q1. How to ignore some keys/nested key?
 
-A1. In *.result.json you can specify output result keys to ignore. 
+A1. In `*.result.json` you can specify output result keys to ignore. 
 	
 For example:
 
@@ -55,7 +55,7 @@ For example:
 } 
 ```
 
-> Checks if lambda response equals to { "db": { "Name": "Input Value" } } and ignores 'validationErrors' key and 'fs' key from db object.
+> Checks if lambda response equals to `{ "db": { "Name": "Input Value" } }` and ignores `validationErrors` key and `fs` key from db object.
 
 	
 ### Step 2. Prepare lambdas and backend tests. 
@@ -76,7 +76,7 @@ Install backend tests dependencies for specific micro application:
 
 ```bash
 cd src/deep-hello-world/tests/backend/ && npm install
-```bash
+```
 		
 #### Option 2.
 
