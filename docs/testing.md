@@ -28,7 +28,7 @@ cd .. && git clone https://github.com/MitocGroup/deep-microservices-helloworld.g
 ./deep-microservices-skeleton/bin/tools/repository_update.sh ./deep-microservices-helloworld/
 ```
 
-> Select microservice name and `backend unit test` option
+> To generate backend unit tests select `backend unit test` option 
 
 
 Generated tests consist from below files:
@@ -38,7 +38,7 @@ Generated tests consist from below files:
 - [x] `functional.spec.js` - used by Devs or QAs as black box testing
 
 > Takes input payload from test-asserts folder (file name convention: `*.payload.json`) , 
-executes `deepify run lambda` and checks if lambda result equals to expected result (file name convention: `*.result.json`)
+executes `deepify run lambda` about 10s for one payload and checks if lambda result equals to expected result (file name convention: `*.result.json`)
 
 Q1. How to ignore some keys/nested key?
 
