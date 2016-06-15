@@ -111,4 +111,5 @@ git commit -m "Gather coverage [ci full]"
 ```
 
 > Backend coverage report is located in `micro-app-name/tests/frontend/coverage`
+
 > Frontend coverage report is located in `micro-app-name/tests/backend/coverage`
