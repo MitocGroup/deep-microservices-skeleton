@@ -144,10 +144,10 @@ export class BackendUnitTest extends AbstractTemplate {
    * Returns full paths to lambda's tests
    * @returns {String[]}
    */
-  getLambdaTestPaths() {
+  getLambdaTestPaths(lambdasPaths) {
     var paths = [];
 
-    paths = this.getLambdaPaths().map((item) => {
+    paths = lambdasPaths.map((item) => {
       return item.replace(BackendUnitTest.BACKEND_SOURCE, BackendUnitTest.BACKEND_UNIT_TEST_FOLDER);
     });
 
@@ -210,13 +210,35 @@ export class BackendUnitTest extends AbstractTemplate {
   }
 
   /**
+   * @param {String[]} pathsArray
+   * @returns {String[]}
+   */
+  getAllPaths(pathsArray) {
+    let result = [];
+
+    for (let pathItem of pathsArray) {
+      result = result.concat(BackendUnitTest._lookupClassFiles(pathItem));
+    }
+
+    return result;
+  }
+
+  /**
    *
    * @param {Function} callback
    * @returns {String[]}
    */
   generateMissingTests(callback) {
     let lambdasPathArray = this.getLambdaPaths();
-    let toUpdateTests = this.getLambdaTestPaths();
+    let toUpdateTests = this.getLambdaTestPaths(lambdasPathArray);
+    let es6ClassPaths = this.getAllPaths(lambdasPathArray);
+    let es6TestClassPaths = this.getLambdaTestPaths(es6ClassPaths);
+
+    console.log('lambdasPathArray: ', lambdasPathArray);
+    console.log('toUpdateTests: ', toUpdateTests);
+    console.log('es6ClassPaths: ', es6ClassPaths);
+    console.log('es6TestClassPaths: ', es6TestClassPaths);
+
     let generatedTests = [];
 
     for (let i = 0; i < toUpdateTests.length; i++) {
@@ -692,6 +714,31 @@ export class BackendUnitTest extends AbstractTemplate {
    * @returns {string}
    * @constructor
    */
+  static get GENERIC_TEST_TPL() {
+    let content = [];
+
+    content.push(`// THIS TEST WAS GENERATED AUTOMATICALLY ON ${new Date().toString()}`);
+    content.push('');
+    content.push('\'use strict\';');
+    content.push('');
+    content.push('import chai from \'chai\';');
+    content.push('{import}');
+    content.push('');
+    content.push('// @todo: Add more advanced tests');
+    content.push('suite(\'{ClassName}\', () => {');
+    content.push('  test(\'Class {ClassName} exists in {lambdaName} module\', () => {');
+    content.push('    chai.expect({ClassName}).to.be.an(\'function\');');
+    content.push('  });');
+    content.push('});');
+    content.push('');
+
+    return content.join(os.EOL);
+  }
+
+  /**
+   * @returns {string}
+   * @constructor
+   */
   static get HANDLER_TEST_TPL() {
     let content = [];
 
@@ -835,6 +882,50 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('');
 
     return content.join(os.EOL);
+  }
+
+  /**
+   * @param {String} dir
+   * @param {Array} files_
+   * @returns {Array}
+   * @private
+   */
+  static _lookupClassFiles(dir, files_ = null) {
+    files_ = files_ || [];
+
+    let files = fs.readdirSync(dir);
+
+    for (let i in files) {
+      if (!files.hasOwnProperty(i)) {
+        continue;
+      }
+
+      let filename = files[i];
+      let filepath = path.join(dir, filename);
+
+      if (fs.statSync(filepath).isDirectory()) {
+        BackendUnitTest._lookupClassFiles(filepath, files_);
+      } else {
+        if (!BackendUnitTest._isClassFile(filename)) {
+          continue;
+        }
+
+        files_.push(filepath);
+      }
+    }
+
+    return files_;
+  }
+
+  /**
+   * @param {String} filename
+   * @returns {Boolean}
+   * @private
+   */
+  static _isClassFile(filename) {
+    return /^[A-Z]/.test(filename) && !/exception\.es6$/i.test(filename)
+      && !/bootstrap\.es6$/i.test(filename) && !/Handler\.es6$/i.test(filename)
+      && path.extname(filename) === '.es6';
   }
 
 }
