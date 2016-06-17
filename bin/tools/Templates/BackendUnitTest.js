@@ -903,7 +903,7 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('    chai.expect(handler).to.be.an.instanceof(Handler);');
     content.push('  });');
     content.push('');
-    content.push('  test(\'Check handle method exists"\', () => {');
+    content.push('  test(\'Check handle method exists\', () => {');
     content.push('    chai.expect(handler.handle).to.be.an(\'function\');');
     content.push('  });');
     content.push('');
