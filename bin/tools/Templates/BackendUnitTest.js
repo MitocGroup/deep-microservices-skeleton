@@ -299,7 +299,7 @@ export class BackendUnitTest extends AbstractTemplate {
       }
     }
 
-    //iterate through handler&bootstrap tests;
+    //iterate through all *.es6 files;
     for (i = 0; i < es6TestClassPaths.length; i++) {
       if (!fs.existsSync(es6TestClassPaths[i])) {
 
