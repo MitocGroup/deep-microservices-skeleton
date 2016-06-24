@@ -58,9 +58,6 @@ export default class S3CoverageSynchronizer {
   }
 
   constructor() {
-    AWS.config.update({
-      region: process.env.AWS_CONFIG_REGION,
-    });
     this._awsS3 = new AWS.S3({});
     this._client = s3.createClient({
       s3Client: this._awsS3,
