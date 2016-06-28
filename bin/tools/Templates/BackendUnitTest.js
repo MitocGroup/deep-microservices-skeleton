@@ -58,6 +58,7 @@ export class BackendUnitTest extends AbstractTemplate {
       dir.readFiles(this.microAppsPath, {
           match: /resources\.json$/,
           exclude: /^\./,
+          excludeDir: ['frontend', 'node_modules', 'docs', 'data', 'tests'],
         }, (err, content, next) => {
           if (err) {
             throw err;
