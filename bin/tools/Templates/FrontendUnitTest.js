@@ -113,14 +113,34 @@ export class FrontendUnitTest extends AbstractTemplate {
     return controllerPaths;
   }
 
+  /**
+   * @returns {string}
+   */
+  getAngularHealthCheckPaths() {
+    let helthCheckPaths = [];
+
+    for (let microAppFrontendPath of this.microAppsPath) {
+      let angularHealthCheck = path.join(__dirname, microAppFrontendPath);
+
+      helthCheckPaths.push(angularHealthCheck);
+    }
+
+    return helthCheckPaths;
+  }
+
 
   /**
-   *
    * @param {Function} callback
    * @returns {String[]}
    */
   generateMissingTests(callback) {
     let generatedTests = [];
+
+    let angularHealthCheckPaths = this.getAngularHealthCheckPaths();
+
+    console.log('angularHealthCheckPaths: ', angularHealthCheckPaths);
+
+    //let pathsToUpdate = this.getPathsToUpdate(generatedTests);
 
     //this.copyNodeBins(pathsToUpdate);
     //this.updatePackageJsons(pathsToUpdate);
@@ -132,10 +152,45 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
   /**
+   * @param {String[]} destinations
+   */
+  updatePackageJsons(destinations) {
+
+    for (let destination of destinations) {
+
+      let dest = path.join(destination, FrontendUnitTest.PACKAGE_JSON);
+      let name = dest.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
+      let resources = this.getResourcesByMicroAppName(name);
+
+      fsExtra.writeJsonSync(dest, JSON.parse(this.updatePackageJson(name, this.getLambdaDeps(resources).join(' '))));
+    }
+  }
+
+  /**
+   * @param {String} name
+   * @returns {string}
+   */
+  updatePackageJson(name) {
+    let packageName = `${name}FrontendTest`.replace(/([A-Z]+)/g, (x, y) => {
+      return '-' + y.toLowerCase();
+    }).replace(/^-/, '');
+
+    return BackendUnitTest.PACKAGE_JSON_TPL_STRING
+      .replace(/\{name\}/g, packageName);
+  }
+
+  /**
    * @returns {string}
    */
   static get FRONTEND() {
     return '/frontend';
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get FRONTEND_TEST_FOLDER() {
+    return '/tests/frontend';
   }
 
   /**
@@ -167,6 +222,19 @@ export class FrontendUnitTest extends AbstractTemplate {
     return 'frontend/js/app/angular/name.js';
   }
 
+  /**
+   * @returns {string}
+   */
+  static get FRONTEND_ANGULAR_HEALTH_CHECK() {
+    return 'test/frontend/angular/health-checks/health.check.spec.js';
+  }
+
+  /**
+   * @returns {string}
+   */
+  static get PACKAGE_JSON() {
+    return 'package.json';
+  }
 
   /**
    * @returns {string}
@@ -178,19 +246,34 @@ export class FrontendUnitTest extends AbstractTemplate {
       version: '0.0.1',
       description: 'Description of {name}',
       scripts: {
-        preinstall: 'bash node-bin/preinstall.sh',
-        install: 'bash node-bin/install.sh',
-        test: 'bash node-bin/test.sh',
-        posttest: 'bash node-bin/posttest.sh'
+        preinstall: 'cd ../../frontend/js/ && npm install && cd ../../tests/frontend/',
+        postinstall: 'jspm install',
+        test: 'karma start config.karma.js',
+        coverage: 'echo \'Coverage has been already gathered during testing for frontend\' && exit 0'
+      },
+      jspm: {
+        directories: {
+          baseURL: '..',
+          lib: '',
+          packages: 'vendor'
+        },
+        configFile: 'config.test.js',
+        dependencies: {
+          angular: 'github:angular/bower-angular@1.4.0',
+          'angular-mocks': 'github:angular/bower-angular-mocks@1.4.4',
+          'angular-ui-router': 'github:angular-ui/ui-router@0.2.15',
+          'es5-shim': 'github:es-shims/es5-shim@4.4.0',
+          'es6-shim': 'github:es-shims/es6-shim@0.34.0'
+        },
+        devDependencies: {
+          babel: 'npm:babel-core@^6.x.x',
+          'babel-runtime': 'npm:babel-runtime@^6.x.x',
+          'core-js': 'npm:core-js@^1.1.4'
+        }
       },
       dependencies: {},
       devDependencies: {},
-      repository: {
-        type: 'git',
-        url: 'https://github.com/MitocGroup/deep-microservices-skeleton.git',
-      },
       private: true,
-      license: 'MIT',
     };
 
     return JSON.stringify(contentObj).concat(os.EOL);
