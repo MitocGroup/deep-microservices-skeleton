@@ -11,6 +11,7 @@ import {Readme} from './Templates/Readme';
 import {Output} from './Helper/Output';
 import {TravisConfig} from './Templates/TravisConfig';
 import {BackendUnitTest} from './Templates/BackendUnitTest';
+import {FrontendUnitTest} from './Templates/FrontendUnitTest';
 
 /**
  * @param {String} resource
@@ -60,6 +61,19 @@ function updateBackendUnitTests(callback) {
 }
 
 /**
+ * @param {Function} callback
+ */
+function updateFrontendUnitTests(callback) {
+
+  console.log('in updateFrontendUnitTests: ', msPath);
+
+  let frontendUnitTest = new FrontendUnitTest(msPath, function() {
+    frontendUnitTest.generateMissingTests(callback);
+  });
+
+}
+
+/**
  * @param {String} microserviceName
  * @param {Array} resources
  */
@@ -85,6 +99,10 @@ function updateMicroservice(microserviceName, resources) {
 
     case 'backend unit test':
       updateBackendUnitTests(callback);
+      break;
+
+    case 'frontend unit test':
+      updateFrontendUnitTests(callback);
       break;
 
     default:
@@ -115,8 +133,8 @@ if (!FS.existsSync(msPath) || !FS.statSync(msPath).isDirectory()) {
 }
 
 let resources = [
-  'README.md', '.travis.yml', '.hound.yml', '.houndignore',
-  '.jscsrc', '.jshintrc', 'bin/test', 'backend unit test',
+  'README.md', '.travis.yml', '.hound.yml', '.houndignore', '.jscsrc',
+  '.jshintrc', 'bin/test', 'backend unit test', 'frontend unit test',
 ];
 let choiceList = resources.reduce((walker, resource) => {
   walker.push({
