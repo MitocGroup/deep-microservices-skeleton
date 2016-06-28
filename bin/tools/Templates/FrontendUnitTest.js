@@ -1,3 +1,5 @@
+/*jshint bitwise: false*/
+
 /**
  * Created by vcernomschi on 4/26/16..
  */
@@ -114,18 +116,43 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
   /**
-   * @returns {string}
+   * @returns {String[]}
    */
   getAngularHealthCheckPaths() {
     let helthCheckPaths = [];
 
-    for (let microAppFrontendPath of this.microAppsPath) {
-      let angularHealthCheck = path.join(__dirname, microAppFrontendPath);
-
-      helthCheckPaths.push(angularHealthCheck);
+    for (let microAppFrontendPath of this._microAppFrontend) {
+      helthCheckPaths.push(path.join(
+        __dirname, '../../../../', microAppFrontendPath.path, FrontendUnitTest.FRONTEND_ANGULAR_HEALTH_CHECK
+      ));
     }
 
     return helthCheckPaths;
+  }
+
+  /**
+   * Returns String[] of generated health checks
+   * @param {String[]} paths - destination paths for angular health checks
+   * @returns {String[]}
+   */
+  generateAngularHealthChecks(paths) {
+    let result = [];
+
+    for (let _path of paths) {
+
+      if(FrontendUnitTest.accessSync(_path)) {
+        console.log('Health check exists: ', _path)
+        continue;
+      }
+
+      fsExtra.copySync(FrontendUnitTest.HEALTH_CHECK_SOURCE, _path, {
+        clobber: true,
+      });
+
+      result.push(_path);
+    }
+
+    return result;
   }
 
 
@@ -139,6 +166,8 @@ export class FrontendUnitTest extends AbstractTemplate {
     let angularHealthCheckPaths = this.getAngularHealthCheckPaths();
 
     console.log('angularHealthCheckPaths: ', angularHealthCheckPaths);
+
+    generatedTests.concat(this.generateAngularHealthChecks(angularHealthCheckPaths));
 
     //let pathsToUpdate = this.getPathsToUpdate(generatedTests);
 
@@ -168,40 +197,70 @@ export class FrontendUnitTest extends AbstractTemplate {
 
   /**
    * @param {String} name
-   * @returns {string}
+   * @returns {String}
    */
   updatePackageJson(name) {
     let packageName = `${name}FrontendTest`.replace(/([A-Z]+)/g, (x, y) => {
       return '-' + y.toLowerCase();
     }).replace(/^-/, '');
 
-    return BackendUnitTest.PACKAGE_JSON_TPL_STRING
+    return FrontendUnitTest.PACKAGE_JSON_TPL_STRING
       .replace(/\{name\}/g, packageName);
   }
 
   /**
-   * @returns {string}
+   * @param {String} pathToAccess
+   * @returns {boolean}
+   */
+  static accessSync(pathToAccess) {
+    try {
+      fs.accessSync(pathToAccess, fs.F_OK | fs.R_OK | fs.W_OK);
+      return true;
+    } catch (exception) {
+      return false;
+    }
+  }
+
+  static updateAngularModuleName(filePath, newValue) {
+
+    let fileContent = fs.readFileSync(filePath, 'utf-8');
+
+    let newContent = fileContent.replace(/\{angularModuleName\}/gi, newValue)
+
+    //  if (err) throw err;
+    //
+    //  var newValue = data.replace(/^\./gim, 'myString');
+    //
+    //  fs.writeFile(filePath, newValue, 'utf-8', function (err) {
+    //    if (err) throw err;
+    //    console.log('filelistAsync complete');
+    //  });
+    //});
+  }
+
+  /**
+   * @returns {String}
    */
   static get FRONTEND() {
     return '/frontend';
   }
 
   /**
-   * @returns {string}
+   * @returns {String}
    */
   static get FRONTEND_TEST_FOLDER() {
     return '/tests/frontend';
   }
 
   /**
-   * @returns {string}
+   * @returns {String}
    */
   static get FRONTEND_NAME() {
     return FrontendUnitTest.FRONTEND + FrontendUnitTest.RESOURCES_JSON;
   }
 
   /**
-   * @returns {string}
+   * @returns {String}
    */
   static get RELATIVE_FRONTEND() {
     return '../../frontend';
@@ -209,35 +268,42 @@ export class FrontendUnitTest extends AbstractTemplate {
 
 
   /**
-   * @returns {string}
+   * @returns {String}
    */
   static get SOURCE() {
     return '/src';
   }
 
   /**
-   * @returns {string}
+   * @returns {String}
    */
   static get FRONTEND_ANGULAR_NAME() {
     return 'frontend/js/app/angular/name.js';
   }
 
   /**
-   * @returns {string}
+   * @returns {String}
    */
-  static get FRONTEND_ANGULAR_HEALTH_CHECK() {
-    return 'test/frontend/angular/health-checks/health.check.spec.js';
+  static get HEALTH_CHECK_SOURCE() {
+    return path.join(__dirname, '../frontend-tests/angular/health-checks/health.check.spec.js');
   }
 
   /**
-   * @returns {string}
+   * @returns {String}
+   */
+  static get FRONTEND_ANGULAR_HEALTH_CHECK() {
+    return 'tests/frontend/angular/health-checks/health.check.spec.js';
+  }
+
+  /**
+   * @returns {String}
    */
   static get PACKAGE_JSON() {
     return 'package.json';
   }
 
   /**
-   * @returns {string}
+   * @returns {String}
    * @constructor
    */
   static get PACKAGE_JSON_TPL_STRING() {
