@@ -26,6 +26,24 @@ if [ "$TRAVIS" == "true" ] && [ -e "$__VARS_FILE_PATH" ]; then
   source "$__VARS_FILE_PATH"
 fi
 
+#############################################################################
+### Checks if all environment variables available for validating coverage ###
+### Arguments:                                                            ###
+###   None                                                                ###
+### Returns:                                                              ###
+###   0 or 1                                                              ###
+#############################################################################
+is_Env_Vars_Available () {
+  if [ -z $GITHUB_OAUTH_TOKEN ] || [ -z $AWS_ACCESS_KEY_ID ] || [ -z AWS_SECRET_ACCESS_KEY ] || \
+    [ -z $S3_BUCKET_NAME ] || [ -z $AWS_DEFAULT_REGION ]; then
+    echo 0;
+
+    return;
+  fi
+
+  echo 1;
+}
+
 
 #######################################################################################
 ### Executes frontend/backend commands for subpaths with/without parallelizing mode ###
