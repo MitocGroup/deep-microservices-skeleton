@@ -65,7 +65,8 @@ function updateBackendUnitTests(callback) {
  */
 function updateFrontendUnitTests(callback) {
 
-  let frontendUnitTest = new FrontendUnitTest(msPath, function() {
+  let frontendUnitTest = new FrontendUnitTest(msPath);
+  frontendUnitTest.init(function() {
     frontendUnitTest.generateMissingTests(callback);
   });
 

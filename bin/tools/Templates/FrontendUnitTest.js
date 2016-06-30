@@ -21,12 +21,17 @@ export class FrontendUnitTest extends AbstractTemplate {
   /**
    * @param {String} customPresetsFile
    */
-  constructor(path, callback) {
+  constructor(path) {
     super();
 
     this.microAppsPath = path;
     this.microAppsFullPath = path;
+  }
 
+  /**
+   * @param {Function} callback
+   */
+  init(callback){
     this.getFrontendInfo(callback);
     this.getFrontendPackageJsonPaths();
   }
