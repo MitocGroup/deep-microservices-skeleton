@@ -19,7 +19,7 @@ import {AbstractTemplate} from './AbstractTemplate';
 export class FrontendUnitTest extends AbstractTemplate {
 
   /**
-   * @param {String} customPresetsFile
+   * @param {String} path
    */
   constructor(path) {
     super();
@@ -152,20 +152,6 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
   /**
-   * @param {String} mPath
-   * @returns {String}
-   */
-  static getMicroAppIdentifier(mPath) {
-    let deepkfPath = path.join(mPath, 'deepkg.json');
-
-    if (FrontendUnitTest.accessSync(deepkfPath)) {
-      return fsExtra.readJsonSync(deepkfPath, {throws: false}).identifier;
-    }
-
-    return '';
-  }
-
-  /**
    * @returns {Object[]}
    */
   getAngularHealthCheckPaths() {
@@ -220,28 +206,6 @@ export class FrontendUnitTest extends AbstractTemplate {
         console.log(`No dependencies found for:  <error>${depName}</error>`);
       }
 
-    }
-
-    return result;
-  }
-
-  /**
-   *
-   * @param {String} microAppPath
-   * @returns {String[]}
-   */
-  static getDependencies(microAppPath) {
-    let result = [];
-    let dependenciesPath = path.join(microAppPath, FrontendUnitTest.FRONTEND_ANGULAR_DEPENDENCIES);
-
-    if (FrontendUnitTest.accessSync(dependenciesPath)) {
-      let fileContent = fs.readFileSync(dependenciesPath, 'utf-8');
-      let dependenciesArray = fileContent.match(/import(.*from.*)?\s+'([^\/\']+(\/[^\/\']+)?)/g);
-      dependenciesArray = dependenciesArray ? dependenciesArray : [];
-
-      for (let dependency of dependenciesArray) {
-        result.push(dependency.replace(/import(.*from.*)?\s+'/, ''));
-      }
     }
 
     return result;
@@ -336,7 +300,6 @@ export class FrontendUnitTest extends AbstractTemplate {
     for (let destination of destinations) {
 
       let karmaDestination = path.join(destination, FrontendUnitTest.KARMA_CONFIG);
-      let packageJsonDestination = path.join(destination, FrontendUnitTest.PACKAGE_JSON);
       let jspmConfigDestination = path.join(destination, FrontendUnitTest.JSPM_CONFIG);
 
       if (!FrontendUnitTest.accessSync(karmaDestination)) {
@@ -483,6 +446,42 @@ export class FrontendUnitTest extends AbstractTemplate {
     }
 
     this._frontendPackageJsonPaths = result;
+
+    return result;
+  }
+
+  /**
+   * @param {String} mPath
+   * @returns {String}
+   */
+  static getMicroAppIdentifier(mPath) {
+    let deepkfPath = path.join(mPath, 'deepkg.json');
+
+    if (FrontendUnitTest.accessSync(deepkfPath)) {
+      return fsExtra.readJsonSync(deepkfPath, {throws: false}).identifier;
+    }
+
+    return '';
+  }
+
+  /**
+   *
+   * @param {String} microAppPath
+   * @returns {String[]}
+   */
+  static getDependencies(microAppPath) {
+    let result = [];
+    let dependenciesPath = path.join(microAppPath, FrontendUnitTest.FRONTEND_ANGULAR_DEPENDENCIES);
+
+    if (FrontendUnitTest.accessSync(dependenciesPath)) {
+      let fileContent = fs.readFileSync(dependenciesPath, 'utf-8');
+      let dependenciesArray = fileContent.match(/import(.*from.*)?\s+'([^\/\']+(\/[^\/\']+)?)/g);
+      dependenciesArray = dependenciesArray ? dependenciesArray : [];
+
+      for (let dependency of dependenciesArray) {
+        result.push(dependency.replace(/import(.*from.*)?\s+'/, ''));
+      }
+    }
 
     return result;
   }

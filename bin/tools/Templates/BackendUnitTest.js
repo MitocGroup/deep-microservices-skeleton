@@ -17,7 +17,7 @@ import {AbstractTemplate} from './AbstractTemplate';
 export class BackendUnitTest extends AbstractTemplate {
 
   /**
-   * @param {String} customPresetsFile
+   * @param {String} path
    */
   constructor(path) {
     super();
@@ -95,7 +95,7 @@ export class BackendUnitTest extends AbstractTemplate {
           if (err) throw err;
 
           microAppBackendPaths = files.map((file) => {
-            return file.replace(RegExp(BackendUnitTest.BACKEND_RESOURCES, 'i'), '');
+            return file.replace(new RegExp(BackendUnitTest.BACKEND_RESOURCES, 'i'), '');
           });
 
           for (var i = 0; i < microAppBackendPaths.length; i++) {
@@ -345,7 +345,7 @@ export class BackendUnitTest extends AbstractTemplate {
     });
 
     var uniqueArray = microAppsArray.filter((item, pos) => {
-      return microAppsArray.indexOf(item) == pos;
+      return microAppsArray.indexOf(item) === pos;
     });
 
     for (var i = 0; i < uniqueArray.length; i++) {
