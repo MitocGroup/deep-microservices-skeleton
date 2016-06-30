@@ -29,7 +29,7 @@ DeepFramework.Kernel.load({
   },
   'microserviceIdentifier': '{microserviceIdentifier}',
   'awsAccountId': 122435435456,
-  'propertyIdentifier': 'livebook.prod',
+  'propertyIdentifier': 'propertyIdentifier',
   'timestamp': 1441198970148,
   'buckets': {
     'public': {
