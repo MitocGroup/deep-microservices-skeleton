@@ -31,7 +31,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   /**
    * @param {Function} callback
    */
-  init(callback){
+  init(callback) {
     this.getFrontendInfo(callback);
     this.getFrontendPackageJsonPaths();
   }

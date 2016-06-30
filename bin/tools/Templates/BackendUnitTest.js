@@ -19,11 +19,16 @@ export class BackendUnitTest extends AbstractTemplate {
   /**
    * @param {String} customPresetsFile
    */
-  constructor(path, callback) {
+  constructor(path) {
     super();
 
     this.microAppsPath = path;
+  }
 
+  /**
+   * @param {Function} callback
+   */
+  init(callback) {
     this.getBackendInfo(callback);
   }
 

@@ -54,7 +54,9 @@ function updateTravis(callback) {
  */
 function updateBackendUnitTests(callback) {
 
-  let backendUnitTest = new BackendUnitTest(msPath, function() {
+  let backendUnitTest = new BackendUnitTest(msPath);
+
+  backendUnitTest.init(()=> {
     backendUnitTest.generateMissingTests(callback);
   });
 
@@ -66,7 +68,7 @@ function updateBackendUnitTests(callback) {
 function updateFrontendUnitTests(callback) {
 
   let frontendUnitTest = new FrontendUnitTest(msPath);
-  frontendUnitTest.init(function() {
+  frontendUnitTest.init(() => {
     frontendUnitTest.generateMissingTests(callback);
   });
 
