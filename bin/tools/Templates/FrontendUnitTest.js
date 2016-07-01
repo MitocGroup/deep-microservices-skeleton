@@ -641,14 +641,14 @@ export class FrontendUnitTest extends AbstractTemplate {
           return FrontendUnitTest.MODELS_TEST_TPL_WITH_SERVICE
             .replace(/\{ClassName\}/g, name)
             .replace(/\{ServiceName\}/g, serviceName)
-            .replace(/\{serviceName\}/g, FrontendUnitTest.uncapitalizeFirstChar(serviceName));
+            .replace(/\{serviceName\}/g, FrontendUnitTest.lowerCaseFirstChar(serviceName));
         }
 
         //create model test as for class
         return FrontendUnitTest.MODELS_TEST_TPL
           .replace(/\{import\}/g, `import {${name}} from \'${relativePath}/${name}\';`)
           .replace(/\{ClassName\}/g, name)
-          .replace(/\{objectName\}/g, FrontendUnitTest.uncapitalizeFirstChar(name));
+          .replace(/\{objectName\}/g, FrontendUnitTest.lowerCaseFirstChar(name));
 
       case FrontendUnitTest.FILTER:
 
@@ -704,7 +704,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @param {String} string
    * @returns {String}
    */
-  static uncapitalizeFirstChar(string) {
+  static lowerCaseFirstChar(string) {
     return string.charAt(0).toLowerCase() + string.slice(1);
   }
 
