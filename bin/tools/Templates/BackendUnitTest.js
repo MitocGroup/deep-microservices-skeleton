@@ -148,7 +148,9 @@ export class BackendUnitTest extends AbstractTemplate {
 
   /**
    * Returns full paths to lambda's tests
-   * @returns {String[]}
+   * @param {String[]} lambdasPaths
+   * @param {Boolean} isChangeFileName
+   * @returns {Array}
    */
   getLambdaTestPaths(lambdasPaths, isChangeFileName = false) {
     var paths = [];
@@ -166,8 +168,11 @@ export class BackendUnitTest extends AbstractTemplate {
   }
 
   /**
-   * @param {String} filePath
-   * @returns {String}
+   * @param filePath
+   * @param name
+   * @param absoluteClassPath
+   * @param absoluteTestPath
+   * @returns {string}
    * @private
    */
   _genTestSuite(filePath, name, absoluteClassPath = '', absoluteTestPath = '') {
@@ -178,7 +183,7 @@ export class BackendUnitTest extends AbstractTemplate {
       /(.*)\/backend\/src\/.*$/, `$1${BackendUnitTest.BACKEND_TEST_FOLDER}${path.sep}node_modules`
     ));
     let testPathDir = path.dirname(absoluteTestPath);
-    let classPathDir = path.dirname(absoluteClassPath)
+    let classPathDir = path.dirname(absoluteClassPath);
     let relativePath = path.relative(testPathDir, classPathDir);
     let nodeRelativePath = path.relative(testPathDir, nodeModulesPath);
 
@@ -310,6 +315,7 @@ export class BackendUnitTest extends AbstractTemplate {
       if (!fs.existsSync(es6TestClassPaths[i])) {
 
         fsExtra.createFileSync(es6TestClassPaths[i]);
+
         fs.writeFileSync(
           es6TestClassPaths[i], this._genTestSuite(
             lambdasPathArray[i],

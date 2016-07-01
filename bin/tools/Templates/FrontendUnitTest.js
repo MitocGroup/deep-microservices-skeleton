@@ -152,6 +152,34 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
   /**
+   * @returns {String[]}
+   */
+  getAllModelsPaths() {
+    return this.getAllPathByPattern(FrontendUnitTest.FRONTEND_MODELS);
+  }
+
+  /**
+   * @returns {String[]}
+   */
+  getAllFiltersPaths() {
+    return this.getAllPathByPattern(FrontendUnitTest.FRONTEND_FILTERS);
+  }
+
+  /**
+   * @returns {String[]}
+   */
+  getAllPathByPattern(pattern) {
+    let result = [];
+
+    for (let pathItem of this._microAppFrontend) {
+      let modelsDir = path.join(pathItem.path, pattern);
+      result = result.concat(FrontendUnitTest._lookupClassFiles(modelsDir));
+    }
+
+    return result;
+  }
+
+  /**
    * @returns {Object[]}
    */
   getAngularHealthCheckPaths() {
@@ -251,7 +279,11 @@ export class FrontendUnitTest extends AbstractTemplate {
 
     this.getAngularHealthCheckPaths();
 
-    generatedTests = generatedTests.concat(this.generateAngularHealthChecks());
+    let healthCheckTestPaths = this.generateAngularHealthChecks();
+    let modelTestPaths = this.generateModelTests(this.getAllModelsPaths(), true);
+    let filterTestPaths = this.generateFilterTests(this.getAllFiltersPaths(), true);
+
+    generatedTests = generatedTests.concat(healthCheckTestPaths, modelTestPaths, filterTestPaths);
 
     let pathsToUpdate = this.getPathsToUpdate(generatedTests);
 
@@ -265,14 +297,86 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
   /**
+   * Returns full paths to tests
+   * @param {String[]} paths
+   * @param {Boolean} isChangeFileName
+   * @returns {Array}
+   */
+  generateTestPaths(paths, isChangeFileName) {
+    let tests = paths.map((item) => {
+
+      if (isChangeFileName) {
+        item = item.replace('.js', FrontendUnitTest.TEST_FILE_EXTENSION);
+      }
+
+      return item.replace(FrontendUnitTest.FRONTEND_APP_FOLDER, FrontendUnitTest.TESTS_FRONTEND_FOLDER);
+    });
+
+    return tests;
+  }
+
+  /**
+   * Generate tests and return full paths to model's tests
+   * @param {String} type
+   * @param {String[]} modelsPaths
+   * @param {Boolean} isChangeFileName
+   * @returns {Array}
+   */
+  generateTests(type, paths, isChangeFileName) {
+    let genTests = [];
+    let testPaths = this.generateTestPaths(paths, isChangeFileName);
+
+    for (const [index, elem] of testPaths.entries()) {
+
+      if (!FrontendUnitTest.accessSync(elem)) {
+        let modelTestContent = FrontendUnitTest.createTestWithRelativePath(type, paths[index], elem);
+
+        fsExtra.createFileSync(elem);
+        fs.writeFileSync(elem, modelTestContent);
+
+        console.log(`Test <info>${elem}</info> for has been added`);
+
+        genTests.push(elem);
+      }
+
+    }
+
+    return genTests;
+  }
+
+  /**
+   * Generate tests and return full paths to model's tests
+   * @param {String[]} modelPaths
+   * @param {Boolean} isChangeFileName
+   * @returns {Array}
+   */
+  generateModelTests(modelPaths, isChangeFileName = true) {
+    return this.generateTests(FrontendUnitTest.MODEL, modelPaths, isChangeFileName);
+  }
+
+  /**
+   * Generate tests and return full paths to model's tests
+   * @param {String[]} filterPaths
+   * @param {Boolean} isChangeFileName
+   * @returns {Array}
+   */
+  generateFilterTests(filterPaths, isChangeFileName = true) {
+    return this.generateTests(FrontendUnitTest.FILTER, filterPaths, isChangeFileName);
+  }
+
+  /**
    * @param {String[]} destinations
    */
   prepareMocks(destinations) {
+
     for (let destination of destinations) {
 
       let profileDestination = path.join(destination, FrontendUnitTest.PROFILE_PATH);
       let frameworkDestination = path.join(destination, FrontendUnitTest.FRAMEWORK_PATH);
+      let stripeDestination = path.join(destination, FrontendUnitTest.STRIPE_PATH);
       let frameworkMockDestination = path.join(destination, FrontendUnitTest.FRAMEWORK_MOCK_PATH);
+      let name = profileDestination.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
+      let healthCheckObj = this.getHealthCheckObjectByName(name);
 
       if (!FrontendUnitTest.accessSync(profileDestination)) {
         fsExtra.copySync(FrontendUnitTest.PROFILE_SOURCE, profileDestination);
@@ -289,6 +393,13 @@ export class FrontendUnitTest extends AbstractTemplate {
 
         FrontendUnitTest.updateFrameworkMock(frameworkMockDestination, name);
       }
+
+      if (healthCheckObj && healthCheckObj.hasOwnProperty('dependencies') &&
+        healthCheckObj.dependencies.hasOwnProperty('angular-stripe') &&
+        !FrontendUnitTest.accessSync(stripeDestination)) {
+        fsExtra.copySync(FrontendUnitTest.STRIPE_SOURCE, stripeDestination);
+      }
+
     }
   }
 
@@ -513,13 +624,96 @@ export class FrontendUnitTest extends AbstractTemplate {
     );
   }
 
+  static createTestWithRelativePath(type, absoluteClassPath = '', absoluteTestPath = '') {
+
+    let name = FrontendUnitTest.getClassName(absoluteTestPath);
+    let testPathDir = path.dirname(absoluteTestPath);
+    let classPathDir = path.dirname(absoluteClassPath);
+    let relativePath = path.relative(testPathDir, classPathDir);
+
+    switch (type) {
+      case FrontendUnitTest.MODEL:
+
+        let serviceName = FrontendUnitTest.isService(absoluteClassPath);
+
+        //create model test as for angular service
+        if (serviceName) {
+          return FrontendUnitTest.MODELS_TEST_TPL_WITH_SERVICE
+            .replace(/\{ClassName\}/g, name)
+            .replace(/\{ServiceName\}/g, serviceName)
+            .replace(/\{serviceName\}/g, FrontendUnitTest.uncapitalizeFirstChar(serviceName));
+        }
+
+        //create model test as for class
+        return FrontendUnitTest.MODELS_TEST_TPL
+          .replace(/\{import\}/g, `import {${name}} from \'${relativePath}/${name}\';`)
+          .replace(/\{ClassName\}/g, name)
+          .replace(/\{objectName\}/g, FrontendUnitTest.uncapitalizeFirstChar(name));
+
+      case FrontendUnitTest.FILTER:
+
+        let filterName = FrontendUnitTest.getFilterName(absoluteClassPath);
+
+        if(!filterName){
+          throw new Error(`Filter name can't be retrieved for filter ${absoluteClassPath}`);
+        }
+
+        //create filter test
+        return FrontendUnitTest.FILTER_TEST_TPL
+          .replace(/\{filterName\}/g, filterName);
+
+      default:
+        throw new Error(`Invalid ${type} type of test`);
+    }
+
+  }
+
+  /**
+   * @param {String} pathToClass
+   * @returns {String|null}
+   */
+  static getFilterName(pathToClass) {
+
+    let fileContentString = fs.readFileSync(pathToClass, 'utf8');
+    let re = /.*angular\.module\(moduleName\).filter\(("|'|`)([a-z_]+)("|'|`).*/mi;
+
+    if (re.test(fileContentString)) {
+      return fileContentString.match(re)[2];
+    }
+
+    return null;
+  }
+
+  /**
+   * @param {String} pathToClass
+   * @returns {String|null}
+   */
+  static isService(pathToClass) {
+
+    let fileContentString = fs.readFileSync(pathToClass, 'utf8');
+    let re = /.*angular\.module\(moduleName\).service\(("|'|`)([a-z]+)("|'|`).*/mi;
+
+    if (re.test(fileContentString)) {
+      return fileContentString.match(re)[2];
+    }
+
+    return null;
+  }
+
+  /**
+   * @param {String} string
+   * @returns {String}
+   */
+  static uncapitalizeFirstChar(string) {
+    return string.charAt(0).toLowerCase() + string.slice(1);
+  }
+
   /**
    * @returns {String}
    */
   static get FRONTEND_TEST_FOLDER() {
     return '/tests/frontend';
   }
-
 
   /**
    * @returns {String}
@@ -537,9 +731,39 @@ export class FrontendUnitTest extends AbstractTemplate {
 
   /**
    * @returns {String}
+   * @constructor
+   */
+  static get FRONTEND_APP_FOLDER() {
+    return 'frontend/js/app';
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get TESTS_FRONTEND_FOLDER() {
+    return 'tests/frontend';
+  }
+
+  /**
+   * @returns {String}
    */
   static get FRONTEND_ANGULAR_DEPENDENCIES() {
     return 'frontend/js/app/angular/module/dependencies.js';
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get FRONTEND_MODELS() {
+    return 'frontend/js/app/angular/models';
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get FRONTEND_FILTERS() {
+    return 'frontend/js/app/angular/filters';
   }
 
   /**
@@ -568,6 +792,13 @@ export class FrontendUnitTest extends AbstractTemplate {
    */
   static get FRAMEWORK_SOURCE() {
     return path.join(__dirname, '../frontend-tests/angular/lib/DeepFramework.js');
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get STRIPE_SOURCE() {
+    return path.join(__dirname, '../frontend-tests/angular/lib/stripe.js');
   }
 
   /**
@@ -610,6 +841,13 @@ export class FrontendUnitTest extends AbstractTemplate {
    */
   static get FRAMEWORK_PATH() {
     return 'lib/DeepFramework.js';
+  }
+
+  /**
+   * @returns {String}
+   */
+  static get STRIPE_PATH() {
+    return 'lib/stripe.js';
   }
 
   /**
@@ -665,6 +903,123 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @returns {string}
    * @constructor
    */
+  static get MODELS_TEST_TPL() {
+    let content = [];
+
+    content.push(`// THIS TEST WAS GENERATED AUTOMATICALLY ON ${new Date().toString()}`);
+    content.push('');
+    content.push('\'use strict\';');
+    content.push('');
+    content.push('{import}');
+    content.push('');
+    content.push('// @todo: Add more advanced tests');
+    content.push('describe(\'Models\', () => {');
+    content.push('');
+    content.push('  describe(\'{ClassName}\', () => {');
+    content.push('    it(\'Class {ClassName} exists\', () => {');
+    content.push('      expect(typeof {ClassName}).toBe(\'function\');');
+    content.push('    });');
+    content.push('');
+    content.push('    it(\'Check {ClassName} constructor\', () => {');
+    content.push('      let {objectName} = new {ClassName}({});');
+    content.push('    expect({objectName} instanceof {ClassName}).toBeTruthy();');
+    content.push('    });');
+    content.push('  });');
+    content.push('');
+    content.push('});');
+    content.push('');
+
+    return content.join(os.EOL);
+  }
+
+  /**
+   * @returns {string}
+   * @constructor
+   */
+  static get MODELS_TEST_TPL_WITH_SERVICE() {
+    let content = [];
+
+    content.push(`// THIS TEST WAS GENERATED AUTOMATICALLY ON ${new Date().toString()}`);
+    content.push('');
+    content.push('/* global angular */');
+    content.push('');
+    content.push('\'use strict\';');
+    content.push('');
+    content.push('import moduleName from \'../../../../frontend/js/app/angular/name\';');
+    content.push('');
+    content.push('// @todo: Add more advanced tests');
+    content.push('describe(\'Models\', () => {');
+    content.push('  let {serviceName}');
+    content.push('  let $q;');
+    content.push('');
+    content.push('  beforeEach(() => {');
+    content.push('    module(\'ui.router\');');
+    content.push('    module(moduleName);');
+    content.push('');
+    content.push('    // inject your service for testing.');
+    content.push('    // The _underscores_ are a convenience thing.');
+    content.push('    // so you can have your variable name be the');
+    content.push('    // same as your injected service.');
+    content.push('    inject((_{ServiceName}_, _$q_) => {');
+    content.push('      {serviceName} = _{ServiceName}_;');
+    content.push('      $q = _$q_;');
+    content.push('    });');
+    content.push('  });');
+    content.push('');
+    content.push('  describe(\'{ClassName}\', () => {');
+    content.push('    it(\'Check constructor sets $q\', () => {');
+    content.push('      expect(angular.isFunction({serviceName}.$q)).toBe(true);');
+    content.push('    });');
+    content.push('  });');
+    content.push('');
+    content.push('});');
+    content.push('');
+
+    return content.join(os.EOL);
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get FILTER_TEST_TPL() {
+    let content = [];
+
+    content.push(`// THIS TEST WAS GENERATED AUTOMATICALLY ON ${new Date().toString()}`);
+    content.push('');
+    content.push('\'use strict\';');
+    content.push('');
+    content.push('import moduleName from \'../../../../frontend/js/app/angular/name\';');
+    content.push('');
+    content.push('// @todo: Add more advanced tests');
+    content.push('describe(\'Check filters\', () => {');
+    content.push('');
+    content.push('  beforeEach(() => {');
+    content.push('    module(\'ui.router\');');
+    content.push('    module(moduleName);');
+    content.push('  });');
+    content.push('');
+    content.push('  describe(\'{filterName}\', () => {');
+    content.push('    it(\'Filter "{filterName}" exists\', inject(($filter) => {');
+    content.push('      expect($filter(\'{filterName}\')).not.toBeNull();');
+    content.push('    }));');
+    content.push('');
+    content.push('    //@todo - add filter logic cases here');
+    content.push('    it(\'Filter "{filterName}" can be called\', inject(({filterName}Filter) => {');
+    content.push('      expect({filterName}Filter([1], [2], [3])).toBeTruthy();');
+    content.push('    }));');
+    content.push('  });');
+    content.push('');
+    content.push('});');
+    content.push('');
+
+    return content.join(os.EOL);
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
   static get PACKAGE_JSON_TPL_STRING() {
     let contentObj = {
       name: '{name}',
@@ -688,6 +1043,7 @@ export class FrontendUnitTest extends AbstractTemplate {
           'angular-cookies': 'npm:angular-cookies@^1.5.3',
           'angular-mocks': 'github:angular/bower-angular-mocks@1.4.4',
           'angular-ui-router': 'github:angular-ui/ui-router@0.2.15',
+          'angular-ui/bootstrap-bower': 'github:angular-ui/bootstrap-bower@0.12.1',
           'es5-shim': 'github:es-shims/es5-shim@4.4.0',
           'es6-shim': 'github:es-shims/es6-shim@0.34.0',
           css: 'github:systemjs/plugin-css@0.1.13',
@@ -705,5 +1061,83 @@ export class FrontendUnitTest extends AbstractTemplate {
     };
 
     return JSON.stringify(contentObj).concat(os.EOL);
+  }
+
+  /**
+   * @param {String} dir
+   * @param {Array} files_
+   * @returns {Array}
+   * @private
+   */
+  static _lookupClassFiles(dir, files_ = null) {
+    files_ = files_ || [];
+    let files;
+
+    if (FrontendUnitTest.accessSync(dir)) {
+      files = fs.readdirSync(dir);
+    }
+
+    for (let i in files) {
+      if (!files.hasOwnProperty(i)) {
+        continue;
+      }
+
+      let filename = files[i];
+      let filepath = path.join(dir, filename);
+
+      if (fs.statSync(filepath).isDirectory() && filepath.indexOf('node_modules') === -1) {
+        FrontendUnitTest._lookupClassFiles(filepath, files_);
+      } else {
+        if (!FrontendUnitTest._isClassFile(filename)) {
+          continue;
+        }
+
+        files_.push(filepath);
+      }
+    }
+
+    return files_;
+  }
+
+  /**
+   * @param {String} filename
+   * @returns {Boolean}
+   * @private
+   */
+  static _isClassFile(filename) {
+    return /^[A-Za-z]/.test(filename) && !/exception\.js$/i.test(filename)
+      && !/index\.js/i.test(filename) && path.extname(filename) === '.js';
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get TEST_FILE_EXTENSION() {
+    return '.spec.js';
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get MODEL() {
+    return 'model';
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get FILTER() {
+    return 'filter';
+  }
+
+  /**
+   * @param {String} fullPath
+   * @returns {String}
+   */
+  static getClassName(fullPath) {
+    return path.basename(fullPath).replace(FrontendUnitTest.TEST_FILE_EXTENSION, '');
   }
 }
