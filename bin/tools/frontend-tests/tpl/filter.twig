@@ -1,0 +1,26 @@
+// THIS TEST WAS GENERATED AUTOMATICALLY ON {{ createdAt }}
+
+'use strict';
+
+import moduleName from '../../../../frontend/js/app/angular/name';
+
+// @todo: Add more advanced tests
+describe('Check filters', () => {
+
+  beforeEach(() => {
+    module('ui.router');
+    module(moduleName);
+  });
+
+  describe('{{ filterName }}', () => {
+    it('Filter "{{ filterName }}" exists', inject(($filter) => {
+      expect($filter('{{ filterName }}')).not.toBeNull();
+    }));
+
+    //@todo - add filter logic cases here
+    it('Filter "{{filterName}}" can be called', inject(({{ filterName }}Filter) => {
+      expect({{ filterName }}Filter([1], [2], [3])).toBeTruthy();
+    }));
+  });
+
+});

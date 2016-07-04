@@ -1,0 +1,34 @@
+// THIS TEST WAS GENERATED AUTOMATICALLY ON {{ createdAt }}
+
+/* global angular */
+
+'use strict';
+
+import moduleName from '../../../../frontend/js/app/angular/name';
+
+// @todo: Add more advanced tests
+describe('Models', () => {
+  let {{ serviceName }};
+  let $q;
+
+  beforeEach(() => {
+    module('ui.router');
+    module(moduleName);
+
+    // inject your service for testing.
+    // The _underscores_ are a convenience thing.
+    // so you can have your variable name be the
+    // same as your injected service.
+    inject((_{{ ServiceName }}_, _$q_) => {
+      {{ serviceName }} = _{{ ServiceName }}_;
+      $q = _$q_;
+    });
+  });
+
+  describe('{{ ClassName }}', () => {
+    it('Check constructor sets $q', () => {
+      expect(angular.isFunction({{ serviceName }}.$q)).toBe(true);
+    });
+  });
+
+});

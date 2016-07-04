@@ -10,6 +10,7 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs';
 import fsExtra from 'fs-extra';
+import Twig from 'twig';
 import dir from 'node-dir';
 import {AbstractTemplate} from './AbstractTemplate';
 
@@ -252,12 +253,16 @@ export class FrontendUnitTest extends AbstractTemplate {
         continue;
       }
 
+      let templateObj = Twig.twig({
+        data: fs.readFileSync(FrontendUnitTest.HEALTH_CHECK_TPL_PATH, 'utf8').toString(),
+      });
+
       fsExtra.createFileSync(healthCheckPath.path);
       fs.writeFileSync(
         healthCheckPath.path,
-        FrontendUnitTest.HEALTH_CHECK_TPL.replace(
-          /\{angularModuleName\}/gi, healthCheckPath.name
-        ),
+        templateObj.render({
+          angularModuleName: healthCheckPath.name
+        }),
         'utf-8'
       );
 
@@ -395,8 +400,7 @@ export class FrontendUnitTest extends AbstractTemplate {
       }
 
       if (healthCheckObj && healthCheckObj.hasOwnProperty('dependencies') &&
-        healthCheckObj.dependencies.hasOwnProperty('angular-stripe') &&
-        !FrontendUnitTest.accessSync(stripeDestination)) {
+        healthCheckObj.dependencies.hasOwnProperty('angular-stripe') && !FrontendUnitTest.accessSync(stripeDestination)) {
         fsExtra.copySync(FrontendUnitTest.STRIPE_SOURCE, stripeDestination);
       }
 
@@ -516,12 +520,16 @@ export class FrontendUnitTest extends AbstractTemplate {
 
       fsExtra.createFileSync(filePath);
 
-      //update name in tests/frontend package.json
-      let packageContentString = JSON.stringify(FrontendUnitTest.PACKAGE_JSON_TPL_STRING).replace(
-        /\{name\}/gi, packageName
-      );
+      let templateObj = Twig.twig({
+        data: fs.readFileSync(FrontendUnitTest.PACKAGE_JSON_TPL_PATH, 'utf8').toString(),
+      });
 
-      packageContentObject = JSON.parse(JSON.parse(packageContentString));
+      //update name in tests/frontend package.json
+      let packageContentString = templateObj.render({
+        name: packageName,
+      });
+
+      packageContentObject = JSON.parse(packageContentString);
 
     } else {
 
@@ -625,7 +633,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
   static createTestWithRelativePath(type, absoluteClassPath = '', absoluteTestPath = '') {
-
+    let templateObj;
     let name = FrontendUnitTest.getClassName(absoluteTestPath);
     let testPathDir = path.dirname(absoluteTestPath);
     let classPathDir = path.dirname(absoluteClassPath);
@@ -633,34 +641,50 @@ export class FrontendUnitTest extends AbstractTemplate {
 
     switch (type) {
       case FrontendUnitTest.MODEL:
-
         let serviceName = FrontendUnitTest.isService(absoluteClassPath);
 
         //create model test as for angular service
         if (serviceName) {
-          return FrontendUnitTest.MODELS_TEST_TPL_WITH_SERVICE
-            .replace(/\{ClassName\}/g, name)
-            .replace(/\{ServiceName\}/g, serviceName)
-            .replace(/\{serviceName\}/g, FrontendUnitTest.lowerCaseFirstChar(serviceName));
+          templateObj = Twig.twig({
+            data: fs.readFileSync(FrontendUnitTest.MODEL_WITH_SERVICE_TPL_PATH, 'utf8').toString(),
+          });
+
+          return templateObj.render({
+            createdAt: new Date().toString(),
+            ClassName: name,
+            ServiceName: serviceName,
+            serviceName: FrontendUnitTest.lowerCaseFirstChar(serviceName),
+          });
         }
 
+        templateObj = Twig.twig({
+          data: fs.readFileSync(FrontendUnitTest.MODEL_TPL_PATH, 'utf8').toString(),
+        });
+
         //create model test as for class
-        return FrontendUnitTest.MODELS_TEST_TPL
-          .replace(/\{import\}/g, `import {${name}} from \'${relativePath}/${name}\';`)
-          .replace(/\{ClassName\}/g, name)
-          .replace(/\{objectName\}/g, FrontendUnitTest.lowerCaseFirstChar(name));
+        return templateObj.render({
+          createdAt: new Date().toString(),
+          ClassName: name,
+          import: `import {${name}} from \'${relativePath}/${name}\';`,
+          objectName: FrontendUnitTest.lowerCaseFirstChar(name),
+        });
 
       case FrontendUnitTest.FILTER:
 
+        templateObj = Twig.twig({
+          data: fs.readFileSync(FrontendUnitTest.FILTER_TPL_PATH, 'utf8').toString(),
+        });
+
         let filterName = FrontendUnitTest.getFilterName(absoluteClassPath);
 
-        if(!filterName){
+        if (!filterName) {
           throw new Error(`Filter name can't be retrieved for filter ${absoluteClassPath}`);
         }
 
-        //create filter test
-        return FrontendUnitTest.FILTER_TEST_TPL
-          .replace(/\{filterName\}/g, filterName);
+        return templateObj.render({
+          createdAt: new Date().toString(),
+          filterName: filterName,
+        });
 
       default:
         throw new Error(`Invalid ${type} type of test`);
@@ -858,209 +882,43 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
   /**
-   * @returns {string}
+   * @returns {String}
    * @constructor
    */
-  static get HEALTH_CHECK_TPL() {
-    let content = [];
-
-    content.push(`/* global angular */`);
-    content.push('');
-    content.push('\'use strict\';');
-    content.push('');
-    content.push('import moduleName from \'../../../../frontend/js/app/angular/name\';');
-    content.push('');
-    content.push('describe(\'Health checks\', () => {');
-    content.push('  it(\'Should load angular library\', () => {');
-    content.push('    expect(typeof angular).toBe(\'object\');');
-    content.push('  });');
-    content.push('');
-    content.push('  it(\'Should load angular version 1.4.0\', () => {');
-    content.push('    expect(angular.version.full).toBe(\'1.4.0\');');
-    content.push('  });');
-    content.push('');
-    content.push('  it(\'Should load angular ui router\', () => {');
-    content.push('    expect(angular.module(\'ui.router\').name).toBe(\'ui.router\');');
-    content.push('  });');
-    content.push('');
-    content.push('  it(\'Should load ngMock\', () => {');
-    content.push('    expect(typeof angular.mock.module).toBe(\'function\');');
-    content.push('    expect(typeof inject).toBe(\'function\');');
-    content.push('    expect(typeof dump).toBe(\'function\');');
-    content.push('  });');
-    content.push('');
-    content.push('  it(\'Module name is [{angularModuleName}]\', () => {');
-    content.push('    expect(moduleName).toBe(\'{angularModuleName}\');');
-    content.push('  });');
-    content.push('');
-    content.push('});');
-    content.push('');
-
-    return content.join(os.EOL);
-  }
-
-  /**
-   * @returns {string}
-   * @constructor
-   */
-  static get MODELS_TEST_TPL() {
-    let content = [];
-
-    content.push(`// THIS TEST WAS GENERATED AUTOMATICALLY ON ${new Date().toString()}`);
-    content.push('');
-    content.push('\'use strict\';');
-    content.push('');
-    content.push('{import}');
-    content.push('');
-    content.push('// @todo: Add more advanced tests');
-    content.push('describe(\'Models\', () => {');
-    content.push('');
-    content.push('  describe(\'{ClassName}\', () => {');
-    content.push('    it(\'Class {ClassName} exists\', () => {');
-    content.push('      expect(typeof {ClassName}).toBe(\'function\');');
-    content.push('    });');
-    content.push('');
-    content.push('    it(\'Check {ClassName} constructor\', () => {');
-    content.push('      let {objectName} = new {ClassName}({});');
-    content.push('    expect({objectName} instanceof {ClassName}).toBeTruthy();');
-    content.push('    });');
-    content.push('  });');
-    content.push('');
-    content.push('});');
-    content.push('');
-
-    return content.join(os.EOL);
-  }
-
-  /**
-   * @returns {string}
-   * @constructor
-   */
-  static get MODELS_TEST_TPL_WITH_SERVICE() {
-    let content = [];
-
-    content.push(`// THIS TEST WAS GENERATED AUTOMATICALLY ON ${new Date().toString()}`);
-    content.push('');
-    content.push('/* global angular */');
-    content.push('');
-    content.push('\'use strict\';');
-    content.push('');
-    content.push('import moduleName from \'../../../../frontend/js/app/angular/name\';');
-    content.push('');
-    content.push('// @todo: Add more advanced tests');
-    content.push('describe(\'Models\', () => {');
-    content.push('  let {serviceName}');
-    content.push('  let $q;');
-    content.push('');
-    content.push('  beforeEach(() => {');
-    content.push('    module(\'ui.router\');');
-    content.push('    module(moduleName);');
-    content.push('');
-    content.push('    // inject your service for testing.');
-    content.push('    // The _underscores_ are a convenience thing.');
-    content.push('    // so you can have your variable name be the');
-    content.push('    // same as your injected service.');
-    content.push('    inject((_{ServiceName}_, _$q_) => {');
-    content.push('      {serviceName} = _{ServiceName}_;');
-    content.push('      $q = _$q_;');
-    content.push('    });');
-    content.push('  });');
-    content.push('');
-    content.push('  describe(\'{ClassName}\', () => {');
-    content.push('    it(\'Check constructor sets $q\', () => {');
-    content.push('      expect(angular.isFunction({serviceName}.$q)).toBe(true);');
-    content.push('    });');
-    content.push('  });');
-    content.push('');
-    content.push('});');
-    content.push('');
-
-    return content.join(os.EOL);
+  static get HEALTH_CHECK_TPL_PATH() {
+    return path.join(__dirname, '../frontend-tests/tpl/health-check.twig');
   }
 
   /**
    * @returns {String}
    * @constructor
    */
-  static get FILTER_TEST_TPL() {
-    let content = [];
-
-    content.push(`// THIS TEST WAS GENERATED AUTOMATICALLY ON ${new Date().toString()}`);
-    content.push('');
-    content.push('\'use strict\';');
-    content.push('');
-    content.push('import moduleName from \'../../../../frontend/js/app/angular/name\';');
-    content.push('');
-    content.push('// @todo: Add more advanced tests');
-    content.push('describe(\'Check filters\', () => {');
-    content.push('');
-    content.push('  beforeEach(() => {');
-    content.push('    module(\'ui.router\');');
-    content.push('    module(moduleName);');
-    content.push('  });');
-    content.push('');
-    content.push('  describe(\'{filterName}\', () => {');
-    content.push('    it(\'Filter "{filterName}" exists\', inject(($filter) => {');
-    content.push('      expect($filter(\'{filterName}\')).not.toBeNull();');
-    content.push('    }));');
-    content.push('');
-    content.push('    //@todo - add filter logic cases here');
-    content.push('    it(\'Filter "{filterName}" can be called\', inject(({filterName}Filter) => {');
-    content.push('      expect({filterName}Filter([1], [2], [3])).toBeTruthy();');
-    content.push('    }));');
-    content.push('  });');
-    content.push('');
-    content.push('});');
-    content.push('');
-
-    return content.join(os.EOL);
+  static get MODEL_TPL_PATH() {
+    return path.join(__dirname, '../frontend-tests/tpl/model.twig');
   }
 
   /**
    * @returns {String}
    * @constructor
    */
-  static get PACKAGE_JSON_TPL_STRING() {
-    let contentObj = {
-      name: '{name}',
-      version: '0.0.1',
-      description: 'Description of {name}',
-      scripts: {
-        preinstall: 'cd ../../frontend/js/ && npm install && cd ../../tests/frontend/',
-        postinstall: 'jspm install',
-        test: 'karma start config.karma.js',
-        coverage: 'echo \'Coverage has been already gathered during testing for frontend\' && exit 0'
-      },
-      jspm: {
-        directories: {
-          baseURL: '..',
-          lib: '',
-          packages: 'vendor'
-        },
-        configFile: 'config.test.js',
-        dependencies: {
-          angular: 'github:angular/bower-angular@1.4.0',
-          'angular-cookies': 'npm:angular-cookies@^1.5.3',
-          'angular-mocks': 'github:angular/bower-angular-mocks@1.4.4',
-          'angular-ui-router': 'github:angular-ui/ui-router@0.2.15',
-          'angular-ui/bootstrap-bower': 'github:angular-ui/bootstrap-bower@0.12.1',
-          'es5-shim': 'github:es-shims/es5-shim@4.4.0',
-          'es6-shim': 'github:es-shims/es6-shim@0.34.0',
-          css: 'github:systemjs/plugin-css@0.1.13',
-          jquery: 'npm:jquery@^2.2.3',
-        },
-        devDependencies: {
-          babel: 'npm:babel-core@^5.8.24',
-          'babel-runtime': 'npm:babel-runtime@^5.8.24',
-          'core-js': 'npm:core-js@^1.1.4',
-        },
-      },
-      'dependencies': {},
-      'devDependencies': {},
-      'private': true,
-    };
+  static get MODEL_WITH_SERVICE_TPL_PATH() {
+    return path.join(__dirname, '../frontend-tests/tpl/model_with_service.twig');
+  }
 
-    return JSON.stringify(contentObj).concat(os.EOL);
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get FILTER_TPL_PATH() {
+    return path.join(__dirname, '../frontend-tests/tpl/filter.twig');
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get PACKAGE_JSON_TPL_PATH() {
+    return path.join(__dirname, '../frontend-tests/tpl/package.twig');
   }
 
   /**
@@ -1105,8 +963,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @private
    */
   static _isClassFile(filename) {
-    return /^[A-Za-z]/.test(filename) && !/exception\.js$/i.test(filename)
-      && !/index\.js/i.test(filename) && path.extname(filename) === '.js';
+    return /^[A-Za-z]/.test(filename) && !/exception\.js$/i.test(filename) && !/index\.js/i.test(filename) && path.extname(filename) === '.js';
   }
 
   /**
