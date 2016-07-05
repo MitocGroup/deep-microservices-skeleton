@@ -881,7 +881,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   static getFilterName(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
-    let re = /.*angular\s*?\.module\([a-zA-Z0-9]+\)\s*?\.filter\(("|'|`)([a-z_]+)("|'|`).*/mi;
+    let re = /.*angular\s*?\.module\([a-z0-9]+\)\s*?\.filter\(("|'|`)([a-z_]+)("|'|`).*/mi;
 
     if (!re.test(fileContentString)) {
       throw new Error(`Filter name can't be retrieved for ${pathToClass}`);
@@ -897,7 +897,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   static getControllerName(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
-    let re = /.*angular\s*?\.module\([a-zA-Z0-9]+\)\s*?\.controller\(("|'|`)([a-z_]+)("|'|`).*/mi;
+    let re = /.*angular\s*?\.module\([a-z0-9]+\)\s*?\.controller\(("|'|`)([a-z_]+)("|'|`).*/mi;
 
     if (!re.test(fileContentString)) {
       throw new Error(`Controller name can't be retrieved for ${pathToClass}`);
@@ -913,7 +913,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   static getServiceName(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
-    let re = /.*angular\s*?\.module\([a-zA-Z0-9]+\)\s*?\.[a-z]+\(("|'|`)([a-z_]+)("|'|`).*/mi;
+    let re = /.*angular\s*?\.module\([a-z0-9]+\)\s*?\.[a-z]+\(("|'|`)([a-z_]+)("|'|`).*/mi;
 
     if (!re.test(fileContentString)) {
       return '';
@@ -990,7 +990,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   static isService(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
-    let re = /.*angular\.module\([a-zA-Z0-9]+\).service\(("|'|`)([a-z]+)("|'|`).*/mi;
+    let re = /.*angular\.module\([a-z0-9]+\).service\(("|'|`)([a-z]+)("|'|`).*/mi;
 
     if (re.test(fileContentString)) {
       return fileContentString.match(re)[2];
