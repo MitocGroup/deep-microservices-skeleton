@@ -130,36 +130,32 @@ subpath_run_cmd () {
     FRONTEND_CMD="${3}"
   fi
 
-  ###############################################
-  ### run tests for frontend  or if [ci full] ###
-  ###############################################
-  if [ "$__IS_CONCURRENT_SCRIPT" == "$__NONE" ] || [ "$__IS_CONCURRENT_SCRIPT" == "$__FRONTEND" ] || \
-     ([ "${CI_FULL}" == "true" ] && [ "$__IS_CONCURRENT_SCRIPT" == "$__BACKEND" ]); then
+  ##################################################
+  ### run always for frontend to gather coverage ###
+  ##################################################
+  for subpath in "${__FRONTEND_MODULES[@]}"
+  do
+    echo "[Running command for frontend] $subpath"
+    if [ -d ${subpath} ]; then
+      cd ${subpath} && eval_or_exit "${FRONTEND_CMD}"
 
-    for subpath in "${__FRONTEND_MODULES[@]}"
-    do
-      echo "[Running command for frontend] $subpath"
-      if [ -d ${subpath} ]; then
-        cd ${subpath} && eval_or_exit "${FRONTEND_CMD}"
+      ####################################################################################################
+      ### replace ./frontend to absolute file path to fix karma issue after combining coverage reports ###
+      ####################################################################################################
+      if [ "${FRONTEND_CMD}" == "npm run test" ]; then
+        SEARCH_VALUE='\.\/frontend\/'
+        subpath=${subpath/tests\/frontend/frontend}
 
-        ####################################################################################################
-        ### replace ./frontend to absolute file path to fix karma issue after combining coverage reports ###
-        ####################################################################################################
-        if [ "${FRONTEND_CMD}" == "npm run test" ]; then
-          SEARCH_VALUE='\.\/frontend\/'
-          subpath=${subpath/tests\/frontend/frontend}
+        #######################################################
+        ### Escape path for sed using bash find and replace ###
+        #######################################################
+        REPLACE_VALUE="${subpath//\//\\/}"
 
-          #######################################################
-          ### Escape path for sed using bash find and replace ###
-          #######################################################
-          REPLACE_VALUE="${subpath//\//\\/}"
-
-          export PATH_TO_TEST_TDF_FILE="$(find ./coverage -name 'coverage-final.json')"
-          sed "s/${SEARCH_VALUE}/${REPLACE_VALUE}/g" "${PATH_TO_TEST_TDF_FILE}" > ./coverage/report.json
-        fi
+        export PATH_TO_TEST_TDF_FILE="$(find ./coverage -name 'coverage-final.json')"
+        sed "s/${SEARCH_VALUE}/${REPLACE_VALUE}/g" "${PATH_TO_TEST_TDF_FILE}" > ./coverage/report.json
       fi
-    done
-  fi
+    fi
+  done
 
   #############################
   ### run tests for backend ###

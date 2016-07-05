@@ -1,0 +1,21 @@
+// THIS TEST WAS GENERATED AUTOMATICALLY ON {{ createdAt }}
+
+'use strict';
+
+{{ import }}
+
+// @todo: Add more advanced tests
+describe('Models', () => {
+
+  describe('{{ ClassName }}', () => {
+    it('Class {{ ClassName }} exists', () => {
+      expect(typeof {{ ClassName }}).toBe('function');
+    });
+
+    it('Check {{ ClassName }} constructor', () => {
+      let {{ objectName }} = new {{ ClassName }}({});
+    expect({{ objectName }} instanceof {{ ClassName }}).toBeTruthy();
+    });
+  });
+
+});

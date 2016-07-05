@@ -18,8 +18,10 @@ module.exports = function(config) {
       'tests/frontend/vendor/github/angular/bower-angular@1.4.0/angular.js',
       'tests/frontend/vendor/github/angular/bower-angular-mocks@1.4.4/angular-mocks.js',
       'tests/frontend/vendor/github/angular-ui/ui-router@0.2.15/angular-ui-router.js',
+      'tests/frontend/vendor/github/angular-ui/bootstrap-bower@0.12.1/ui-bootstrap-tpls.js', //https://github.com/angular-ui/bootstrap/issues/1936
       'tests/frontend/vendor/system.js',
       'tests/frontend/lib/DeepFramework.js',
+      'tests/frontend/lib/stripe.js', //https://github.com/bendrucker/angular-stripe/issues/23
       'tests/frontend/mock/lib/DeepFramework.js',
       {pattern: 'tests/frontend/mock/data/*.json', watched: true, served: true, included: false},
     ],
