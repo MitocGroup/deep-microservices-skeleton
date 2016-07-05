@@ -1,0 +1,47 @@
+// THIS TEST WAS GENERATED AUTOMATICALLY ON {{ createdAt }}
+
+/* global angular */
+/* global inject */
+
+'use strict';
+
+import moduleName from '{{ moduleNamePath }}';
+
+// @todo: Add more advanced tests
+describe('Controllers', () => {
+  let scope;
+  let controller;
+
+  // Mocked Services
+  angular.module('mocks', []);
+
+  beforeEach(function() {
+    module('ui.router');
+    angular.module('mocks');
+    angular.mock.module(moduleName);
+  });
+
+  beforeEach(
+    inject(
+      ($rootScope, $controller) => {
+        scope = $rootScope.$new();
+
+        let inputParameters = {
+          $scope: scope,
+          $modalInstance: {},
+        };
+
+        scope.$digest();
+
+        controller = $controller('{{ ControllerName }}', inputParameters);
+        scope.$digest();
+    })
+  );
+
+  describe('{{ ClassName }}', () => {
+    it('Check {{ ClassName }} constructor', () => {
+      expect(typeof controller).toEqual('object');
+    });
+  });
+
+});
