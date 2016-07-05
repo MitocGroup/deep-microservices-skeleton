@@ -8,7 +8,7 @@
 import moduleName from '{{ moduleNamePath }}';
 
 // @todo: Add more advanced tests
-describe('Models', () => {
+describe('Services', () => {
   let {{ serviceName }};
   let $q;
 
@@ -28,8 +28,9 @@ describe('Models', () => {
 
   describe('{{ ClassName }}', () => {
     it('Check constructor sets $q', () => {
-      expect(angular.isFunction({{ serviceName }}.$q)).toBe(true);
+      expect(typeof {{ serviceName }}).toBe('object');
     });
   });
 
 });
+
