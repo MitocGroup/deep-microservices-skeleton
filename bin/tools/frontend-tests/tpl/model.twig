@@ -1,4 +1,4 @@
-// THIS TEST WAS GENERATED AUTOMATICALLY ON {{ createdAt }}
+// THIS TEST WAS GENERATED AUTOMATICALLY ON {{ "now"|date("m/d/Y H:i:s") }}
 
 'use strict';
 
@@ -16,14 +16,13 @@ describe('Models', () => {
       let {{ objectName }} = new {{ ClassName }}({});
       expect({{ objectName }} instanceof {{ ClassName }}).toBeTruthy();
     });
-
   {% for getter in staticGetters %}
+
     // @todo: Add valid getter values
     it('Check static getter {{ getter }}', () => {
       expect({{ ClassName }}.{{ getter }}).toBeTruthy();
     });
-
   {% endfor %}
-  });
 
+  });
 });

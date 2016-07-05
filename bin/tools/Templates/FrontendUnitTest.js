@@ -7,7 +7,6 @@
 'use strict';
 
 import path from 'path';
-import os from 'os';
 import fs from 'fs';
 import fsExtra from 'fs-extra';
 import Twig from 'twig';
@@ -325,7 +324,8 @@ export class FrontendUnitTest extends AbstractTemplate {
       healthCheckTestPaths,
       modelTestPaths,
       filterTestPaths,
-      controllerTestPaths
+      controllerTestPaths,
+      serviceTestPaths
     );
 
     let pathsToUpdate = this.getPathsToUpdate(generatedTests);
@@ -474,7 +474,8 @@ export class FrontendUnitTest extends AbstractTemplate {
       }
 
       if (healthCheckObj && healthCheckObj.hasOwnProperty('dependencies') &&
-        healthCheckObj.dependencies.hasOwnProperty('angular-stripe') && !FrontendUnitTest.accessSync(stripeDestination)) {
+        healthCheckObj.dependencies.hasOwnProperty('angular-stripe') &&
+        !FrontendUnitTest.accessSync(stripeDestination)) {
         fsExtra.copySync(FrontendUnitTest.STRIPE_SOURCE, stripeDestination);
       }
 
@@ -779,7 +780,6 @@ export class FrontendUnitTest extends AbstractTemplate {
         });
 
         return templateObj.render({
-          createdAt: new Date().toString(),
           ControllerName: controllerName,
           ClassName: name,
           moduleNamePath: moduleNamePath,
@@ -808,7 +808,6 @@ export class FrontendUnitTest extends AbstractTemplate {
           });
 
           return templateObj.render({
-            createdAt: new Date().toString(),
             ClassName: name,
             import: importString,
             objectName: FrontendUnitTest.lowerCaseFirstChar(name),
@@ -821,7 +820,6 @@ export class FrontendUnitTest extends AbstractTemplate {
         });
 
         return templateObj.render({
-          createdAt: new Date().toString(),
           ClassName: name,
           ServiceName: serviceName,
           serviceName: FrontendUnitTest.lowerCaseFirstChar(serviceName),
@@ -838,7 +836,6 @@ export class FrontendUnitTest extends AbstractTemplate {
           });
 
           return templateObj.render({
-            createdAt: new Date().toString(),
             ClassName: name,
             ServiceName: service,
             serviceName: FrontendUnitTest.lowerCaseFirstChar(service),
@@ -852,7 +849,6 @@ export class FrontendUnitTest extends AbstractTemplate {
 
         //create model test as for class
         return templateObj.render({
-          createdAt: new Date().toString(),
           ClassName: name,
           import: `import {${name}} from \'${relativePath}/${name}\';`,
           objectName: FrontendUnitTest.lowerCaseFirstChar(name),
@@ -868,7 +864,6 @@ export class FrontendUnitTest extends AbstractTemplate {
         let filterName = FrontendUnitTest.getFilterName(absoluteClassPath);
 
         return templateObj.render({
-          createdAt: new Date().toString(),
           filterName: filterName,
           moduleNamePath: moduleNamePath,
         });
@@ -886,7 +881,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   static getFilterName(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
-    let re = /.*angular\s*?\.module\(moduleName\)\s*?\.filter\(("|'|`)([a-z_]+)("|'|`).*/mi;
+    let re = /.*angular\s*?\.module\([a-zA-Z0-9]+\)\s*?\.filter\(("|'|`)([a-z_]+)("|'|`).*/mi;
 
     if (!re.test(fileContentString)) {
       throw new Error(`Filter name can't be retrieved for ${pathToClass}`);
@@ -902,7 +897,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   static getControllerName(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
-    let re = /.*angular\s*?\.module\(moduleName\)\s*?\.controller\(("|'|`)([a-z_]+)("|'|`).*/mi;
+    let re = /.*angular\s*?\.module\([a-zA-Z0-9]+\)\s*?\.controller\(("|'|`)([a-z_]+)("|'|`).*/mi;
 
     if (!re.test(fileContentString)) {
       throw new Error(`Controller name can't be retrieved for ${pathToClass}`);
@@ -918,7 +913,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   static getServiceName(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
-    let re = /.*angular\s*?\.module\(moduleName\)\s*?\.[a-z]+\(("|'|`)([a-z_]+)("|'|`).*/mi;
+    let re = /.*angular\s*?\.module\([a-zA-Z0-9]+\)\s*?\.[a-z]+\(("|'|`)([a-z_]+)("|'|`).*/mi;
 
     if (!re.test(fileContentString)) {
       return '';
@@ -995,7 +990,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   static isService(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
-    let re = /.*angular\.module\(moduleName\).service\(("|'|`)([a-z]+)("|'|`).*/mi;
+    let re = /.*angular\.module\([a-zA-Z0-9]+\).service\(("|'|`)([a-z]+)("|'|`).*/mi;
 
     if (re.test(fileContentString)) {
       return fileContentString.match(re)[2];
@@ -1296,7 +1291,8 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @private
    */
   static _isClassFile(filename) {
-    return /^[A-Za-z]/.test(filename) && !/exception\.js$/i.test(filename) && !/index\.js/i.test(filename) && path.extname(filename) === '.js';
+    return /^[A-Za-z]/.test(filename) && !/exception\.js$/i.test(filename) &&
+      !/index\.js/i.test(filename) && path.extname(filename) === '.js';
   }
 
   /**
