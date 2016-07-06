@@ -319,13 +319,15 @@ export class FrontendUnitTest extends AbstractTemplate {
     let filterTestPaths = this.generateFilterTests(this.getAllFiltersPaths(), true);
     let controllerTestPaths = this.generateControllerTests(this.getAllControllersPaths(), true);
     let serviceTestPaths = this.generateServiceTests(this.getAllServicesPaths(), true);
+    let directiveTestPaths = this.generateDirectiveTests(this.getAllDirectiviesPaths(), true);
 
     generatedTests = generatedTests.concat(
       healthCheckTestPaths,
       modelTestPaths,
       filterTestPaths,
       controllerTestPaths,
-      serviceTestPaths
+      serviceTestPaths,
+      directiveTestPaths
     );
 
     let pathsToUpdate = this.getPathsToUpdate(generatedTests);
@@ -476,7 +478,9 @@ export class FrontendUnitTest extends AbstractTemplate {
       if (healthCheckObj && healthCheckObj.hasOwnProperty('dependencies') &&
         healthCheckObj.dependencies.hasOwnProperty('angular-stripe') &&
         !FrontendUnitTest.accessSync(stripeDestination)) {
+
         fsExtra.copySync(FrontendUnitTest.STRIPE_SOURCE, stripeDestination);
+
       }
 
     }
@@ -564,7 +568,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @param {Object} contentObj - object to update
    * @param {Object} dependenciesObj - object with dependencies to add
    */
-  addDependencies(contentObj, dependenciesObj) {
+  static addDependencies(contentObj, dependenciesObj) {
 
     if (dependenciesObj && dependenciesObj.hasOwnProperty('dependencies')) {
       for (let depItem in dependenciesObj.dependencies) {
@@ -612,7 +616,7 @@ export class FrontendUnitTest extends AbstractTemplate {
       packageContentObject = fsExtra.readJsonSync(filePath, {throws: true});
     }
 
-    this.addDependencies(packageContentObject, healthCheckObj);
+    FrontendUnitTest.addDependencies(packageContentObject, healthCheckObj);
 
     fsExtra.writeJsonSync(
       filePath,
@@ -785,9 +789,31 @@ export class FrontendUnitTest extends AbstractTemplate {
           moduleNamePath: moduleNamePath,
         });
 
-      //@todo - implement directive tests generation
       case FrontendUnitTest.DIRECTIVE:
-        throw new Error(`${type} type is not implemented yet`);
+        let directiveName = FrontendUnitTest.getDirectiveName(absoluteClassPath);
+
+        if (hasInjectedServices || hasInjectedProviders) {
+          return '';
+        }
+
+        if (!directiveName || directiveName.length === 0) {
+          let importString = (FrontendUnitTest.isDefaultExport(absoluteClassPath)) ?
+            `import ${name} from \'${relativePath}/${name}\';` :
+            `import {${name}} from \'${relativePath}/${name}\';`;
+
+          templateObj = Twig.twig({
+            data: fs.readFileSync(FrontendUnitTest.DIRECTIVE_AS_CLASS_TPL_PATH, 'utf8').toString(),
+          });
+
+          return templateObj.render({
+            ClassName: name,
+            import: importString,
+            objectName: FrontendUnitTest.lowerCaseFirstChar(name),
+            staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
+          });
+        }
+
+        return '';
 
       case FrontendUnitTest.SERVICE:
 
@@ -924,7 +950,23 @@ export class FrontendUnitTest extends AbstractTemplate {
 
   /**
    * @param {String} pathToClass
-   * @returns {String|null}
+   * @returns {String}
+   */
+  static getDirectiveName(pathToClass) {
+
+    let fileContentString = fs.readFileSync(pathToClass, 'utf8');
+    let re = /.*angular\s*?\.module\([a-z0-9]+\)\s*?\.directive\(("|'|`)([a-z_]+)("|'|`).*/mi;
+
+    if (!re.test(fileContentString)) {
+      return '';
+    }
+
+    return fileContentString.match(re)[2];
+  }
+
+  /**
+   * @param {String} pathToClass
+   * @returns {Boolean}
    */
   static hasInjectedServices(pathToClass) {
 
@@ -942,7 +984,7 @@ export class FrontendUnitTest extends AbstractTemplate {
 
   /**
    * @param {String} pathToClass
-   * @returns {String|null}
+   * @returns {Boolean}
    */
   static hasInjectedProviders(pathToClass) {
 
@@ -961,7 +1003,6 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
 
-
   /**
    * @param {String} pathToClass
    * @returns {String[]}
@@ -975,7 +1016,7 @@ export class FrontendUnitTest extends AbstractTemplate {
     if (re.test(fileContentString)) {
       let staticGettersArray = fileContentString.match(re);
 
-      for (let getterName of staticGettersArray){
+      for (let getterName of staticGettersArray) {
         result.push(getterName.replace(/static\s+get\s+/gm, ''));
       }
     }
@@ -1231,6 +1272,14 @@ export class FrontendUnitTest extends AbstractTemplate {
    */
   static get SERVICE_AS_CLASS_TPL_PATH() {
     return path.join(__dirname, '../frontend-tests/tpl/service_as_class.twig');
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get DIRECTIVE_AS_CLASS_TPL_PATH() {
+    return path.join(__dirname, '../frontend-tests/tpl/directive_as_class.twig');
   }
 
   /**
