@@ -326,7 +326,8 @@ export class FrontendUnitTest extends AbstractTemplate {
       modelTestPaths,
       filterTestPaths,
       controllerTestPaths,
-      serviceTestPaths
+      serviceTestPaths,
+      directiveTestPaths
     );
 
     let pathsToUpdate = this.getPathsToUpdate(generatedTests);
@@ -477,7 +478,9 @@ export class FrontendUnitTest extends AbstractTemplate {
       if (healthCheckObj && healthCheckObj.hasOwnProperty('dependencies') &&
         healthCheckObj.dependencies.hasOwnProperty('angular-stripe') &&
         !FrontendUnitTest.accessSync(stripeDestination)) {
+
         fsExtra.copySync(FrontendUnitTest.STRIPE_SOURCE, stripeDestination);
+
       }
 
     }
@@ -565,7 +568,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @param {Object} contentObj - object to update
    * @param {Object} dependenciesObj - object with dependencies to add
    */
-  addDependencies(contentObj, dependenciesObj) {
+  static addDependencies(contentObj, dependenciesObj) {
 
     if (dependenciesObj && dependenciesObj.hasOwnProperty('dependencies')) {
       for (let depItem in dependenciesObj.dependencies) {
@@ -613,7 +616,7 @@ export class FrontendUnitTest extends AbstractTemplate {
       packageContentObject = fsExtra.readJsonSync(filePath, {throws: true});
     }
 
-    this.addDependencies(packageContentObject, healthCheckObj);
+    FrontendUnitTest.addDependencies(packageContentObject, healthCheckObj);
 
     fsExtra.writeJsonSync(
       filePath,
@@ -963,7 +966,7 @@ export class FrontendUnitTest extends AbstractTemplate {
 
   /**
    * @param {String} pathToClass
-   * @returns {String|null}
+   * @returns {Boolean}
    */
   static hasInjectedServices(pathToClass) {
 
@@ -981,7 +984,7 @@ export class FrontendUnitTest extends AbstractTemplate {
 
   /**
    * @param {String} pathToClass
-   * @returns {String|null}
+   * @returns {Boolean}
    */
   static hasInjectedProviders(pathToClass) {
 
@@ -1000,7 +1003,6 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
 
-
   /**
    * @param {String} pathToClass
    * @returns {String[]}
@@ -1014,7 +1016,7 @@ export class FrontendUnitTest extends AbstractTemplate {
     if (re.test(fileContentString)) {
       let staticGettersArray = fileContentString.match(re);
 
-      for (let getterName of staticGettersArray){
+      for (let getterName of staticGettersArray) {
         result.push(getterName.replace(/static\s+get\s+/gm, ''));
       }
     }
