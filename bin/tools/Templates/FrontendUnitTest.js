@@ -822,9 +822,17 @@ export class FrontendUnitTest extends AbstractTemplate {
             directive: FrontendUnitTest.toKebabCase(name),
             moduleNamePath: moduleNamePath,
           });
-        }
+        } else {
+          templateObj = Twig.twig({
+            data: fs.readFileSync(FrontendUnitTest.DIRECTIVE_WITH_TEMPLATE_TPL_PATH, 'utf8').toString(),
+          });
 
-        return '';
+          return templateObj.render({
+            directiveName: name,
+            directive: FrontendUnitTest.toKebabCase(name),
+            moduleNamePath: moduleNamePath,
+          });
+        }
 
       case FrontendUnitTest.SERVICE:
 
@@ -1334,6 +1342,14 @@ export class FrontendUnitTest extends AbstractTemplate {
    */
   static get DIRECTIVE_AS_CLASS_TPL_PATH() {
     return path.join(FrontendUnitTest.TPL_DIR_PATH, 'directive_as_class.twig');
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get DIRECTIVE_WITH_TEMPLATE_TPL_PATH() {
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'directive_with_template.twig');
   }
 
   /**

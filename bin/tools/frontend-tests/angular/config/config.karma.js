@@ -63,6 +63,7 @@ module.exports = function(config) {
     preprocessors: {
       'frontend/js/app/angular/**/*.js': ['coverage'],
       'tests/frontend/angular/**/*.spec.js': ['babel'],
+      '**/views/directives/*.html': 'ng-html2js',
     },
 
     babelPreprocessor: {
@@ -72,6 +73,10 @@ module.exports = function(config) {
       },
     },
 
+    ngHtml2JsPreprocessor: {
+      moduleName: 'templates',
+    },
+
     plugins: [
       'karma-babel-preprocessor',
       'karma-jasmine',
@@ -79,6 +84,7 @@ module.exports = function(config) {
       'karma-jspm',
       'karma-phantomjs-launcher',
       'karma-verbose-reporter',
+      'karma-ng-html2js-preprocessor',
     ],
 
     // test results reporter to use
