@@ -966,6 +966,23 @@ export class FrontendUnitTest extends AbstractTemplate {
 
   /**
    * @param {String} pathToClass
+   * @returns {String}
+   */
+  static getExternalTemplatePath(pathToClass) {
+
+    let fileContentString = fs.readFileSync(pathToClass, 'utf8');
+
+    let re = /.*angular\s*?\.module\([a-z0-9]+\)\s*?\.directive\(("|'|`)([a-z_]+)("|'|`)[\s\S]+templateUrl\:\s+[a-z0-9\.]+\(("|'|`)@[a-z0-9-]+\:(.+)("|'|`)/mi;
+
+    if (!re.test(fileContentString)) {
+      return '';
+    }
+
+    return fileContentString.match(re)[2];
+  }
+
+  /**
+   * @param {String} pathToClass
    * @returns {Boolean}
    */
   static hasInjectedServices(pathToClass) {
@@ -1272,6 +1289,14 @@ export class FrontendUnitTest extends AbstractTemplate {
    */
   static get SERVICE_AS_CLASS_TPL_PATH() {
     return path.join(__dirname, '../frontend-tests/tpl/service_as_class.twig');
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get DIRECTIVE_TPL_PATH() {
+    return path.join(__dirname, '../frontend-tests/tpl/directive.twig');
   }
 
   /**

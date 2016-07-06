@@ -1,0 +1,42 @@
+// THIS TEST WAS GENERATED AUTOMATICALLY ON {{ "now"|date("m/d/Y H:i:s") }}
+
+'use strict';
+
+{{ import }}
+
+// @todo: Add more advanced tests
+describe('Directives', () => {
+
+  describe('{{ ClassName }}', () => {
+    it('Class {{ ClassName }} exists', () => {
+      expect(typeof {{ ClassName }}).toBe('function');
+    });
+
+    // @todo: should be reworked by passing valid arguments and add asserts
+    it('Check {{ ClassName }} constructor', () => {
+      let $q = {
+        defer: function() { return; },
+      };
+      let {{ objectName }};
+      let error = null;
+
+      try {
+        {{ objectName }} = new {{ ClassName }}($q);
+      } catch(exception) {
+        error = exception;
+      }
+
+      if(!error) {
+        expect({{ objectName }} instanceof {{ ClassName }}).toBeTruthy();
+      }
+    });
+  {% for getter in staticGetters %}
+
+    // @todo: Add valid getter values
+    it('Check static getter {{ getter }}', () => {
+      expect({{ ClassName }}.{{ getter }}).toBeTruthy();
+    });
+  {% endfor %}
+
+  });
+});
