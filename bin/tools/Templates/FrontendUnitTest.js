@@ -1267,16 +1267,25 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @returns {String}
    * @constructor
    */
-  static get HEALTH_CHECK_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/health-check.twig');
+  static get TPL_DIR_PATH() {
+    return path.join(__dirname, '../../../tpl/tests/frontend');
   }
 
   /**
    * @returns {String}
    * @constructor
    */
+  static get HEALTH_CHECK_TPL_PATH() {
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'health-check.twig');
+  }
+
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
   static get MODEL_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/model.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'model.twig');
   }
 
   /**
@@ -1284,7 +1293,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get MODEL_WITH_SERVICE_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/model_with_service.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'model_with_service.twig');
   }
 
   /**
@@ -1292,7 +1301,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get CONTROLLER_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/controller.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'controller.twig');
   }
 
   /**
@@ -1300,7 +1309,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get SERVICE_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/service.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'service.twig');
   }
 
   /**
@@ -1308,7 +1317,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get SERVICE_AS_CLASS_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/service_as_class.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'service_as_class.twig');
   }
 
   /**
@@ -1316,7 +1325,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get DIRECTIVE_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/directive.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'directive.twig');
   }
 
   /**
@@ -1324,7 +1333,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get DIRECTIVE_AS_CLASS_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/directive_as_class.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'directive_as_class.twig');
   }
 
   /**
@@ -1332,7 +1341,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get FILTER_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/filter.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'filter.twig');
   }
 
   /**
@@ -1340,7 +1349,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get PACKAGE_JSON_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/package.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'package.twig');
   }
 
   /**
