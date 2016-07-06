@@ -791,6 +791,7 @@ export class FrontendUnitTest extends AbstractTemplate {
 
       case FrontendUnitTest.DIRECTIVE:
         let directiveName = FrontendUnitTest.getDirectiveName(absoluteClassPath);
+        let externalTemplatePath = FrontendUnitTest.getExternalTemplatePath(absoluteClassPath);
 
         if (hasInjectedServices || hasInjectedProviders) {
           return '';
@@ -810,6 +811,16 @@ export class FrontendUnitTest extends AbstractTemplate {
             import: importString,
             objectName: FrontendUnitTest.lowerCaseFirstChar(name),
             staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
+          });
+        } else if (!externalTemplatePath || externalTemplatePath.length === 0) {
+          templateObj = Twig.twig({
+            data: fs.readFileSync(FrontendUnitTest.DIRECTIVE_TPL_PATH, 'utf8').toString(),
+          });
+
+          return templateObj.render({
+            directiveName: name,
+            directive: FrontendUnitTest.toKebabCase(name),
+            moduleNamePath: moduleNamePath,
           });
         }
 
@@ -971,8 +982,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   static getExternalTemplatePath(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
-
-    let re = /.*angular\s*?\.module\([a-z0-9]+\)\s*?\.directive\(("|'|`)([a-z_]+)("|'|`)[\s\S]+templateUrl\:\s+[a-z0-9\.]+\(("|'|`)@[a-z0-9-]+\:(.+)("|'|`)/mi;
+    let re = /[\s\S]+templateUrl\:\s+[a-z0-9\.]+\(("|'|`)@[a-z0-9-]+\:(.+)("|'|`)/mi;
 
     if (!re.test(fileContentString)) {
       return '';
@@ -1071,6 +1081,16 @@ export class FrontendUnitTest extends AbstractTemplate {
    */
   static lowerCaseFirstChar(string) {
     return string.charAt(0).toLowerCase() + string.slice(1);
+  }
+
+  /**
+   *
+   * @param string
+   */
+  static toKebabCase(string) {
+    return string.replace(/([A-Z]+)/g, (x, y) => {
+      return '-' + y.toLowerCase();
+    }).replace(/^-/, '');
   }
 
   /**
