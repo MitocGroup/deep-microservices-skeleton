@@ -791,6 +791,7 @@ export class FrontendUnitTest extends AbstractTemplate {
 
       case FrontendUnitTest.DIRECTIVE:
         let directiveName = FrontendUnitTest.getDirectiveName(absoluteClassPath);
+        let externalTemplatePath = FrontendUnitTest.getExternalTemplatePath(absoluteClassPath);
 
         if (hasInjectedServices || hasInjectedProviders) {
           return '';
@@ -810,6 +811,16 @@ export class FrontendUnitTest extends AbstractTemplate {
             import: importString,
             objectName: FrontendUnitTest.lowerCaseFirstChar(name),
             staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
+          });
+        } else if (!externalTemplatePath || externalTemplatePath.length === 0) {
+          templateObj = Twig.twig({
+            data: fs.readFileSync(FrontendUnitTest.DIRECTIVE_TPL_PATH, 'utf8').toString(),
+          });
+
+          return templateObj.render({
+            directiveName: name,
+            directive: FrontendUnitTest.toKebabCase(name),
+            moduleNamePath: moduleNamePath,
           });
         }
 
@@ -966,6 +977,22 @@ export class FrontendUnitTest extends AbstractTemplate {
 
   /**
    * @param {String} pathToClass
+   * @returns {String}
+   */
+  static getExternalTemplatePath(pathToClass) {
+
+    let fileContentString = fs.readFileSync(pathToClass, 'utf8');
+    let re = /[\s\S]+templateUrl\:\s+[a-z0-9\.]+\(("|'|`)@[a-z0-9-]+\:(.+)("|'|`)/mi;
+
+    if (!re.test(fileContentString)) {
+      return '';
+    }
+
+    return fileContentString.match(re)[2];
+  }
+
+  /**
+   * @param {String} pathToClass
    * @returns {Boolean}
    */
   static hasInjectedServices(pathToClass) {
@@ -1054,6 +1081,16 @@ export class FrontendUnitTest extends AbstractTemplate {
    */
   static lowerCaseFirstChar(string) {
     return string.charAt(0).toLowerCase() + string.slice(1);
+  }
+
+  /**
+   *
+   * @param string
+   */
+  static toKebabCase(string) {
+    return string.replace(/([A-Z]+)/g, (x, y) => {
+      return '-' + y.toLowerCase();
+    }).replace(/^-/, '');
   }
 
   /**
@@ -1230,16 +1267,25 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @returns {String}
    * @constructor
    */
-  static get HEALTH_CHECK_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/health-check.twig');
+  static get TPL_DIR_PATH() {
+    return path.join(__dirname, '../../../tpl/tests/frontend');
   }
 
   /**
    * @returns {String}
    * @constructor
    */
+  static get HEALTH_CHECK_TPL_PATH() {
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'health-check.twig');
+  }
+
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
   static get MODEL_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/model.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'model.twig');
   }
 
   /**
@@ -1247,7 +1293,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get MODEL_WITH_SERVICE_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/model_with_service.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'model_with_service.twig');
   }
 
   /**
@@ -1255,7 +1301,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get CONTROLLER_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/controller.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'controller.twig');
   }
 
   /**
@@ -1263,7 +1309,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get SERVICE_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/service.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'service.twig');
   }
 
   /**
@@ -1271,7 +1317,15 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get SERVICE_AS_CLASS_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/service_as_class.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'service_as_class.twig');
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get DIRECTIVE_TPL_PATH() {
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'directive.twig');
   }
 
   /**
@@ -1279,7 +1333,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get DIRECTIVE_AS_CLASS_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/directive_as_class.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'directive_as_class.twig');
   }
 
   /**
@@ -1287,7 +1341,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get FILTER_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/filter.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'filter.twig');
   }
 
   /**
@@ -1295,7 +1349,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @constructor
    */
   static get PACKAGE_JSON_TPL_PATH() {
-    return path.join(__dirname, '../frontend-tests/tpl/package.twig');
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'package.twig');
   }
 
   /**

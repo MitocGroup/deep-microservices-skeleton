@@ -24,6 +24,9 @@ module.exports = function(config) {
       'tests/frontend/lib/stripe.js', //https://github.com/bendrucker/angular-stripe/issues/23
       'tests/frontend/mock/lib/DeepFramework.js',
       {pattern: 'tests/frontend/mock/data/*.json', watched: true, served: true, included: false},
+
+      //include the directory where directive templates are stored.
+      '**/views/directives/*.html',
     ],
 
     // jspm configuration
