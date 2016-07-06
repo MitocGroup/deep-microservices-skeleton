@@ -61,6 +61,11 @@ fi
 if [ "${__E2E_WITH_PUBLIC_REPO}" = "${E2E_TESTING}" ] || [ "${__E2E_WITH_PRIVATE_REPO}" = "${E2E_TESTING}" ]; then
   bash `dirname $0`/protractor.sh
 
+  #######################################################
+  ### Install module to be able to rerun failed tests ###
+  #######################################################
+  (npm list -g protractor-flake --depth=0 || npm install -g protractor-flake) &&\
+
   ###############################################################
   ### Install locally, protractor doesn't find babel globally ###
   ###############################################################
