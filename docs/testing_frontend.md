@@ -19,13 +19,13 @@ cd deep-microservices-skeleton && ./bin/tools/skeleton-install.sh
 > Install skeleton dependencies
 
 ```bash
-cd .. && git clone https://github.com/MitocGroup/deep-microservices-helloworld.git
+cd .. && git clone https://github.com/MitocGroup/deep-microservices-todomvc.git
 ```
 
 > Clone your project
 
 ```bash
-./deep-microservices-skeleton/bin/tools/repository_update.sh ./deep-microservices-helloworld/
+./deep-microservices-skeleton/bin/tools/repository_update.sh ./deep-microservices-todomvc/
 ```
 
 > To generate frontend unit tests select `frontend unit test` option 
@@ -42,7 +42,7 @@ cd .. && git clone https://github.com/MitocGroup/deep-microservices-helloworld.g
 Install frontend tests dependencies for specific micro application: 
 
 ```bash
-cd src/deep-hello-world/tests/frontend/ && npm install
+cd src/deep-todomvc/tests/frontend/ && npm install
 ```
 		
 #### Option 2.
@@ -60,7 +60,7 @@ cd src/deep-hello-world/tests/frontend/ && npm install
 > To execute frontend test dependencies for specific micro application
  
 ```bash
-cd src/deep-hello-world/tests/frontend/ && npm run test
+cd src/deep-todomvc/tests/frontend/ && npm run test
 ```
 		
 #### Option 2.
