@@ -476,8 +476,7 @@ export class FrontendUnitTest extends AbstractTemplate {
       }
 
       if (healthCheckObj && healthCheckObj.hasOwnProperty('dependencies') &&
-        healthCheckObj.dependencies.hasOwnProperty('angular-stripe') &&
-        !FrontendUnitTest.accessSync(stripeDestination)) {
+        healthCheckObj.dependencies.hasOwnProperty('angular-stripe') && !FrontendUnitTest.accessSync(stripeDestination)) {
 
         fsExtra.copySync(FrontendUnitTest.STRIPE_SOURCE, stripeDestination);
 
@@ -495,12 +494,28 @@ export class FrontendUnitTest extends AbstractTemplate {
 
       let karmaDestination = path.join(destination, FrontendUnitTest.KARMA_CONFIG);
       let jspmConfigDestination = path.join(destination, FrontendUnitTest.JSPM_CONFIG);
+      let name = karmaDestination.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
+      let healthCheckObj = this.getHealthCheckObjectByName(name);
+      let hasStripeDependency = false;
 
       if (!FrontendUnitTest.accessSync(karmaDestination)) {
-        fsExtra.copySync(
-          path.join(FrontendUnitTest.CONFIGS_SOURCE, FrontendUnitTest.KARMA_CONFIG),
-          karmaDestination
-        );
+
+        fsExtra.createFileSync(karmaDestination);
+
+        let templateObj = Twig.twig({
+          data: fs.readFileSync(FrontendUnitTest.KARMA_CONFIG_TPL_PATH, 'utf8').toString(),
+        });
+
+        if (healthCheckObj && healthCheckObj.hasOwnProperty('dependencies') &&
+          healthCheckObj.dependencies.hasOwnProperty('angular-stripe')) {
+          hasStripeDependency = true;
+        }
+
+        let karmaContentString = templateObj.render({
+          hasStripeDependency: hasStripeDependency,
+        });
+
+        fs.writeFileSync(karmaDestination, karmaContentString);
       }
 
       if (!FrontendUnitTest.accessSync(jspmConfigDestination)) {
@@ -796,6 +811,8 @@ export class FrontendUnitTest extends AbstractTemplate {
         let externalTemplatePath = FrontendUnitTest.getExternalTemplatePath(absoluteClassPath);
         let restrictType = FrontendUnitTest.getRestrictType(absoluteClassPath);
         let directiveController = FrontendUnitTest.getDirectiveController(absoluteClassPath);
+        let services = FrontendUnitTest.fetchServices(depsForDirectiveCtrl);
+        let providers = FrontendUnitTest.fetchProviders(depsForDirectiveCtrl);
 
         if (hasInjectedProviders || hasImports) {
           return '';
@@ -816,9 +833,7 @@ export class FrontendUnitTest extends AbstractTemplate {
             objectName: FrontendUnitTest.lowerCaseFirstChar(name),
             staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
           });
-        } else if (!FrontendUnitTest.containsProvider(depsForDirectiveCtrl)) {
-
-          let services = FrontendUnitTest.fetchServices(depsForDirectiveCtrl);
+        } else {
 
           templateObj = Twig.twig({
             data: fs.readFileSync(FrontendUnitTest.DIRECTIVE_TPL_PATH, 'utf8').toString(),
@@ -829,14 +844,11 @@ export class FrontendUnitTest extends AbstractTemplate {
             directive: FrontendUnitTest.toKebabCase(directiveName),
             moduleNamePath: moduleNamePath,
             services: services,
+            providers: providers,
             templateUrl: externalTemplatePath,
             restrictType: restrictType,
             directiveController: directiveController,
           });
-        } else { //providers
-          console.log('external with injected providers');
-
-          return '';
         }
 
       case FrontendUnitTest.SERVICE:
@@ -1107,6 +1119,16 @@ export class FrontendUnitTest extends AbstractTemplate {
   static fetchServices(depsArray) {
     return depsArray.filter((element) => {
       return /service/i.test(element);
+    });
+  }
+
+  /**
+   * @param {String[]} depsArray
+   * @returns {String[]}
+   */
+  static fetchProviders(depsArray) {
+    return depsArray.filter((element) => {
+      return /provider|notification|msAuthentication/i.test(element);
     });
   }
 
@@ -1403,6 +1425,14 @@ export class FrontendUnitTest extends AbstractTemplate {
    */
   static get MODEL_TPL_PATH() {
     return path.join(FrontendUnitTest.TPL_DIR_PATH, 'model.twig');
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
+  static get KARMA_CONFIG_TPL_PATH() {
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'config.karma.twig');
   }
 
   /**

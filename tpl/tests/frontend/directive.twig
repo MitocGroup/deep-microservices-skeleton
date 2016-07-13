@@ -25,6 +25,13 @@ import moduleName from '{{ moduleNamePath }}';
   let mock{{ service }};
 {% endfor %}
 {% endif %}
+{% if providers|length > 0 %}
+
+    //mocked provider references
+    {% for provider in providers %}
+        let mock{{ provider }};
+    {% endfor %}
+{% endif %}
 
   beforeEach(() => {
 
@@ -34,9 +41,9 @@ import moduleName from '{{ moduleNamePath }}';
     module('templates');
 {% endif %}
     angular.mock.module(moduleName);
-{% if services|length > 0 %}
+{% if services|length > 0 or providers|length > 0%}
 
-    // include previous module containing mocked service which will override actual service
+    // include previous module containing mocked service/provider which will override actual service/provider
     module(($provide) => {
   {% for service in services %}
 
@@ -47,7 +54,29 @@ import moduleName from '{{ moduleNamePath }}';
         };
       });
   {% endfor %}
+  {% for provider in providers %}
+
+      // @todo - need to implement methods for mock {{ provider }}
+      $provide.provider('{{ provider }}', function() {
+        this.$get = () => {
+          var sampleMethod = jasmine.createSpy('sampleMethod');
+
+          return {
+            sampleMethod: sampleMethod,
+          };
+        };
+      });
+  {% endfor %}
   });
+{% endif %}
+{% if providers|length > 0 %}
+
+    //mocked provider references
+    module(({{ providers|join('Provider, ') }}Provider) => {
+    {% for provider in providers %}
+        mock{{ provider }} = {{ provider }}Provider;
+    {% endfor %}
+    });
 {% endif %}
 
 {% if services|length > 0 %}
@@ -104,6 +133,9 @@ import moduleName from '{{ moduleNamePath }}';
     $rootScope: rootScope,
 {% for service in services %}
       {{ service }}: mock{{ service }},
+{% endfor %}
+{% for provider in providers %}
+      {{ provider }}: mock{{ provider }},
 {% endfor %}
     });
 
