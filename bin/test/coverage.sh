@@ -23,10 +23,10 @@ if [ $(IS_ENV_VARS_AVAILABLE) == "1" ] && [ "${IS_SKIP_TESTS}" == "false" ] && \
 
   sed -e "s@${SEARCH_VALUE}@${REPLACE_VALUE}@g" ${__COVERAGE_PATH}"/lcov.info" > ${__COVERAGE_PATH}"/coverage.info"
 
-  #######################################
-  ### Upload Coverage info to Codacy  ###
-  #######################################
-  cat ${__COVERAGE_PATH}"/coverage.info" | codacy-coverage --debug
+  ############################################
+  ### Upload Coverage info to Codeclimate  ###
+  ############################################
+  codeclimate-test-reporter < ${__COVERAGE_PATH}"/coverage.info"
 
   #####################################################################
   ### Log top 20 file paths to be able see paths format from travis ###
