@@ -27,10 +27,10 @@ import moduleName from '{{ moduleNamePath }}';
 {% endif %}
 {% if providers|length > 0 %}
 
-    //mocked provider references
-    {% for provider in providers %}
-        let mock{{ provider }};
-    {% endfor %}
+  //mocked provider references
+{% for provider in providers %}
+  let mock{{ provider }};
+{% endfor %}
 {% endif %}
 
   beforeEach(() => {
@@ -73,20 +73,19 @@ import moduleName from '{{ moduleNamePath }}';
 
     //mocked provider references
     module(({{ providers|join('Provider, ') }}Provider) => {
-    {% for provider in providers %}
-        mock{{ provider }} = {{ provider }}Provider;
-    {% endfor %}
+{% for provider in providers %}
+      mock{{ provider }} = {{ provider }}Provider;
+{% endfor %}
     });
 {% endif %}
-
 {% if services|length > 0 %}
 
     //mocked service references
     inject(({{ services|join(', ') }}) => {
-  {% for service in services %}
-    mock{{ service }} = {{ service }};
-  {% endfor %}
-  });
+{% for service in services %}
+      mock{{ service }} = {{ service }};
+{% endfor %}
+    });
 {% endif %}
 
     // store references to scope, rootScope and compile

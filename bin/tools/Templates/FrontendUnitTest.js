@@ -142,16 +142,6 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
   /**
-   * Returns full paths to controllers
-   * @returns {String[]}
-   */
-  getControllerPaths() {
-    var controllerPaths = [];
-
-    return controllerPaths;
-  }
-
-  /**
    * @returns {String[]}
    */
   getAllModelsPaths() {
@@ -374,18 +364,22 @@ export class FrontendUnitTest extends AbstractTemplate {
     for (const [index, elem] of testPaths.entries()) {
 
       if (!FrontendUnitTest.accessSync(elem)) {
-        let modelTestContent = FrontendUnitTest.createTestWithRelativePath(type, paths[index], elem);
 
-        if (modelTestContent && modelTestContent.length > 0) {
-          fsExtra.createFileSync(elem);
-          fs.writeFileSync(elem, modelTestContent);
+        let testContent;
 
-          console.log(`Test <info>${elem}</info> for has been added`);
+        try {
+          testContent = FrontendUnitTest.createTestWithRelativePath(type, paths[index], elem);
 
-          genTests.push(elem);
+          if (testContent && testContent.length > 0) {
+            fsExtra.createFileSync(elem);
+            fs.writeFileSync(elem, testContent);
 
-        } else {
-          console.log(`Test <warn>${elem}</warn> has not been added due to injected providers/services`);
+            console.log(`Test <info>${elem}</info> for has been added`);
+
+            genTests.push(elem);
+          }
+        } catch(exception) {
+          console.log(`Test <warn>${elem}</warn> has not been added due to reason: <warn>[${exception.message}]</warn>`);
         }
 
       }
@@ -770,7 +764,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @returns {String}
    */
   static createTestWithRelativePath(type, absoluteClassPath = '', absoluteTestPath = '') {
-    let templateObj;
+    let templateObj, services, providers, injectedDepsArray;
     let name = FrontendUnitTest.getClassName(absoluteTestPath);
     let testPathDir = path.dirname(absoluteTestPath);
     let classPathDir = path.dirname(absoluteClassPath);
@@ -784,15 +778,16 @@ export class FrontendUnitTest extends AbstractTemplate {
 
       case FrontendUnitTest.CONTROLLER:
         let controllerName = FrontendUnitTest.getControllerName(absoluteClassPath);
+        injectedDepsArray = FrontendUnitTest.getInjectedDepsForCtrl(absoluteClassPath);
+        services = FrontendUnitTest.fetchServices(injectedDepsArray);
+        providers = FrontendUnitTest.fetchProviders(injectedDepsArray);
+        let otherDeps = FrontendUnitTest.skipScopeServices(
+          FrontendUnitTest.diffArray(injectedDepsArray, services, providers)
+        );
 
         //@todo - need to clarify if we want to force this validation
         if (controllerName.indexOf(name) === -1) {
           throw new Error(`Controller name doesn't match to file name: ${absoluteClassPath}. Please refactor.`);
-        }
-
-        //create controller test with injected services or providers
-        if (hasInjectedServices || hasInjectedProviders) {
-          return '';
         }
 
         templateObj = Twig.twig({
@@ -803,19 +798,27 @@ export class FrontendUnitTest extends AbstractTemplate {
           ControllerName: controllerName,
           ClassName: name,
           moduleNamePath: moduleNamePath,
+          services: services,
+          providers: providers,
+          otherDeps: otherDeps,
+          staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
         });
 
       case FrontendUnitTest.DIRECTIVE:
         let directiveName = FrontendUnitTest.getDirectiveName(absoluteClassPath);
-        let depsForDirectiveCtrl = FrontendUnitTest.getInjectedDepsForDirectiveCtrl(absoluteClassPath);
         let externalTemplatePath = FrontendUnitTest.getExternalTemplatePath(absoluteClassPath);
         let restrictType = FrontendUnitTest.getRestrictType(absoluteClassPath);
         let directiveController = FrontendUnitTest.getDirectiveController(absoluteClassPath);
-        let services = FrontendUnitTest.fetchServices(depsForDirectiveCtrl);
-        let providers = FrontendUnitTest.fetchProviders(depsForDirectiveCtrl);
+        injectedDepsArray = FrontendUnitTest.getInjectedDepsForCtrl(absoluteClassPath);
+        services = FrontendUnitTest.fetchServices(injectedDepsArray);
+        providers = FrontendUnitTest.fetchProviders(injectedDepsArray);
 
-        if (hasInjectedProviders || hasImports) {
-          return '';
+        if (hasImports) {
+          throw new Error(`Directive has import to external files`);
+        }
+
+        if (hasInjectedProviders) {
+          throw new Error(`Directive has dependencies to unmocked providers`);
         }
 
         if (!directiveName || directiveName.length === 0) {
@@ -833,31 +836,32 @@ export class FrontendUnitTest extends AbstractTemplate {
             objectName: FrontendUnitTest.lowerCaseFirstChar(name),
             staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
           });
-        } else {
-
-          templateObj = Twig.twig({
-            data: fs.readFileSync(FrontendUnitTest.DIRECTIVE_TPL_PATH, 'utf8').toString(),
-          });
-
-          return templateObj.render({
-            directiveName: directiveName,
-            directive: FrontendUnitTest.toKebabCase(directiveName),
-            moduleNamePath: moduleNamePath,
-            services: services,
-            providers: providers,
-            templateUrl: externalTemplatePath,
-            restrictType: restrictType,
-            directiveController: directiveController,
-          });
         }
 
-      case FrontendUnitTest.SERVICE:
+        templateObj = Twig.twig({
+          data: fs.readFileSync(FrontendUnitTest.DIRECTIVE_TPL_PATH, 'utf8').toString(),
+        });
 
+        return templateObj.render({
+          directiveName: directiveName,
+          directive: FrontendUnitTest.toKebabCase(directiveName),
+          moduleNamePath: moduleNamePath,
+          services: services,
+          providers: providers,
+          templateUrl: externalTemplatePath,
+          restrictType: restrictType,
+          directiveController: directiveController,
+        });
+
+      case FrontendUnitTest.SERVICE:
         let serviceName = FrontendUnitTest.getServiceName(absoluteClassPath);
+        injectedDepsArray = FrontendUnitTest.getInjectedDepsForService(absoluteClassPath);
+        services = FrontendUnitTest.fetchServices(injectedDepsArray);
+        providers = FrontendUnitTest.fetchProviders(injectedDepsArray);
 
         //create service test with injected services or providers
-        if (hasInjectedServices || hasInjectedProviders || serviceName === 'msAuthentication' || hasImports) {
-          return '';
+        if (serviceName === 'msAuthentication' || hasImports) {
+          throw new Error(`Service has import to external files or service name is "msAuthentication"`);
         }
 
         if (!serviceName || serviceName.length === 0) {
@@ -875,18 +879,22 @@ export class FrontendUnitTest extends AbstractTemplate {
             objectName: FrontendUnitTest.lowerCaseFirstChar(name),
             staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
           });
+        } else {
+
+          templateObj = Twig.twig({
+            data: fs.readFileSync(FrontendUnitTest.SERVICE_TPL_PATH, 'utf8').toString(),
+          });
+
+          return templateObj.render({
+            ClassName: name,
+            ServiceName: serviceName,
+            serviceName: FrontendUnitTest.lowerCaseFirstChar(serviceName),
+            moduleNamePath: moduleNamePath,
+            services: services,
+            providers: providers,
+            staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
+          });
         }
-
-        templateObj = Twig.twig({
-          data: fs.readFileSync(FrontendUnitTest.SERVICE_TPL_PATH, 'utf8').toString(),
-        });
-
-        return templateObj.render({
-          ClassName: name,
-          ServiceName: serviceName,
-          serviceName: FrontendUnitTest.lowerCaseFirstChar(serviceName),
-          moduleNamePath: moduleNamePath,
-        });
 
       case FrontendUnitTest.MODEL:
         let service = FrontendUnitTest.isService(absoluteClassPath);
@@ -1096,7 +1104,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @param {String} pathToClass
    * @returns {String[]}
    */
-  static getInjectedDepsForDirectiveCtrl(pathToClass) {
+  static getInjectedDepsForCtrl(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
 
@@ -1113,13 +1121,38 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
   /**
+   * @param {String} pathToClass
+   * @returns {String[]}
+   */
+  static getInjectedDepsForService(pathToClass) {
+
+    let fileContentString = fs.readFileSync(pathToClass, 'utf8');
+
+    let re = /service\(.*\[([\s\S]*)\(.*\{.*/mi;
+
+    if (re.test(fileContentString)) {
+      let injectedDepsString = fileContentString.match(re)[1].replace(/[\s]/mg, '').replace(/"|'|`/mg, '');
+
+      return injectedDepsString.split(',').filter((element) => {
+        return element;
+      });
+    }
+
+    return [];
+  }
+
+  /**
    * @param {String[]} depsArray
    * @returns {String[]}
    */
   static fetchServices(depsArray) {
-    return depsArray.filter((element) => {
-      return /service/i.test(element);
-    });
+    if (depsArray && depsArray.length > 0) {
+      return depsArray.filter((element) => {
+        return /service/i.test(element);
+      });
+    }
+
+    return [];
   }
 
   /**
@@ -1127,9 +1160,13 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @returns {String[]}
    */
   static fetchProviders(depsArray) {
-    return depsArray.filter((element) => {
-      return /provider|notification|msAuthentication/i.test(element);
-    });
+    if (depsArray && depsArray.length > 0) {
+      return depsArray.filter((element) => {
+        return /provider|notification|msAuthentication/i.test(element);
+      });
+    }
+
+    return [];
   }
 
   /**
@@ -1230,6 +1267,63 @@ export class FrontendUnitTest extends AbstractTemplate {
     return string.replace(/([A-Z]+)/g, (x, y) => {
       return '-' + y.toLowerCase();
     }).replace(/^-/, '');
+  }
+
+  /**
+   * Return new array which consits from arraySource elements without elements from arrayToRemove
+   * @param {Array} arraySource
+   * @returns {Array}
+   */
+  static diffArray(arraySource) {
+    let bidimentionalArray = Array.prototype.slice.call(arguments, 1);
+    let arrayToRemove = [];
+
+    for (var i = 0; i < bidimentionalArray.length; i++) {
+      arrayToRemove = arrayToRemove.concat(bidimentionalArray[i]);
+    }
+
+    return arraySource.filter((element) => {
+      return arrayToRemove.indexOf(element) < 0;
+    });
+  }
+
+  /**
+   * @param {Array} arraySource
+   * @returns {Array}
+   */
+  static skipScopeServices(deps) {
+    return deps.filter((element) => {
+      return !/scope/i.test(element);
+    });
+  }
+
+
+  /**
+   * Return new array which consits from arraySource elements without elements from arrayToRemove
+   * @param {String[]} arraySource
+   * @param {String} mode - values 'BOTH', 'FIRST', 'LAST'
+   * @returns {Array}
+   */
+  static toUnderscore(arraySource, mode = 'BOTH') {
+    return arraySource.map((element) => {
+      let result;
+
+      switch (mode.toUpperCase()) {
+        case 'BOTH':
+          result = `_${element}_`;
+          break;
+        case 'FIRST':
+          result = `_${element}`;
+          break;
+        case 'LAST':
+          result = `${element}_`;
+          break;
+        default:
+          throw new Error(`Invalid mode value [${mode}]`);
+      }
+
+      return result;
+    });
   }
 
   /**

@@ -8,41 +8,152 @@
 
 import moduleName from '{{ moduleNamePath }}';
 
-// @todo: Add more advanced tests
-describe('Controllers', () => {
-  let scope;
+  // @todo: Add more advanced tests
+  describe('Controllers', () => {
+
+  let scope, rootScope;
+{% if ControllerName %}
+  let $controller;
   let controller;
+{% endif %}
+{% if services|length > 0 %}
 
-  // Mocked Services
-  angular.module('mocks', []);
+  //mocked service references
+{% for service in services %}
+  let mock{{ service }};
+{% endfor %}
+{% endif %}
+{% if providers|length > 0 %}
 
-  beforeEach(function() {
+  //mocked provider references
+{% for provider in providers %}
+  let mock{{ provider }};
+{% endfor %}
+{% endif %}
+
+  beforeEach(() => {
+
+    // Load modules
     module('ui.router');
-    angular.module('mocks');
+{% if templateUrl %}
+    module('templates');
+{% endif %}
     angular.mock.module(moduleName);
-  });
+{% if services|length > 0 or providers|length > 0%}
 
-  beforeEach(
-    inject(
-      ($rootScope, $controller) => {
-        scope = $rootScope.$new();
+    // include previous module containing mocked service/provider which will override actual service/provider
+    module(($provide) => {
+  {% for service in services %}
 
-        let inputParameters = {
-          $scope: scope,
-          $modalInstance: {},
+      // @todo - need to implement methods for mock {{ service }}
+      $provide.service('{{ service }}', () => {
+        return {
+          sampleMethod: function() { return; },
         };
+      });
+  {% endfor %}
+  {% for provider in providers %}
 
-        scope.$digest();
+      // @todo - need to implement methods for mock {{ provider }}
+      $provide.provider('{{ provider }}', function() {
+        this.$get = () => {
+          var sampleMethod = jasmine.createSpy('sampleMethod');
 
-        controller = $controller('{{ ControllerName }}', inputParameters);
-        scope.$digest();
-    })
-  );
+          return {
+            sampleMethod: sampleMethod,
+          };
+        };
+      });
+  {% endfor %}
+  });
+{% endif %}
+{% if providers|length > 0 %}
 
-  describe('{{ ClassName }}', () => {
-    it('Check {{ ClassName }} constructor', () => {
-      expect(typeof controller).toEqual('object');
+    //mocked provider references
+    module(({{ providers|join('Provider, ') }}Provider) => {
+{% for provider in providers %}
+      mock{{ provider }} = {{ provider }}Provider;
+{% endfor %}
+    });
+{% endif %}
+{% if services|length > 0 %}
+
+    //mocked service references
+    inject(({{ services|join(', ') }}) => {
+{% for service in services %}
+      mock{{ service }} = {{ service }};
+{% endfor %}
+    });
+{% endif %}
+
+    // store references to scope, rootScope
+    // so they are available to all tests in this describe block
+    //
+    // $controller service that is responsible for instantiating controllers
+    // $rootScope ngMock’s service to allow getting an instance of angular’s core and create child scopes via its $new
+    //
+    // The underscores are a convenience trick to inject a service under a different name
+    // so that we can locally assign a local variable of the same name as the service.
+    inject((_$controller_, $rootScope) => {
+
+{% if ControllerName %}
+      $controller = _$controller_;
+{% endif %}
+      rootScope = $rootScope;
+      scope = $rootScope.$new();
+
+      //how to set model testedModelValue value for controller
+      //scope.testedModelValue = null;
     });
   });
 
+  /**
+  * Sets ready for testing
+  * @returns {HTMLDivElement}
+  */
+  function instantiateController() {
+    scope.$digest();
+{% if ControllerName %}
+
+    controller = $controller('{{ ControllerName }}', {
+    $scope: scope,
+    $rootScope: rootScope,
+{% for service in services %}
+      {{ service }}: mock{{ service }},
+{% endfor %}
+{% for provider in providers %}
+      {{ provider }}: mock{{ provider }},
+{% endfor %}
+{% for otherDep in otherDeps %}
+        {{ otherDep }}: {},  //@todo - add mock here if need
+{% endfor %}
+    });
+
+    scope.$digest();
+{% endif %}
+  }
+
+  //@todo - should be added controller's use cases by using "controller"
+  describe('{{ ControllerName }}', () => {
+    it('Check {{ ControllerName }} constructor', () => {
+      let error = null;
+
+      try {
+        instantiateController();
+      } catch (exception) {
+        error = exception;
+      }
+
+      if (!error) {
+        expect(typeof controller).toEqual('object');
+      }
+    });
+{% for getter in staticGetters %}
+
+    // @todo: Uncomment if controller instantiated successfully and add valid getter values
+    //it('Check static getter {{ getter }}', () => {
+    //    expect(controller.constructor.{{ getter }}).toBeTruthy();
+    //});
+{% endfor %}
+  });
 });
