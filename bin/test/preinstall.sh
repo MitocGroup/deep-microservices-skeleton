@@ -15,7 +15,7 @@ source $(dirname $0)/_head.sh
 (npm list -g jspm --depth=0 || npm install -g jspm@0.16.15)  &&\
 (npm list -g browserify --depth=0 || npm install -g browserify@11.2.x) &&\
 (npm list -g jscs --depth=0 || npm install -g jscs@2.1.x) &&\
-(npm list -g mocha --depth=0 || npm install -g mocha@2.4.x) &&\
+(npm list -g mocha@2.5.x --depth=0 || npm install -g mocha@2.5.x) &&\
 (npm list -g chai --depth=0 || npm install -g chai@3.3.x) &&\
 (npm list -g jasmine-core --depth=0 || npm install -g jasmine-core@2.3.x) &&\
 (npm list -g istanbul@^1.0.0-alpha --depth=0 || npm install -g istanbul@^1.0.0-alpha) &&\
