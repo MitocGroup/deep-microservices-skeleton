@@ -2,6 +2,8 @@
  * Created by AlexanderC on 10/06/2015
  */
 
+/*eslint global-require: 1 */
+
 'use strict';
 
 module.exports = function(callback) {
@@ -19,10 +21,10 @@ module.exports = function(callback) {
   installation.stderr.pipe(process.stderr);
 
   installation.on('close', function(code) {
-      if (code !== 0) {
-        console.error('Framework installation failed (exit with code ' + code + ')');
-      }
+    if (code !== 0) {
+      console.error('Framework installation failed (exit with code ' + code + ')');
+    }
 
-      callback();
-    });
+    callback();
+  });
 };

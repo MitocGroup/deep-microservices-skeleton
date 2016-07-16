@@ -146,13 +146,13 @@ rules:
   func-style: 0
   id-length: 0
   id-match: 0
-  indent: 0
+  indent: [2, 2]
   jsx-quotes: 0
   key-spacing: 0
   linebreak-style: 0
   lines-around-comment: 0
   max-depth: 0
-  max-len: 0
+  max-len: [2, {code: 120, ignoreComments: true}]
   max-nested-callbacks: 0
   max-params: 0
   max-statements: [2, 30]
