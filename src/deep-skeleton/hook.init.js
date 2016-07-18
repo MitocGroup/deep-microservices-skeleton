@@ -2,7 +2,7 @@
  * Created by AlexanderC on 10/06/2015
  */
 
-/*eslint global-require: 1, strict: 1 */
+/*eslint global-require: 0, strict: 0, angular/log: 0 */
 
 'use strict';
 
