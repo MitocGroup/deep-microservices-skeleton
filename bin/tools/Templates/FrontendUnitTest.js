@@ -26,13 +26,16 @@ export class FrontendUnitTest extends AbstractTemplate {
 
     this.microAppsPath = path;
     this.microAppsFullPath = path;
+    this.providers = [];
   }
 
   /**
    * @param {Function} callback
    */
   init(callback) {
-    this.getFrontendInfo(callback);
+    this.getFrontendInfo(()=> {
+      this.getProvidersList(callback);
+    });
     this.getFrontendPackageJsonPaths();
   }
 
@@ -378,7 +381,7 @@ export class FrontendUnitTest extends AbstractTemplate {
 
             genTests.push(elem);
           }
-        } catch(exception) {
+        } catch (exception) {
           console.log(`Test <warn>${elem}</warn> has not been added due to reason: <warn>[${exception.message}]</warn>`);
         }
 
@@ -680,6 +683,43 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
   /**
+   * @param {Function} callback
+   */
+  getProvidersList(callback) {
+
+    if (FrontendUnitTest.accessSync(this.microAppsPath)) {
+
+      // match only filenames with by name.js pattern
+      dir.readFiles(this.microAppsPath, {
+          match: /\.js/,
+          exclude: /^\./,
+          excludeDir: ['backend', 'node_modules', 'docs', 'data', 'tests'],
+        }, (err, content, next) => {
+          if (err) {
+            throw err;
+          }
+
+          let re = /\.provider\(("|'|`)([a-z]+)("|'|`).*/mi;
+
+          if (re.test(content)) {
+            this.providers.push(content.match(re)[2]);
+          }
+
+          next();
+        },
+        (err, files) => {
+          if (err) {
+            throw err;
+          }
+
+          callback();
+        }
+      );
+
+    }
+  }
+
+  /**
    * @param {String} dir
    * @returns {String}
    */
@@ -857,7 +897,7 @@ export class FrontendUnitTest extends AbstractTemplate {
         let serviceName = FrontendUnitTest.getServiceName(absoluteClassPath);
         injectedDepsArray = FrontendUnitTest.getInjectedDepsForService(absoluteClassPath);
         services = FrontendUnitTest.fetchServices(injectedDepsArray);
-        providers = FrontendUnitTest.fetchProviders(injectedDepsArray);
+        providers = this.fetchProviders(injectedDepsArray);
 
         //create service test with injected services or providers
         if (serviceName === 'msAuthentication' || hasImports) {
@@ -1159,10 +1199,10 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @param {String[]} depsArray
    * @returns {String[]}
    */
-  static fetchProviders(depsArray) {
+  fetchProviders(depsArray) {
     if (depsArray && depsArray.length > 0) {
       return depsArray.filter((element) => {
-        return /provider|notification|msAuthentication/i.test(element);
+        return new RegExp(`provider|${this.providers}.join('|')`, 'i').test(element);
       });
     }
 
@@ -1174,7 +1214,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @returns {Boolean}
    */
   static containsProvider(depsArray) {
-    return /provider|notification|msAuthentication/gmi.test(depsArray.join(','));
+    return new RegExp(`provider|${this.providers}.join('|')`, 'gmi').test(depsArray.join(','));
   }
 
   /**
@@ -1198,8 +1238,7 @@ export class FrontendUnitTest extends AbstractTemplate {
     if (re.test(fileContentString)) {
       let injectedDepsString = fileContentString.match(re)[1].replace(/[\s]/mg, '').replace(/"|'|`/mg, '');
 
-      //@todo - clarify if we want to enforce validation
-      return (/provider|notification|msAuthentication/gmi.test(injectedDepsString));
+      return (new RegExp(`provider|${this.providers}.join('|')`, 'gmi').test(injectedDepsString));
     }
 
     return false;
