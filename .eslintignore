@@ -1,8 +1,8 @@
 bin/**/*
 test/**/*
 **/tests
-**/vendor
 tmp/**/*
+vendor/**/*
 **.spec.js
 **.min.js
 **.min.css

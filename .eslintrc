@@ -84,7 +84,7 @@ rules:
   no-iterator: 2
   no-labels: 0
   no-lone-blocks: 2
-  no-loop-func: 2
+  no-loop-func: 1
   no-magic-number: 0
   no-multi-spaces: 0
   no-multi-str: 0
@@ -224,6 +224,10 @@ rules:
   prefer-spread: 0
   prefer-template: 0
   require-yield: 0
+
+  #angular rules
+  angular/timeout-service: 1
+  angular/no-service-method: 1
 
 globals:
   DeepFramework: true
