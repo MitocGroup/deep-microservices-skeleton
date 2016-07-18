@@ -158,7 +158,7 @@ rules:
   linebreak-style: 0
   lines-around-comment: 0
   max-depth: [2, 7]
-  max-len: [2, {code: 120, ignoreComments: true}]
+  max-len: [2, 120, 2, {ignoreComments: true}]
   max-nested-callbacks: 0
   max-params: 0
   max-statements: [2, 50]
@@ -188,7 +188,7 @@ rules:
   operator-linebreak: 0
   padded-blocks: 0
   quote-props: 0
-  quotes: [2, single, {avoidEscape: true, allowTemplateLiterals: true}]
+  quotes: [2, single]
   require-jsdoc: 0
   semi-spacing: 0
   semi: 0
@@ -226,3 +226,4 @@ rules:
 
 globals:
   DeepFramework: true
+  angular: true
