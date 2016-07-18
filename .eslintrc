@@ -228,6 +228,7 @@ rules:
   #angular rules
   angular/timeout-service: 1
   angular/no-service-method: 1
+  angular/json-functions: 0
 
 globals:
   DeepFramework: true
