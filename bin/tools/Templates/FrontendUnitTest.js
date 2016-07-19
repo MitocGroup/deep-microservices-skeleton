@@ -371,7 +371,7 @@ export class FrontendUnitTest extends AbstractTemplate {
         let testContent;
 
         try {
-          testContent = FrontendUnitTest.createTestWithRelativePath(type, paths[index], elem);
+          testContent = this.createTestWithRelativePath(type, paths[index], elem);
 
           if (testContent && testContent.length > 0) {
             fsExtra.createFileSync(elem);
@@ -803,7 +803,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @param {String} absoluteTestPath
    * @returns {String}
    */
-  static createTestWithRelativePath(type, absoluteClassPath = '', absoluteTestPath = '') {
+   createTestWithRelativePath(type, absoluteClassPath = '', absoluteTestPath = '') {
     let templateObj, services, providers, injectedDepsArray;
     let name = FrontendUnitTest.getClassName(absoluteTestPath);
     let testPathDir = path.dirname(absoluteTestPath);
@@ -820,7 +820,7 @@ export class FrontendUnitTest extends AbstractTemplate {
         let controllerName = FrontendUnitTest.getControllerName(absoluteClassPath);
         injectedDepsArray = FrontendUnitTest.getInjectedDepsForCtrl(absoluteClassPath);
         services = FrontendUnitTest.fetchServices(injectedDepsArray);
-        providers = FrontendUnitTest.fetchProviders(injectedDepsArray);
+        providers = this.fetchProviders(injectedDepsArray);
         let otherDeps = FrontendUnitTest.skipScopeServices(
           FrontendUnitTest.diffArray(injectedDepsArray, services, providers)
         );
@@ -851,7 +851,7 @@ export class FrontendUnitTest extends AbstractTemplate {
         let directiveController = FrontendUnitTest.getDirectiveController(absoluteClassPath);
         injectedDepsArray = FrontendUnitTest.getInjectedDepsForCtrl(absoluteClassPath);
         services = FrontendUnitTest.fetchServices(injectedDepsArray);
-        providers = FrontendUnitTest.fetchProviders(injectedDepsArray);
+        providers = this.fetchProviders(injectedDepsArray);
 
         if (hasImports) {
           throw new Error(`Directive has import to external files`);
