@@ -561,7 +561,12 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @returns {Object|null}
    */
   getHealthCheckObjectByName(name) {
-    let testPath = path.join('livebook/src/', name, FrontendUnitTest.FRONTEND_ANGULAR_HEALTH_CHECK);
+    let testPath = path.join(
+      this.microAppsPath,
+      FrontendUnitTest.SOURCE,
+      name,
+      FrontendUnitTest.FRONTEND_ANGULAR_HEALTH_CHECK
+    );
 
     for (let element of this.healthCheckPaths) {
 
