@@ -601,9 +601,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @param {String} filePath
    */
   updatePackageJson(name, filePath) {
-    let packageName = `${name}FrontendTest`.replace(/([A-Z]+)/g, (x, y) => {
-      return '-' + y.toLowerCase();
-    }).replace(/^-/, '');
+    let packageName = FrontendUnitTest.toKebabCase(`${name}FrontendTest`);
 
     //find dependencies
     let healthCheckObj = this.getHealthCheckObjectByName(name);
