@@ -1,5 +1,3 @@
-/*jshint bitwise: false*/
-
 /**
  * Created by vcernomschi on 4/26/16..
  */
