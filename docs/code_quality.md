@@ -24,10 +24,12 @@ npm install -g eslint-config-angular
 > Install pre-commit hook (should be run from project root folder)
 
 ```bash
-./bin/install_precommit.sh
+docker pull codeclimate/codeclimate
 ```
 
-> To install/setup Codeclimate CLI use [Codeclimate installation steps](https://github.com/codeclimate/codeclimate#installation)
+> Docker is required, because Code Climate CLI is distributed and run as a Docker image. 
+To more details for setup Codeclimate CLI use [Codeclimate installation steps](https://github.com/codeclimate/codeclimate#installation)
+
 
 ## Usage
 	
@@ -67,7 +69,7 @@ eslint --fix path/to/file
 - Use configuration file specific for project.
 - Apply and Ok.
 
-![ESLint WebStorm setup](https://github.com/MitocGroup/deep-framework/blob/master/docs/ESLint_WebStorm_setup.png)
+![ESLint WebStorm setup](https://github.com/MitocGroup/deep-microservices-skeleton/blob/master/docs/ESLint_WebStorm_setup.png)
 		
 ### How to run codeclimate on local
 
