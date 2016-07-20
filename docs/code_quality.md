@@ -67,7 +67,7 @@ eslint --fix path/to/file
 - Use configuration file specific for project.
 - Apply and Ok.
 
-![ESLint WebStorm setup](https://github.com/MitocGroup/deep-framework/blob/master/docs/ESLint_WebStorm_setup.png)
+![ESLint WebStorm setup](https://github.com/MitocGroup/deep-microservices-skeleton/blob/master/docs/ESLint_WebStorm_setup.png)
 		
 ### How to run codeclimate on local
 
