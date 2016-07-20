@@ -954,7 +954,6 @@ export class BackendUnitTest extends AbstractTemplate {
   static get FUNCTIONAL_TEST_TPL() {
     let content = [];
 
-    content.push('/*jshint evil:true */');
     content.push('');
     content.push('\'use strict\';');
     content.push('');

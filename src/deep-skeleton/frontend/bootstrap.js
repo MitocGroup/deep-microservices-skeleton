@@ -1,6 +1,8 @@
 /* global System */
+/* global DeepFramework */
+/*eslint strict: 0 */
+
 'use strict';
-'format es6';
 
 export default function skeleton() {
   var deepAsset = DeepFramework.Kernel.container.get('asset');

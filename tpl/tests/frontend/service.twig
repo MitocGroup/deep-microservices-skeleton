@@ -1,8 +1,5 @@
 // THIS TEST WAS GENERATED AUTOMATICALLY ON {{ "now"|date("m/d/Y H:i:s") }}
 
-/* global angular */
-/* global inject */
-
 'use strict';
 
 import moduleName from '{{ moduleNamePath }}';
@@ -10,27 +7,99 @@ import moduleName from '{{ moduleNamePath }}';
 // @todo: Add more advanced tests
 describe('Services', () => {
   let {{ serviceName }};
+  let scope, rootScope;
   let $q;
+{% if services|length > 0 %}
+
+  //mocked service references
+{% for service in services %}
+  let mock{{ service }};
+{% endfor %}
+{% endif %}
+{% if providers|length > 0 %}
+
+  //mocked provider references
+{% for provider in providers %}
+  let mock{{ provider }};
+{% endfor %}
+{% endif %}
 
   beforeEach(() => {
     module('ui.router');
-    module(moduleName);
+    angular.mock.module(moduleName);
+{% if services|length > 0 or providers|length > 0%}
 
-    // inject your service for testing.
-    // The _underscores_ are a convenience thing.
-    // so you can have your variable name be the
-    // same as your injected service.
-    inject((_{{ ServiceName }}_, _$q_) => {
-      {{ serviceName }} = _{{ ServiceName }}_;
+    // include previous module containing mocked service/provider which will override actual service/provider
+    module(($provide) => {
+  {% for service in services %}
+
+      // @todo - need to implement methods for mock {{ service }}
+      $provide.service('{{ service }}', () => {
+        return {
+          sampleMethod: function() { return; },
+        };
+      });
+  {% endfor %}
+  {% for provider in providers %}
+
+      // @todo - need to implement methods for mock {{ provider }}
+      $provide.provider('{{ provider }}', function() {
+        this.$get = () => {
+          var sampleMethod = jasmine.createSpy('sampleMethod');
+
+          return {
+            sampleMethod: sampleMethod,
+          };
+        };
+      });
+  {% endfor %}
+  });
+{% endif %}
+{% if providers|length > 0 %}
+
+    //mocked provider references
+    module(({{ providers|join('Provider, ') }}Provider) => {
+{% for provider in providers %}
+      mock{{ provider }} = {{ provider }}Provider;
+{% endfor %}
+    });
+{% endif %}
+
+{% if services|length > 0 %}
+
+    //mocked service references
+    inject(({{ services|join(', ') }}) => {
+{% for service in services %}
+      mock{{ service }} = {{ service }};
+{% endfor %}
+    });
+{% endif %}
+
+    // store references to scope, rootScope
+    // so they are available to all tests in this describe block
+    //
+    // $rootScope ngMock’s service to allow getting an instance of angular’s core and create child scopes via its $new
+    //
+    // The underscores are a convenience trick to inject a service under a different name
+    // so that we can locally assign a local variable of the same name as the service.
+    inject(($rootScope, {{ ServiceName }}, _$q_) => {
+      rootScope = $rootScope;
+      scope = $rootScope.$new();
+      {{ serviceName }} = {{ ServiceName }};
       $q = _$q_;
     });
   });
 
   describe('{{ ClassName }}', () => {
-    it('Check constructor sets $q', () => {
-      expect(typeof {{ serviceName }}).toBe('object');
+    it('Check constructor create instance w/o errors', () => {
+      expect(['object', 'function', 'undefined']).toContain(typeof {{ serviceName }});
     });
+{% for getter in staticGetters %}
+
+    // @todo: Uncomment if service instantiated successfully and add valid getter values
+    //it('Check static getter {{ getter }}', () => {
+    //  expect({{ serviceName }}.constructor.{{ getter }}).toBeTruthy();
+    //});
+{% endfor %}
   });
-
 });
-

@@ -1,5 +1,3 @@
-/*jshint bitwise: false*/
-
 /**
  * Created by vcernomschi on 4/26/16..
  */
@@ -26,13 +24,16 @@ export class FrontendUnitTest extends AbstractTemplate {
 
     this.microAppsPath = path;
     this.microAppsFullPath = path;
+    this.providers = [];
   }
 
   /**
    * @param {Function} callback
    */
   init(callback) {
-    this.getFrontendInfo(callback);
+    this.getFrontendInfo(()=> {
+      this.getProvidersList(callback);
+    });
     this.getFrontendPackageJsonPaths();
   }
 
@@ -104,7 +105,7 @@ export class FrontendUnitTest extends AbstractTemplate {
             throw err;
           }
 
-          let name = content.replace(/[\s\S]+export\s+default\s+'(.*)';[\n\r]/g, '$1');
+          let name = content.replace(/[\s\S]+export\s+default\s+'(.*)';[\n\r]?/g, '$1');
 
           if (name.indexOf('root') < 0) {
             microAppFrontendNames.push(name);
@@ -139,16 +140,6 @@ export class FrontendUnitTest extends AbstractTemplate {
       );
 
     }
-  }
-
-  /**
-   * Returns full paths to controllers
-   * @returns {String[]}
-   */
-  getControllerPaths() {
-    var controllerPaths = [];
-
-    return controllerPaths;
   }
 
   /**
@@ -374,18 +365,22 @@ export class FrontendUnitTest extends AbstractTemplate {
     for (const [index, elem] of testPaths.entries()) {
 
       if (!FrontendUnitTest.accessSync(elem)) {
-        let modelTestContent = FrontendUnitTest.createTestWithRelativePath(type, paths[index], elem);
 
-        if (modelTestContent && modelTestContent.length > 0) {
-          fsExtra.createFileSync(elem);
-          fs.writeFileSync(elem, modelTestContent);
+        let testContent;
 
-          console.log(`Test <info>${elem}</info> for has been added`);
+        try {
+          testContent = this.createTestWithRelativePath(type, paths[index], elem);
 
-          genTests.push(elem);
+          if (testContent && testContent.length > 0) {
+            fsExtra.createFileSync(elem);
+            fs.writeFileSync(elem, testContent);
 
-        } else {
-          console.log(`Test <warn>${elem}</warn> has not been added due to injected providers/services`);
+            console.log(`Test <info>${elem}</info> for has been added`);
+
+            genTests.push(elem);
+          }
+        } catch (exception) {
+          console.log(`Test <warn>${elem}</warn> has not been added due to reason: <warn>[${exception.message}]</warn>`);
         }
 
       }
@@ -476,8 +471,7 @@ export class FrontendUnitTest extends AbstractTemplate {
       }
 
       if (healthCheckObj && healthCheckObj.hasOwnProperty('dependencies') &&
-        healthCheckObj.dependencies.hasOwnProperty('angular-stripe') &&
-        !FrontendUnitTest.accessSync(stripeDestination)) {
+        healthCheckObj.dependencies.hasOwnProperty('angular-stripe') && !FrontendUnitTest.accessSync(stripeDestination)) {
 
         fsExtra.copySync(FrontendUnitTest.STRIPE_SOURCE, stripeDestination);
 
@@ -495,12 +489,28 @@ export class FrontendUnitTest extends AbstractTemplate {
 
       let karmaDestination = path.join(destination, FrontendUnitTest.KARMA_CONFIG);
       let jspmConfigDestination = path.join(destination, FrontendUnitTest.JSPM_CONFIG);
+      let name = karmaDestination.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
+      let healthCheckObj = this.getHealthCheckObjectByName(name);
+      let hasStripeDependency = false;
 
       if (!FrontendUnitTest.accessSync(karmaDestination)) {
-        fsExtra.copySync(
-          path.join(FrontendUnitTest.CONFIGS_SOURCE, FrontendUnitTest.KARMA_CONFIG),
-          karmaDestination
-        );
+
+        fsExtra.createFileSync(karmaDestination);
+
+        let templateObj = Twig.twig({
+          data: fs.readFileSync(FrontendUnitTest.KARMA_CONFIG_TPL_PATH, 'utf8').toString(),
+        });
+
+        if (healthCheckObj && healthCheckObj.hasOwnProperty('dependencies') &&
+          healthCheckObj.dependencies.hasOwnProperty('angular-stripe')) {
+          hasStripeDependency = true;
+        }
+
+        let karmaContentString = templateObj.render({
+          hasStripeDependency: hasStripeDependency,
+        });
+
+        fs.writeFileSync(karmaDestination, karmaContentString);
       }
 
       if (!FrontendUnitTest.accessSync(jspmConfigDestination)) {
@@ -551,7 +561,12 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @returns {Object|null}
    */
   getHealthCheckObjectByName(name) {
-    let testPath = path.join('livebook/src/', name, FrontendUnitTest.FRONTEND_ANGULAR_HEALTH_CHECK);
+    let testPath = path.join(
+      this.microAppsPath,
+      FrontendUnitTest.SOURCE,
+      name,
+      FrontendUnitTest.FRONTEND_ANGULAR_HEALTH_CHECK
+    );
 
     for (let element of this.healthCheckPaths) {
 
@@ -586,9 +601,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @param {String} filePath
    */
   updatePackageJson(name, filePath) {
-    let packageName = `${name}FrontendTest`.replace(/([A-Z]+)/g, (x, y) => {
-      return '-' + y.toLowerCase();
-    }).replace(/^-/, '');
+    let packageName = FrontendUnitTest.toKebabCase(`${name}FrontendTest`);
 
     //find dependencies
     let healthCheckObj = this.getHealthCheckObjectByName(name);
@@ -668,6 +681,43 @@ export class FrontendUnitTest extends AbstractTemplate {
     });
 
     return filelist;
+  }
+
+  /**
+   * @param {Function} callback
+   */
+  getProvidersList(callback) {
+
+    if (FrontendUnitTest.accessSync(this.microAppsPath)) {
+
+      // match only filenames with by name.js pattern
+      dir.readFiles(this.microAppsPath, {
+          match: /\.js/,
+          exclude: /^\./,
+          excludeDir: ['backend', 'node_modules', 'docs', 'data', 'tests'],
+        }, (err, content, next) => {
+          if (err) {
+            throw err;
+          }
+
+          let re = /\.provider\(("|'|`)([a-z]+)("|'|`).*/mi;
+
+          if (re.test(content)) {
+            this.providers.push(content.match(re)[2]);
+          }
+
+          next();
+        },
+        (err, files) => {
+          if (err) {
+            throw err;
+          }
+
+          callback();
+        }
+      );
+
+    }
   }
 
   /**
@@ -754,8 +804,8 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @param {String} absoluteTestPath
    * @returns {String}
    */
-  static createTestWithRelativePath(type, absoluteClassPath = '', absoluteTestPath = '') {
-    let templateObj;
+   createTestWithRelativePath(type, absoluteClassPath = '', absoluteTestPath = '') {
+    let templateObj, services, providers, injectedDepsArray;
     let name = FrontendUnitTest.getClassName(absoluteTestPath);
     let testPathDir = path.dirname(absoluteTestPath);
     let classPathDir = path.dirname(absoluteClassPath);
@@ -763,20 +813,22 @@ export class FrontendUnitTest extends AbstractTemplate {
     let moduleNamePath = relativePath.replace(new RegExp(`${type}.+`, 'i'), 'name');
     let hasInjectedServices = FrontendUnitTest.hasInjectedServices(absoluteClassPath);
     let hasInjectedProviders = FrontendUnitTest.hasInjectedProviders(absoluteClassPath);
+    let hasImports = FrontendUnitTest.hasImports(absoluteClassPath);
 
     switch (type) {
 
       case FrontendUnitTest.CONTROLLER:
         let controllerName = FrontendUnitTest.getControllerName(absoluteClassPath);
+        injectedDepsArray = FrontendUnitTest.getInjectedDepsForCtrl(absoluteClassPath);
+        services = FrontendUnitTest.fetchServices(injectedDepsArray);
+        providers = this.fetchProviders(injectedDepsArray);
+        let otherDeps = FrontendUnitTest.skipScopeServices(
+          FrontendUnitTest.diffArray(injectedDepsArray, services, providers)
+        );
 
         //@todo - need to clarify if we want to force this validation
         if (controllerName.indexOf(name) === -1) {
           throw new Error(`Controller name doesn't match to file name: ${absoluteClassPath}. Please refactor.`);
-        }
-
-        //create controller test with injected services or providers
-        if (hasInjectedServices || hasInjectedProviders) {
-          return '';
         }
 
         templateObj = Twig.twig({
@@ -787,14 +839,27 @@ export class FrontendUnitTest extends AbstractTemplate {
           ControllerName: controllerName,
           ClassName: name,
           moduleNamePath: moduleNamePath,
+          services: services,
+          providers: providers,
+          otherDeps: otherDeps,
+          staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
         });
 
       case FrontendUnitTest.DIRECTIVE:
         let directiveName = FrontendUnitTest.getDirectiveName(absoluteClassPath);
         let externalTemplatePath = FrontendUnitTest.getExternalTemplatePath(absoluteClassPath);
+        let restrictType = FrontendUnitTest.getRestrictType(absoluteClassPath);
+        let directiveController = FrontendUnitTest.getDirectiveController(absoluteClassPath);
+        injectedDepsArray = FrontendUnitTest.getInjectedDepsForCtrl(absoluteClassPath);
+        services = FrontendUnitTest.fetchServices(injectedDepsArray);
+        providers = this.fetchProviders(injectedDepsArray);
 
-        if (hasInjectedServices || hasInjectedProviders) {
-          return '';
+        if (hasImports) {
+          throw new Error(`Directive has import to external files`);
+        }
+
+        if (hasInjectedProviders) {
+          throw new Error(`Directive has dependencies to unmocked providers`);
         }
 
         if (!directiveName || directiveName.length === 0) {
@@ -812,27 +877,32 @@ export class FrontendUnitTest extends AbstractTemplate {
             objectName: FrontendUnitTest.lowerCaseFirstChar(name),
             staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
           });
-        } else if (!externalTemplatePath || externalTemplatePath.length === 0) {
-          templateObj = Twig.twig({
-            data: fs.readFileSync(FrontendUnitTest.DIRECTIVE_TPL_PATH, 'utf8').toString(),
-          });
-
-          return templateObj.render({
-            directiveName: name,
-            directive: FrontendUnitTest.toKebabCase(name),
-            moduleNamePath: moduleNamePath,
-          });
         }
 
-        return '';
+        templateObj = Twig.twig({
+          data: fs.readFileSync(FrontendUnitTest.DIRECTIVE_TPL_PATH, 'utf8').toString(),
+        });
+
+        return templateObj.render({
+          directiveName: directiveName,
+          directive: FrontendUnitTest.toKebabCase(directiveName),
+          moduleNamePath: moduleNamePath,
+          services: services,
+          providers: providers,
+          templateUrl: externalTemplatePath,
+          restrictType: restrictType,
+          directiveController: directiveController,
+        });
 
       case FrontendUnitTest.SERVICE:
-
         let serviceName = FrontendUnitTest.getServiceName(absoluteClassPath);
+        injectedDepsArray = FrontendUnitTest.getInjectedDepsForService(absoluteClassPath);
+        services = FrontendUnitTest.fetchServices(injectedDepsArray);
+        providers = this.fetchProviders(injectedDepsArray);
 
         //create service test with injected services or providers
-        if (hasInjectedServices || hasInjectedProviders || serviceName === 'msAuthentication') {
-          return '';
+        if (serviceName === 'msAuthentication' || hasImports) {
+          throw new Error(`Service has import to external files or service name is "msAuthentication"`);
         }
 
         if (!serviceName || serviceName.length === 0) {
@@ -850,18 +920,22 @@ export class FrontendUnitTest extends AbstractTemplate {
             objectName: FrontendUnitTest.lowerCaseFirstChar(name),
             staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
           });
+        } else {
+
+          templateObj = Twig.twig({
+            data: fs.readFileSync(FrontendUnitTest.SERVICE_TPL_PATH, 'utf8').toString(),
+          });
+
+          return templateObj.render({
+            ClassName: name,
+            ServiceName: serviceName,
+            serviceName: FrontendUnitTest.lowerCaseFirstChar(serviceName),
+            moduleNamePath: moduleNamePath,
+            services: services,
+            providers: providers,
+            staticGetters: FrontendUnitTest.getStaticGetters(absoluteClassPath),
+          });
         }
-
-        templateObj = Twig.twig({
-          data: fs.readFileSync(FrontendUnitTest.SERVICE_TPL_PATH, 'utf8').toString(),
-        });
-
-        return templateObj.render({
-          ClassName: name,
-          ServiceName: serviceName,
-          serviceName: FrontendUnitTest.lowerCaseFirstChar(serviceName),
-          moduleNamePath: moduleNamePath,
-        });
 
       case FrontendUnitTest.MODEL:
         let service = FrontendUnitTest.isService(absoluteClassPath);
@@ -993,6 +1067,38 @@ export class FrontendUnitTest extends AbstractTemplate {
 
   /**
    * @param {String} pathToClass
+   * @returns {String}
+   */
+  static getRestrictType(pathToClass) {
+
+    let fileContentString = fs.readFileSync(pathToClass, 'utf8');
+    let re = /[\s\S]+restrict\:\s+("|'|`)([a-z0-9-]+)("|'|`)/mi;
+
+    if (!re.test(fileContentString)) {
+      return 'A';
+    }
+
+    return fileContentString.match(re)[2];
+  }
+
+  /**
+   * @param {String} pathToClass
+   * @returns {String}
+   */
+  static getDirectiveController(pathToClass) {
+
+    let fileContentString = fs.readFileSync(pathToClass, 'utf8');
+    let re = /[\s\S]+controller\:\s+("|'|`)([a-z0-9-]+)("|'|`)/mi;
+
+    if (!re.test(fileContentString)) {
+      return '';
+    }
+
+    return fileContentString.match(re)[2];
+  }
+
+  /**
+   * @param {String} pathToClass
    * @returns {Boolean}
    */
   static hasInjectedServices(pathToClass) {
@@ -1013,6 +1119,117 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @param {String} pathToClass
    * @returns {Boolean}
    */
+  static hasImports(pathToClass) {
+
+    let fileContentString = fs.readFileSync(pathToClass, 'utf8');
+
+    let re = /import.*["']([a-z0-9-\.\/]+)['"]/gmi;
+
+    if (!re.test(fileContentString)) {
+      return false;
+    } else {
+      let imports = fileContentString.match(re);
+
+      for (let item of imports) {
+        if (item.indexOf('/name') === -1) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+
+  }
+
+  /**
+   * @param {String} pathToClass
+   * @returns {String[]}
+   */
+  static getInjectedDepsForCtrl(pathToClass) {
+
+    let fileContentString = fs.readFileSync(pathToClass, 'utf8');
+
+    let re = /controller\(.*\[([\s\S]*)\(.*\{.*/mi;
+
+    if (re.test(fileContentString)) {
+      let injectedDepsString = fileContentString.match(re)[1].replace(/[\s]/mg, '').replace(/"|'|`/mg, '');
+      return injectedDepsString.split(',').filter((element) => {
+        return element;
+      });
+    }
+
+    return [];
+  }
+
+  /**
+   * @param {String} pathToClass
+   * @returns {String[]}
+   */
+  static getInjectedDepsForService(pathToClass) {
+
+    let fileContentString = fs.readFileSync(pathToClass, 'utf8');
+
+    let re = /service\(.*\[([\s\S]*)\(.*\{.*/mi;
+
+    if (re.test(fileContentString)) {
+      let injectedDepsString = fileContentString.match(re)[1].replace(/[\s]/mg, '').replace(/"|'|`/mg, '');
+
+      return injectedDepsString.split(',').filter((element) => {
+        return element;
+      });
+    }
+
+    return [];
+  }
+
+  /**
+   * @param {String[]} depsArray
+   * @returns {String[]}
+   */
+  static fetchServices(depsArray) {
+    if (depsArray && depsArray.length > 0) {
+      return depsArray.filter((element) => {
+        return /service/i.test(element);
+      });
+    }
+
+    return [];
+  }
+
+  /**
+   * @param {String[]} depsArray
+   * @returns {String[]}
+   */
+  fetchProviders(depsArray) {
+    if (depsArray && depsArray.length > 0) {
+      return depsArray.filter((element) => {
+        return new RegExp(`provider|${this.providers}.join('|')`, 'i').test(element);
+      });
+    }
+
+    return [];
+  }
+
+  /**
+   * @param {String[]} depsArray
+   * @returns {Boolean}
+   */
+  static containsProvider(depsArray) {
+    return new RegExp(`provider|${this.providers}.join('|')`, 'gmi').test(depsArray.join(','));
+  }
+
+  /**
+   * @param {String[]} depsArray
+   * @returns {Boolean}
+   */
+  static containsService(depsArray) {
+    return /service/gmi.test(depsArray.join(','));
+  }
+
+  /**
+   * @param {String} pathToClass
+   * @returns {Boolean}
+   */
   static hasInjectedProviders(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
@@ -1022,8 +1239,7 @@ export class FrontendUnitTest extends AbstractTemplate {
     if (re.test(fileContentString)) {
       let injectedDepsString = fileContentString.match(re)[1].replace(/[\s]/mg, '').replace(/"|'|`/mg, '');
 
-      //@todo - clarify if we want to enforce validation
-      return (/provider|notification|msAuthentication/gmi.test(injectedDepsString));
+      return (new RegExp(`provider|${this.providers}.join('|')`, 'gmi').test(injectedDepsString));
     }
 
     return false;
@@ -1091,6 +1307,63 @@ export class FrontendUnitTest extends AbstractTemplate {
     return string.replace(/([A-Z]+)/g, (x, y) => {
       return '-' + y.toLowerCase();
     }).replace(/^-/, '');
+  }
+
+  /**
+   * Return new array which consits from arraySource elements without elements from arrayToRemove
+   * @param {Array} arraySource
+   * @returns {Array}
+   */
+  static diffArray(arraySource) {
+    let bidimentionalArray = Array.prototype.slice.call(arguments, 1);
+    let arrayToRemove = [];
+
+    for (var i = 0; i < bidimentionalArray.length; i++) {
+      arrayToRemove = arrayToRemove.concat(bidimentionalArray[i]);
+    }
+
+    return arraySource.filter((element) => {
+      return arrayToRemove.indexOf(element) < 0;
+    });
+  }
+
+  /**
+   * @param {Array} arraySource
+   * @returns {Array}
+   */
+  static skipScopeServices(deps) {
+    return deps.filter((element) => {
+      return !/scope/i.test(element);
+    });
+  }
+
+
+  /**
+   * Return new array which consits from arraySource elements without elements from arrayToRemove
+   * @param {String[]} arraySource
+   * @param {String} mode - values 'BOTH', 'FIRST', 'LAST'
+   * @returns {Array}
+   */
+  static toUnderscore(arraySource, mode = 'BOTH') {
+    return arraySource.map((element) => {
+      let result;
+
+      switch (mode.toUpperCase()) {
+        case 'BOTH':
+          result = `_${element}_`;
+          break;
+        case 'FIRST':
+          result = `_${element}`;
+          break;
+        case 'LAST':
+          result = `${element}_`;
+          break;
+        default:
+          throw new Error(`Invalid mode value [${mode}]`);
+      }
+
+      return result;
+    });
   }
 
   /**
@@ -1292,6 +1565,14 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @returns {String}
    * @constructor
    */
+  static get KARMA_CONFIG_TPL_PATH() {
+    return path.join(FrontendUnitTest.TPL_DIR_PATH, 'config.karma.twig');
+  }
+
+  /**
+   * @returns {String}
+   * @constructor
+   */
   static get MODEL_WITH_SERVICE_TPL_PATH() {
     return path.join(FrontendUnitTest.TPL_DIR_PATH, 'model_with_service.twig');
   }
@@ -1394,8 +1675,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @private
    */
   static _isClassFile(filename) {
-    return /^[A-Za-z]/.test(filename) && !/exception\.js$/i.test(filename) &&
-      !/index\.js/i.test(filename) && path.extname(filename) === '.js';
+    return /^[A-Za-z]/.test(filename) && !/exception\.js$/i.test(filename) && !/index\.js/i.test(filename) && path.extname(filename) === '.js';
   }
 
   /**

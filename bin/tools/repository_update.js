@@ -98,6 +98,24 @@ function updateMicroservice(microserviceName, resources) {
       updateTravis(callback);
       break;
 
+    case '.codeclimate.yml':
+      updateResource(resource, callback);
+      break;
+
+    case '.csslintrc':
+      updateResource(resource, callback);
+      break;
+
+    case '.eslintrc', '.eslintignore':
+      updateResource(resource, callback);
+      break;
+
+    case 'pre-commit hook':
+      updateResource('bin/install_precommit.sh', () => {
+        updateResource('bin/pre-commit', callback);
+      });
+      break;
+
     case 'backend unit test':
       updateBackendUnitTests(callback);
       break;
@@ -134,8 +152,9 @@ if (!FS.existsSync(msPath) || !FS.statSync(msPath).isDirectory()) {
 }
 
 let resources = [
-  'README.md', '.travis.yml', '.hound.yml', '.houndignore', '.jscsrc',
-  '.jshintrc', 'bin/test', 'backend unit test', 'frontend unit test',
+  'README.md', '.travis.yml', '.hound.yml', '.houndignore', 'bin/test',
+  '.codeclimate.yml', '.csslintrc', '.eslintignore', '.eslintrc',
+  'pre-commit hook', 'backend unit test', 'frontend unit test',
 ];
 let choiceList = resources.reduce((walker, resource) => {
   walker.push({
