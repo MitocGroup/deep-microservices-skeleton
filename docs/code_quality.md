@@ -28,7 +28,7 @@ docker pull codeclimate/codeclimate
 ```
 
 > Docker is required, because Code Climate CLI is distributed and run as a Docker image. 
-To install/setup Codeclimate CLI use [Codeclimate installation steps](https://github.com/codeclimate/codeclimate#installation)
+To more details for setup Codeclimate CLI use [Codeclimate installation steps](https://github.com/codeclimate/codeclimate#installation)
 
 
 ## Usage
