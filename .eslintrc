@@ -16,6 +16,7 @@ env:
   jquery: true
   node: true
   jasmine: true
+  mocha: true
 
 parserOptions:
   sourceType: module
@@ -225,4 +226,5 @@ rules:
 
 globals:
   DeepFramework: true
+  Stripe: true
   angular: true
