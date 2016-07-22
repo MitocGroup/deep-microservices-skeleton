@@ -16,6 +16,7 @@ env:
   jquery: true
   node: true
   jasmine: true
+  mocha: true
 
 parserOptions:
   sourceType: module
@@ -151,7 +152,7 @@ rules:
   func-style: 0
   id-length: 0
   id-match: 0
-  indent: [2, 2]
+  indent: [2, 2, { SwitchCase: 1 }]
   jsx-quotes: 0
   key-spacing: 0
   linebreak-style: 0
@@ -225,4 +226,5 @@ rules:
 
 globals:
   DeepFramework: true
+  Stripe: true
   angular: true
