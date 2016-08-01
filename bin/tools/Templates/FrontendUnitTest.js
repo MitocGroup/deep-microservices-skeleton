@@ -229,7 +229,14 @@ export class FrontendUnitTest extends AbstractTemplate {
       let isDependencyMatched = false;
 
       for (j = 0; j < this.frontendPackageJsonPaths.length; j++) {
-        let content = JSON.parse(fs.readFileSync(this.frontendPackageJsonPaths[j], 'utf8'));
+        let content;
+
+        try {
+          content = JSON.parse(fs.readFileSync(this.frontendPackageJsonPaths[j], 'utf8'));
+        } catch(e) {
+          console.log(`Unable to read/parse file:  <error>${this.frontendPackageJsonPaths[j]}</error>`);
+          process.exit(1);
+        }
 
         if (content.hasOwnProperty('jspm') && typeof content.jspm.dependencies !== 'undefined' &&
           Object.getOwnPropertyNames(content.jspm.dependencies).length !== 0) {
