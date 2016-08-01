@@ -7,7 +7,7 @@ engines:
     config:
       languages:
         javascript:
-          mass_threshold: 140
+          mass_threshold: 300
     exclude_paths:
       - "**/tests"
   eslint:
@@ -34,6 +34,7 @@ exclude_paths:
 - "**.min.js"
 - "**.min.css"
 - "DeepFramework.js"
+- "deep-framework.js"
 - "**/frontend/_build/"
 - "**/dist"
 - "**/node_modules"
