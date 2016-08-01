@@ -16,6 +16,7 @@ tmp/**/*
 
 # DeepFramework
 DeepFramework.js
+deep-framework.js
 
 ## Directory-based project format:
 .idea/

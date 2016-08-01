@@ -34,6 +34,7 @@ exclude_paths:
 - "**.min.js"
 - "**.min.css"
 - "DeepFramework.js"
+- "deep-framework.js"
 - "**/frontend/_build/"
 - "**/dist"
 - "**/node_modules"
