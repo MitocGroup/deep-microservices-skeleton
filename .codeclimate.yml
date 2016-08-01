@@ -7,7 +7,7 @@ engines:
     config:
       languages:
         javascript:
-          mass_threshold: 140
+          mass_threshold: 300
     exclude_paths:
       - "**/tests"
   eslint:
