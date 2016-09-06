@@ -9,7 +9,7 @@ import global from './Helper/Global';
 import {ValidatorFactory} from './Helper/ValidatorFactory';
 import {Readme} from './Templates/Readme';
 import {Output} from './Helper/Output';
-import {TravisConfig} from './Templates/TravisConfig';
+import {YamlConfig} from './Templates/YamlConfig';
 import {BackendUnitTest} from './Templates/BackendUnitTest';
 import {FrontendUnitTest} from './Templates/FrontendUnitTest';
 
@@ -42,11 +42,22 @@ function updateReadme(microserviceName, callback) {
  * @param {Function} callback
  */
 function updateTravis(callback) {
-  let travisTemplate = new TravisConfig(
-    path.join(msPath, 'docs/.travis.yml')
+  let travisTemplate = new YamlConfig(
+    path.join(msPath, 'docs/.travis.yml'), '../../../.travis.yml'
   );
 
   travisTemplate.writeIntoFile(path.join(msPath, '.travis.yml'), callback);
+}
+
+/**
+ * @param {Function} callback
+ */
+function updateCodeclimate(callback) {
+  let codeclimateTemplate = new YamlConfig(
+    path.join(msPath, 'docs/.codeclimate.yml'), '../../../.codeclimate.yml'
+  );
+
+  codeclimateTemplate.writeIntoFile(path.join(msPath, '.codeclimate.yml'), callback);
 }
 
 /**
@@ -99,7 +110,7 @@ function updateMicroservice(microserviceName, resources) {
       break;
 
     case '.codeclimate.yml':
-      updateResource(resource, callback);
+      updateCodeclimate(resource, callback);
       break;
 
     case '.csslintrc':
@@ -107,6 +118,10 @@ function updateMicroservice(microserviceName, resources) {
       break;
 
     case '.eslintrc', '.eslintignore':
+      updateResource(resource, callback);
+      break;
+
+    case 'tslint.json':
       updateResource(resource, callback);
       break;
 
@@ -153,7 +168,7 @@ if (!FS.existsSync(msPath) || !FS.statSync(msPath).isDirectory()) {
 
 let resources = [
   'README.md', '.travis.yml', '.hound.yml', 'bin/test',
-  '.codeclimate.yml', '.csslintrc', '.eslintignore', '.eslintrc',
+  '.codeclimate.yml', '.csslintrc', '.eslintignore', '.eslintrc', 'tslint.json',
   'pre-commit hook', 'backend unit test', 'frontend unit test',
 ];
 let choiceList = resources.reduce((walker, resource) => {
