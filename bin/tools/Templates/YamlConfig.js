@@ -21,7 +21,6 @@ export class YamlConfig extends AbstractConfigTemplate {
     let customPresetsRaw = this._tryToReadFromFile(customPresetsFile);
     this._customPresets = customPresetsRaw ? yml.safeLoad(customPresetsRaw) : null;
     this._templatePath = path.join(__dirname, templatePath);
-    //this._templatePath = path.join(__dirname, '../../../.travis.yml');
   }
 
   /**
