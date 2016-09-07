@@ -9,4 +9,5 @@
 (if [ ! -d "node_modules/fs-extra" ]; then npm install fs-extra@0.x.x; fi) &&\
 (if [ ! -d "node_modules/node-dir" ]; then npm install node-dir; fi) &&\
 (if [ ! -d "node_modules/deep-extend" ]; then npm install deep-extend; fi) &&\
+(if [ ! -d "node_modules/properties-reader" ]; then npm install properties-reader; fi) &&\
 (if [ ! -d "node_modules/twig" ]; then npm install twig; fi)

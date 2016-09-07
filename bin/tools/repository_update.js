@@ -10,6 +10,8 @@ import {ValidatorFactory} from './Helper/ValidatorFactory';
 import {Readme} from './Templates/Readme';
 import {Output} from './Helper/Output';
 import {YamlConfig} from './Templates/YamlConfig';
+import {IngnoreConfig} from './Templates/IngnoreConfig';
+import {JsonConfig} from './Templates/JsonConfig';
 import {BackendUnitTest} from './Templates/BackendUnitTest';
 import {FrontendUnitTest} from './Templates/FrontendUnitTest';
 
@@ -39,25 +41,39 @@ function updateReadme(microserviceName, callback) {
 }
 
 /**
+ * @param {String} configName
  * @param {Function} callback
  */
-function updateTravis(callback) {
+function updateYaml(configName, callback) {
   let travisTemplate = new YamlConfig(
-    path.join(msPath, 'docs/.travis.yml'), '../../../.travis.yml'
+    path.join(msPath, `docs/${configName}`), `../../../${configName}`
   );
 
-  travisTemplate.writeIntoFile(path.join(msPath, '.travis.yml'), callback);
+  travisTemplate.writeIntoFile(path.join(msPath, configName), callback);
 }
 
 /**
+ * @param {String} configName
  * @param {Function} callback
  */
-function updateCodeclimate(callback) {
-  let codeclimateTemplate = new YamlConfig(
-    path.join(msPath, 'docs/.codeclimate.yml'), '../../../.codeclimate.yml'
+function updateConfig(configName, callback) {
+  let ignoreConfig = new IngnoreConfig(
+    path.join(msPath, `docs/${configName}`), `../../../${configName}`
   );
 
-  codeclimateTemplate.writeIntoFile(path.join(msPath, '.codeclimate.yml'), callback);
+  ignoreConfig.writeIntoFile(path.join(msPath, configName), callback);
+}
+
+/**
+ * @param {String} configName
+ * @param {Function} callback
+ */
+function updateJson(configName, callback) {
+  let jsonConfig = new JsonConfig(
+    path.join(msPath, `docs/${configName}`), `../../../${configName}`
+  );
+
+  jsonConfig.writeIntoFile(path.join(msPath, configName), callback);
 }
 
 /**
@@ -105,24 +121,29 @@ function updateMicroservice(microserviceName, resources) {
     case 'README.md':
       updateReadme(microserviceName, callback);
       break;
+
     case '.travis.yml':
-      updateTravis(callback);
+      updateYaml(resource, callback);
       break;
 
     case '.codeclimate.yml':
-      updateCodeclimate(resource, callback);
+      updateYaml(resource, callback);
       break;
 
     case '.csslintrc':
-      updateResource(resource, callback);
+      updateConfig(resource, callback);
       break;
 
-    case '.eslintrc', '.eslintignore':
-      updateResource(resource, callback);
+    case '.eslintrc':
+      updateYaml(resource, callback);
+      break;
+
+    case '.eslintignore':
+      updateConfig(resource, callback);
       break;
 
     case 'tslint.json':
-      updateResource(resource, callback);
+      updateJson(resource, callback);
       break;
 
     case 'pre-commit hook':
