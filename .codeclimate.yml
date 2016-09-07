@@ -39,3 +39,5 @@ exclude_paths:
   - '**/packages'
   - '**/font-awesome.css'
   - '**/materialdesignicons.css'
+  - '**/DeepFramework.js'
+  - '**/deep-framework.js'
