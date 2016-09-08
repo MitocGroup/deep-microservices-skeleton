@@ -41,3 +41,4 @@ exclude_paths:
   - '**/materialdesignicons.css'
   - '**/DeepFramework.js'
   - '**/deep-framework.js'
+  - '**/src/deep-root-*'
