@@ -77,6 +77,6 @@ export class AbstractTemplate {
   writeIntoFile(file, callback) {
     let readmeContent = this.render();
 
-    FS.writeFile(file, readmeContent, callback);
+    FS.writeFile(file, readmeContent, 'utf8', callback);
   }
 }

@@ -9,24 +9,26 @@ import yml from 'js-yaml';
 import {AbstractConfigTemplate} from './AbstractConfigTemplate';
 
 /**
- * Travis Config
+ * Yaml Config
  */
-export class TravisConfig extends AbstractConfigTemplate {
+export class YamlConfig extends AbstractConfigTemplate {
   /**
    * @param {String} customPresetsFile
+   * @param {String} templatePath
    */
-  constructor(customPresetsFile) {
+  constructor(customPresetsFile, templatePath) {
     super();
 
     let customPresetsRaw = this._tryToReadFromFile(customPresetsFile);
     this._customPresets = customPresetsRaw ? yml.safeLoad(customPresetsRaw) : null;
+    this._templatePath = path.join(__dirname, templatePath);
   }
 
   /**
    * @returns {string}
    */
   get templatePath() {
-    return path.join(__dirname, '../../../.travis.yml');
+    return this._templatePath;
   }
 
   /**
@@ -38,7 +40,6 @@ export class TravisConfig extends AbstractConfigTemplate {
     if (this._customPresets) {
       let jsonConfig = yml.safeLoad(processedTemplate);
       jsonConfig = this._extendConfig(jsonConfig, this._customPresets);
-
       processedTemplate = yml.safeDump(jsonConfig);
     }
 

@@ -5,6 +5,7 @@
 'use strict';
 
 import {AbstractTemplate} from './AbstractTemplate';
+import deepExtend from 'deep-extend';
 
 /**
  * Abstract Config Template
@@ -17,23 +18,8 @@ export class AbstractConfigTemplate extends AbstractTemplate {
    * @protected
    */
   _extendConfig(config, extendedConfig) {
-    for (let key in extendedConfig) {
-      if (!extendedConfig.hasOwnProperty(key)) {
-        continue;
-      }
 
-      if (!config.hasOwnProperty(key)) {
-        config[key] = extendedConfig[key];
-      } else if (typeof config[key] === typeof extendedConfig[key]) {
-        if (Array.isArray(extendedConfig[key])) {
-          config[key].concat(extendedConfig[key]);
-        } else if (typeof extendedConfig[key] === 'object') {
-          config[key] = this._extendConfig(config[key], extendedConfig[key]);
-        } else {
-          config[key] = extendedConfig[key];
-        }
-      }
-    }
+    deepExtend(config, extendedConfig);
 
     return config;
   }

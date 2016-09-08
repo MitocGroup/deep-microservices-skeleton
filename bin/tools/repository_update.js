@@ -9,7 +9,9 @@ import global from './Helper/Global';
 import {ValidatorFactory} from './Helper/ValidatorFactory';
 import {Readme} from './Templates/Readme';
 import {Output} from './Helper/Output';
-import {TravisConfig} from './Templates/TravisConfig';
+import {YamlConfig} from './Templates/YamlConfig';
+import {IngnoreConfig} from './Templates/IngnoreConfig';
+import {JsonConfig} from './Templates/JsonConfig';
 import {BackendUnitTest} from './Templates/BackendUnitTest';
 import {FrontendUnitTest} from './Templates/FrontendUnitTest';
 
@@ -39,14 +41,39 @@ function updateReadme(microserviceName, callback) {
 }
 
 /**
+ * @param {String} configName
  * @param {Function} callback
  */
-function updateTravis(callback) {
-  let travisTemplate = new TravisConfig(
-    path.join(msPath, 'docs/.travis.yml')
+function updateYaml(configName, callback) {
+  let travisTemplate = new YamlConfig(
+    path.join(msPath, `docs/${configName}`), `../../../${configName}`
   );
 
-  travisTemplate.writeIntoFile(path.join(msPath, '.travis.yml'), callback);
+  travisTemplate.writeIntoFile(path.join(msPath, configName), callback);
+}
+
+/**
+ * @param {String} configName
+ * @param {Function} callback
+ */
+function updateConfig(configName, callback) {
+  let ignoreConfig = new IngnoreConfig(
+    path.join(msPath, `docs/${configName}`), `../../../${configName}`
+  );
+
+  ignoreConfig.writeIntoFile(path.join(msPath, configName), callback);
+}
+
+/**
+ * @param {String} configName
+ * @param {Function} callback
+ */
+function updateJson(configName, callback) {
+  let jsonConfig = new JsonConfig(
+    path.join(msPath, `docs/${configName}`), `../../../${configName}`
+  );
+
+  jsonConfig.writeIntoFile(path.join(msPath, configName), callback);
 }
 
 /**
@@ -94,20 +121,29 @@ function updateMicroservice(microserviceName, resources) {
     case 'README.md':
       updateReadme(microserviceName, callback);
       break;
+
     case '.travis.yml':
-      updateTravis(callback);
+      updateYaml(resource, callback);
       break;
 
     case '.codeclimate.yml':
-      updateResource(resource, callback);
+      updateYaml(resource, callback);
       break;
 
     case '.csslintrc':
-      updateResource(resource, callback);
+      updateConfig(resource, callback);
       break;
 
-    case '.eslintrc', '.eslintignore':
-      updateResource(resource, callback);
+    case '.eslintrc':
+      updateYaml(resource, callback);
+      break;
+
+    case '.eslintignore':
+      updateConfig(resource, callback);
+      break;
+
+    case 'tslint.json':
+      updateJson(resource, callback);
       break;
 
     case 'pre-commit hook':
@@ -153,7 +189,7 @@ if (!FS.existsSync(msPath) || !FS.statSync(msPath).isDirectory()) {
 
 let resources = [
   'README.md', '.travis.yml', '.hound.yml', 'bin/test',
-  '.codeclimate.yml', '.csslintrc', '.eslintignore', '.eslintrc',
+  '.codeclimate.yml', '.csslintrc', '.eslintignore', '.eslintrc', 'tslint.json',
   'pre-commit hook', 'backend unit test', 'frontend unit test',
 ];
 let choiceList = resources.reduce((walker, resource) => {
