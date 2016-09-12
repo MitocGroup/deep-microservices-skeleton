@@ -1,0 +1,10 @@
+{
+  "reposArray": [
+    "https://github.com/MitocGroup/deep-microservices-core-registry",
+    "https://github.com/MitocGroup/deep-microservices-core-search"
+  ],
+  "folderPath": "./repos",
+  "sourceBranchName": "dev",
+  "destBranchName": "test_publisher",
+  "prMessage": "Test automatic repos update"
+}
