@@ -11,7 +11,7 @@ import path from 'path';
 import fs from 'fs';
 import ChildProcess from 'child_process';
 
-export default class PullRequestManager {
+export default class UpdatesManager {
 
   /**
    * @returns {String}
@@ -65,11 +65,10 @@ export default class PullRequestManager {
   constructor() {
     this._gitHubPrSubmiter = new GitHubPrSubmiter();
 
-    //todo - 1. add absent config msg
     //todo - 2. no env var msg
-    if (PullRequestManager.accessSync(PullRequestManager.CONFIG_PATH)) {
+    if (UpdatesManager.accessSync(UpdatesManager.CONFIG_PATH)) {
       let _content = fsExtra.readJsonSync(
-        PullRequestManager.CONFIG_PATH, {throws: false}
+        UpdatesManager.CONFIG_PATH, {throws: false}
       );
       this._folderPath = path.join(__dirname, '../../../../', _content.folderPath);
       this._repos = _content.reposArray;
@@ -78,6 +77,8 @@ export default class PullRequestManager {
       this._commitMessage = _content.commitMessage;
       this._pullRequestMessage = (typeof _content.pullRequestMessage === 'undefined' ||
       _content.pullRequestMessage === '') ? _content.commitMessage : _content.pullRequestMessage;
+    } else {
+      console.log('No config file: ', UpdatesManager.CONFIG_PATH)
     }
   }
 
@@ -135,7 +136,7 @@ export default class PullRequestManager {
             return 1;
           },
           credentials: function () {
-            return NodeGit.Cred.userpassPlaintextNew(PullRequestManager.Auth0Token, 'x-oauth-basic');
+            return NodeGit.Cred.userpassPlaintextNew(UpdatesManager.Auth0Token, 'x-oauth-basic');
           }
         }
       },
@@ -166,7 +167,7 @@ export default class PullRequestManager {
 
     for (let repo of this.repos) {
       promises.push(
-        NodeGit.Clone(repo, path.join(this.folderPath, PullRequestManager.getRepoName(repo)), this.cloneOptions)
+        NodeGit.Clone(repo, path.join(this.folderPath, UpdatesManager.getRepoName(repo)), this.cloneOptions)
       );
     }
 
@@ -189,7 +190,9 @@ export default class PullRequestManager {
 
     for (let repo of this.repos) {
       promises.push(
-        this.createDestBranch(path.join(this.folderPath, PullRequestManager.getRepoName(repo)), this.destBranchName, 'Msg here')
+        this.createDestBranch(
+          path.join(this.folderPath, UpdatesManager.getRepoName(repo)), this.destBranchName, 'Msg here'
+        )
       );
     }
 
@@ -311,7 +314,7 @@ export default class PullRequestManager {
             {
               callbacks: {
                 credentials: function () {
-                  return NodeGit.Cred.userpassPlaintextNew(PullRequestManager.Auth0Token, 'x-oauth-basic');
+                  return NodeGit.Cred.userpassPlaintextNew(UpdatesManager.Auth0Token, 'x-oauth-basic');
                 }
               }
             }
@@ -335,7 +338,7 @@ export default class PullRequestManager {
 
     for (let repo of this.repos) {
       promises.push(
-        this.changeToDestBranch(path.join(this.folderPath, PullRequestManager.getRepoName(repo)), this.destBranchName)
+        this.changeToDestBranch(path.join(this.folderPath, UpdatesManager.getRepoName(repo)), this.destBranchName)
       );
     }
 
@@ -355,7 +358,7 @@ export default class PullRequestManager {
 
     for (let repo of this.repos) {
       promises.push(
-        this.addChangesAndCommit(path.join(this.folderPath, PullRequestManager.getRepoName(repo)), this.commitMessage, this.destBranchName)
+        this.addChangesAndCommit(path.join(this.folderPath, UpdatesManager.getRepoName(repo)), this.commitMessage, this.destBranchName)
       );
     }
 
@@ -374,9 +377,9 @@ export default class PullRequestManager {
     var promises = [];
 
     for (let repo of this.repos) {
-      let repoPath = path.join(this.folderPath, PullRequestManager.getRepoName(repo));
+      let repoPath = path.join(this.folderPath, UpdatesManager.getRepoName(repo));
       let cwd = path.join(__dirname, '../../../../');
-      let fullCmd = `${PullRequestManager.REPOSITORY_UPDATE} ${repoPath}`;
+      let fullCmd = `${UpdatesManager.REPOSITORY_UPDATE} ${repoPath}`;
       promises.push(
         this._exec(fullCmd, cwd)
       );
@@ -399,8 +402,8 @@ export default class PullRequestManager {
     for (let repo of this.repos) {
       promises.push(
         this.gitHubPrSubmiter.createPr(
-          PullRequestManager.getRepoUser(repo),
-          PullRequestManager.getRepoName(repo),
+          UpdatesManager.getRepoUser(repo),
+          UpdatesManager.getRepoName(repo),
           this.pullRequestMessage,
           this.destBranchName,
           this.sourceBranchName
@@ -446,19 +449,19 @@ export default class PullRequestManager {
 
 }
 
-let pullRequestManager = new PullRequestManager();
-pullRequestManager.ensureReposFolderSync();
-pullRequestManager.copyRepos().then(
+let UpdatesManager = new UpdatesManager();
+UpdatesManager.ensureReposFolderSync();
+UpdatesManager.copyRepos().then(
   (result) => {
-    pullRequestManager.createDestBranches().then(
+    UpdatesManager.createDestBranches().then(
       (result) => {
-        pullRequestManager.changeToDestBranches().then(
+        UpdatesManager.changeToDestBranches().then(
           (result) => {
-            pullRequestManager.updateBranches().then(
+            UpdatesManager.updateBranches().then(
               (result) => {
-                pullRequestManager.commitChanges().then(
+                UpdatesManager.commitChanges().then(
                   (result) => {
-                    pullRequestManager.createPrs().then(
+                    UpdatesManager.createPrs().then(
                       (result) => {
                         console.log('TOTAL DONE: ', result);
                       }
