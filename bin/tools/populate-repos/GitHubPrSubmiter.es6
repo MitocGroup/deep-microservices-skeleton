@@ -8,22 +8,6 @@ import GitHubApi from 'github';
 
 export default class GitHubMsgPublisher {
 
-  /**
-   * @returns {string}
-   * @constructor
-   */
-  static get gitUser() {
-    return process.env['TRAVIS_REPO_SLUG'].replace(/(.*)\/.*/i, '$1');
-  }
-
-  /**
-   * @returns {string}
-   * @constructor
-   */
-  static get gitRepoName() {
-    return process.env['TRAVIS_REPO_SLUG'].replace(/.*\/(.*)/i, '$1');
-  }
-
   constructor() {
     this.github = new GitHubApi({
       debug: false,
@@ -43,82 +27,38 @@ export default class GitHubMsgPublisher {
     });
   }
 
+
   /**
-   * Add comments for PR or fails if coverage
-   * @param {Number} s3SumPercent - s3 summary coverage percent
-   * @param {Number} localSumPercent - local summary coverage percent
-   * @param {Function} callback
+   * @param {String} gitUser
+   * @param {String} gitRepoName
+   * @param {String} prTitle
+   * @param {String} sourceBranch
+   * @param {String} destBranch
+   * @returns {Promise}
    */
-  addComment(s3SumPercent, localSumPercent, callback) {
-    let commentMsg;
+  createPr(gitUser, gitRepoName, prTitle, sourceBranch, destBranch) {
 
-    //failed if coverage decreased more that 1 %
-    let isFailed = ((localSumPercent + 1) < s3SumPercent);
-    let failMsg = 'Failed due to decreasing coverage';
+    var promise = new Promise((resolve, reject) => {
 
-    //no need to add comments for !PR
-    if (!GitHubMsgPublisher.isPullRequest) {
-      callback(null, null);
-      return;
-    }
+      this.github.pullRequests.create({
+          user: gitUser,
+          repo: gitRepoName,
+          title: prTitle,
+          head: sourceBranch,
+          base: destBranch,
+        },
+        (err, result) => {
 
-    if (isFailed) {
-      commentMsg = `:x: coverage decreased from ${s3SumPercent}% to ${localSumPercent}%`;
-    } else if (localSumPercent === s3SumPercent) {
-      commentMsg = `:white_check_mark: coverage remained the same at ${localSumPercent}%`;
-    } else if (-1 < (localSumPercent - s3SumPercent) && (localSumPercent - s3SumPercent) < 0) {
-      commentMsg = `:warning: coverage decreased less than 1% from ${s3SumPercent}% to ${localSumPercent}%`;
-    } else {
-      commentMsg = `:white_check_mark: coverage increased from ${s3SumPercent}% to ${localSumPercent}%`;
-    }
-
-    this.github.issues.getComments({
-        user: GitHubMsgPublisher.gitUser,
-        repo: GitHubMsgPublisher.gitRepoName,
-        number: GitHubMsgPublisher.gitPRNumber,
-      }, (err, issues) => {
-        let isCommentAdded = false;
-
-        if (err) {
-          console.log(err);
-          callback(err, null);
-          return;
-        }
-
-        for (let issue of issues) {
-          if (issue.hasOwnProperty('body') && issue.body === commentMsg) {
-            isCommentAdded = true;
-            console.log('Comment has already been added: ', commentMsg);
-
-            if (isFailed) {
-              console.log(failMsg);
-              process.exit(1)
-            }
+          if (err) {
+            console.log(err);
+            reject(err);
           }
+
+          resolve(result.html_url);
         }
+      );
+    });
 
-        if (!isCommentAdded) {
-          this.github.issues.createComment({
-            user: GitHubMsgPublisher.gitUser,
-            repo: GitHubMsgPublisher.gitRepoName,
-            number: GitHubMsgPublisher.gitPRNumber,
-            body: commentMsg,
-          }, (err, res) => {
-            if (err) {
-              console.log(err);
-              callback(err, null);
-              return;
-            }
-
-            callback(null, res);
-
-            if (isFailed) {
-              console.log(failMsg);
-              process.exit(1)
-            }
-          });
-        }
-      }
-    );
+    return promise;
   }
 }

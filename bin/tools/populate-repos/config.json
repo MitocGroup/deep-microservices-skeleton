@@ -5,6 +5,7 @@
   ],
   "folderPath": "./repos",
   "sourceBranchName": "dev",
-  "destBranchName": "test_publisher",
-  "prMessage": "Test automatic repos update"
+  "destBranchName": "test_pr_update",
+  "commitMessage": "Test automatic repos update commit msg",
+  "pullRequestMessage": "Test automatic repos update pr"
 }
