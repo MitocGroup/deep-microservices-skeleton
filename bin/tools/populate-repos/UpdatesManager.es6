@@ -27,7 +27,7 @@ export default class UpdatesManager {
    */
   static get isEnvVarsAdded() {
     return (typeof process.env['GITHUB_OAUTH_TOKEN'] === 'string' && process.env['GITHUB_OAUTH_TOKEN'].length > 1) &&
-    (typeof process.env['NO_INTERACTION'] === 'string' && process.env['NO_INTERACTION'] === '1');
+      (typeof process.env['NO_INTERACTION'] === 'string' && process.env['NO_INTERACTION'] === '1');
   }
 
   /**
@@ -44,13 +44,17 @@ export default class UpdatesManager {
   }
 
   /**
-   * @returns {string}
+   * @returns {String}
    * @constructor
    */
   static get CONFIG_PATH() {
     return path.join(__dirname, 'config.json')
   }
 
+  /**
+   * @returns {String}
+   * @constructor
+   */
   static get REPOSITORY_UPDATE() {
     return 'deep-microservices-skeleton/bin/tools/repository_update.sh';
   }
@@ -96,7 +100,7 @@ export default class UpdatesManager {
   }
 
   /**
-   * @returns {String[]}
+   * @returns {String}
    */
   get destBranchName() {
     return this._destBranchName;
@@ -175,7 +179,7 @@ export default class UpdatesManager {
   /**
    * @param {String} repoUrl
    * @param {String} localPth
-   * @param cloneOptions
+   * @param {Object} cloneOptions
    */
   cloneRepo(repoUrl, localPth, cloneOptions) {
     var promise = new Promise((resolve, reject) => {
@@ -371,7 +375,6 @@ export default class UpdatesManager {
       });
     });
 
-
     return promise;
   }
 
@@ -431,7 +434,6 @@ export default class UpdatesManager {
     return promise;
   }
 }
-
 Output.overwriteConsole().overwriteStdout();
 
 let updatesManager = new UpdatesManager();

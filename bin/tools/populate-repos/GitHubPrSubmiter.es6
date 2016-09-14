@@ -28,7 +28,6 @@ export default class GitHubMsgPublisher {
     });
   }
 
-
   /**
    * @param {String} gitUser
    * @param {String} gitRepoName
