@@ -173,6 +173,9 @@ let rootDirectory = path.join(__dirname, '../..');
 let argv = minimist(process.argv.slice(2));
 let msPath = argv.path || argv._[0];
 
+//set env variable
+global.NO_INTERACTION = process.env['NO_INTERACTION'];
+
 if (typeof argv.interaction !== 'undefined') { // --no-interaction flag sets argv.interaction to false
   global.NO_INTERACTION = !argv.interaction;
 }
