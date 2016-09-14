@@ -5,6 +5,7 @@
 'use strict';
 
 import GitHubApi from 'github';
+import {Output} from './../Helper/Output';
 
 export default class GitHubMsgPublisher {
 
@@ -36,7 +37,7 @@ export default class GitHubMsgPublisher {
    * @param {String} destBranch
    * @returns {Promise}
    */
-  createPr(gitUser, gitRepoName, prTitle, sourceBranch, destBranch) {
+  createPullRequest(gitUser, gitRepoName, prTitle, sourceBranch, destBranch) {
 
     var promise = new Promise((resolve, reject) => {
 
@@ -54,6 +55,7 @@ export default class GitHubMsgPublisher {
             reject(err);
           }
 
+          console.log(`<info>${result.html_url}</info> has been opened`);
           resolve(result.html_url);
         }
       );

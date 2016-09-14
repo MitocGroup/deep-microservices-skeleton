@@ -10,6 +10,7 @@ import fsExtra from 'fs-extra';
 import path from 'path';
 import fs from 'fs';
 import ChildProcess from 'child_process';
+import {Output} from './../Helper/Output';
 
 export default class UpdatesManager {
 
@@ -19,6 +20,14 @@ export default class UpdatesManager {
    */
   static get Auth0Token() {
     return process.env['GITHUB_OAUTH_TOKEN'];
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  static get isEnvVarsAdded() {
+    return (typeof process.env['GITHUB_OAUTH_TOKEN'] === 'string' && process.env['GITHUB_OAUTH_TOKEN'].length > 1) &&
+    (typeof process.env['NO_INTERACTION'] === 'string' && process.env['NO_INTERACTION'] === '1');
   }
 
   /**
@@ -50,23 +59,25 @@ export default class UpdatesManager {
    * @param {String} repo
    * @returns {String}
    */
-  static getRepoName(repo) {
-    return repo.replace(/.*\/(.*)/i, '$1');
+  static getRepoName(repoUrl) {
+    return repoUrl.replace(/.*\/(.*)/i, '$1');
   }
 
   /**
    * @param {String} repo
    * @returns {String}
    */
-  static getRepoUser(repo) {
-    return repo.replace(/(git@|ssh|http(s)?:(\/\/))github.com(\/|:)((.*))\/.*(\.git)?(\/)?/i, '$5');
+  static getRepoUser(repoUrl) {
+    return repoUrl.replace(/(git@|ssh|http(s)?:(\/\/))github.com(\/|:)((.*))\/.*(\.git)?(\/)?/i, '$5');
   }
 
   constructor() {
-    this._gitHubPrSubmiter = new GitHubPrSubmiter();
-
-    //todo - 2. no env var msg
-    if (UpdatesManager.accessSync(UpdatesManager.CONFIG_PATH)) {
+    if (!UpdatesManager.isEnvVarsAdded) {
+      console.error(`<error>No all environment variables configured:</error>`);
+      console.log(`Run from terminal: <warn>export NO_INTERACTION=1 && export GITHUB_OAUTH_TOKEN=YOUR_TOKEN</warn>`);
+      throw Error('No all env var configured');
+    }
+    else if (UpdatesManager.accessSync(UpdatesManager.CONFIG_PATH)) {
       let _content = fsExtra.readJsonSync(
         UpdatesManager.CONFIG_PATH, {throws: false}
       );
@@ -78,8 +89,10 @@ export default class UpdatesManager {
       this._pullRequestMessage = (typeof _content.pullRequestMessage === 'undefined' ||
       _content.pullRequestMessage === '') ? _content.commitMessage : _content.pullRequestMessage;
     } else {
-      console.log('No config file: ', UpdatesManager.CONFIG_PATH)
+      console.error(`<error>No config file:</error> ${UpdatesManager.CONFIG_PATH}`);
+      throw Error('No config file');
     }
+    this._gitHubPrSubmiter = new GitHubPrSubmiter();
   }
 
   /**
@@ -155,27 +168,20 @@ export default class UpdatesManager {
   /**
    * Prepares folder for repos
    */
-  ensureReposFolderSync() {
+  _ensureReposFolderSync() {
     fsExtra.emptyDirSync(this.folderPath);
   }
 
   /**
-   * @returns {Promise}
+   * @param {String} repoUrl
+   * @param {String} localPth
+   * @param cloneOptions
    */
-  copyRepos() {
-    var promises = [];
-
-    for (let repo of this.repos) {
-      promises.push(
-        NodeGit.Clone(repo, path.join(this.folderPath, UpdatesManager.getRepoName(repo)), this.cloneOptions)
-      );
-    }
-
+  cloneRepo(repoUrl, localPth, cloneOptions) {
     var promise = new Promise((resolve, reject) => {
-      Promise.all(promises).then(
-        () => resolve('cloned repositories')
-      ).catch(
-        (err) => reject(err)
+      NodeGit.Clone(repoUrl, localPth, cloneOptions).then(
+        (repository) => resolve(repository),
+        (error) => reject(error)
       );
     });
 
@@ -183,54 +189,25 @@ export default class UpdatesManager {
   }
 
   /**
-   * @returns {Promise}
-   */
-  createDestBranches() {
-    var promises = [];
-
-    for (let repo of this.repos) {
-      promises.push(
-        this.createDestBranch(
-          path.join(this.folderPath, UpdatesManager.getRepoName(repo)), this.destBranchName, 'Msg here'
-        )
-      );
-    }
-
-    var promise = new Promise((resolve, reject) => {
-      Promise.all(promises).then(
-        () => resolve('created dest repositories')
-      ).catch(
-        (err) => reject(err)
-      );
-    });
-
-    return promise;
-  }
-
-  /**
-   * @param {String} repoPath
+   * @param {Object} repo
    * @param {String} branchName
    * @param {String} logMsg
    * @returns {Promise}
    */
-  createDestBranch(repoPath, branchName, logMsg) {
+  createDestinationBranch(repo, branchName, logMsg) {
     var promise = new Promise((resolve, reject) => {
-      NodeGit.Repository.open(path.resolve(repoPath, './.git'))
-        .then(function (repo) {
 
-          // Create a new branch on head
-          return repo.getHeadCommit()
-            .then(function (commit) {
-              return repo.createBranch(
-                branchName,
-                commit,
-                0,
-                repo.defaultSignature(),
-                logMsg);
-            });
-
+      // Create a new branch on head
+      repo.getHeadCommit()
+        .then(function (commit) {
+          return repo.createBranch(
+            branchName,
+            commit,
+            0,
+            repo.defaultSignature(),
+            logMsg);
         }).done(function () {
-          resolve(repoPath);
+          resolve(branchName);
         });
     });
 
@@ -264,28 +241,50 @@ export default class UpdatesManager {
   }
 
   /**
+   * @param {Object} repo
+   * @param {String} branchName
+   * @returns {Promise}
+   */
+  changeDestinationBranch(repo, branchName) {
+    var promise = new Promise((resolve, reject) => {
+
+      // Create a new branch on head
+      repo.getBranch(branchName)
+        .then(function (reference) {
+
+          //checkout branch
+          return repo.checkoutRef(reference);
+        }).done(function () {
+          resolve(branchName);
+        });
+    });
+
+    return promise;
+  }
+
+  /**
    * @param {String} repoPath
    * @param {String} commitMsg
    * @param {String} destBranchName
    * @returns {Promise}
    */
-  addChangesAndCommit(repoPath, commitMsg, destBranchName) {
+  pushChanges(localRepoPath, commitMsg, destBranchName) {
     var repo, index, paths = [], remote;
 
     var promise = new Promise((resolve, reject) => {
-      NodeGit.Repository.open(path.join(repoPath, './.git'))
+      NodeGit.Repository.open(path.join(localRepoPath, './.git'))
         .then((repoResult) => {
           repo = repoResult;
           return repoResult.index();
         })
-        .then(function (indexResult) {
+        .then((indexResult) => {
           index = indexResult;
           index.read(1);
           paths = [];
 
-          return NodeGit.Status.foreach(repo, function (filePath) {
+          return NodeGit.Status.foreach(repo, (filePath) => {
             paths.push(filePath);
-          }).then(function () {
+          }).then(() => {
             return Promise.resolve(paths);
           });
         })
@@ -332,96 +331,25 @@ export default class UpdatesManager {
     return promise;
   }
 
-
-  changeToDestBranches() {
-    var promises = [];
-
-    for (let repo of this.repos) {
-      promises.push(
-        this.changeToDestBranch(path.join(this.folderPath, UpdatesManager.getRepoName(repo)), this.destBranchName)
-      );
-    }
+  /**
+   * @param {String} localRepoPath
+   * @returns {Promise}
+   */
+  updateBranch(localRepoPath) {
 
     var promise = new Promise((resolve, reject) => {
-      Promise.all(promises).then(
-        () => resolve('switched to dest repositories')
-      ).catch(
-        (err) => reject(err)
-      );
-    });
 
-    return promise;
-  }
-
-  commitChanges() {
-    var promises = [];
-
-    for (let repo of this.repos) {
-      promises.push(
-        this.addChangesAndCommit(path.join(this.folderPath, UpdatesManager.getRepoName(repo)), this.commitMessage, this.destBranchName)
-      );
-    }
-
-    var promise = new Promise((resolve, reject) => {
-      Promise.all(promises).then(
-        () => resolve('added changes')
-      ).catch(
-        (err) => reject(err)
-      );
-    });
-
-    return promise;
-  }
-
-  updateBranches() {
-    var promises = [];
-
-    for (let repo of this.repos) {
-      let repoPath = path.join(this.folderPath, UpdatesManager.getRepoName(repo));
       let cwd = path.join(__dirname, '../../../../');
-      let fullCmd = `${UpdatesManager.REPOSITORY_UPDATE} ${repoPath}`;
-      promises.push(
-        this._exec(fullCmd, cwd)
-      );
-    }
+      let fullCmd = `${UpdatesManager.REPOSITORY_UPDATE} ${localRepoPath}`;
 
-    var promise = new Promise((resolve, reject) => {
-      Promise.all(promises).then(
-        () => resolve('updated repositories')
-      ).catch(
-        (err) => reject(err)
-      );
+      this._exec(fullCmd, cwd).then(
+          cmdResult => resolve(cmdResult),
+          cmdError => reject(cmdError)
+      )
     });
 
     return promise;
   }
-
-  createPrs() {
-    var promises = [];
-
-    for (let repo of this.repos) {
-      promises.push(
-        this.gitHubPrSubmiter.createPr(
-          UpdatesManager.getRepoUser(repo),
-          UpdatesManager.getRepoName(repo),
-          this.pullRequestMessage,
-          this.destBranchName,
-          this.sourceBranchName
-        )
-      );
-    }
-
-    var promise = new Promise((resolve, reject) => {
-      Promise.all(promises).then(
-        (prs) =>  resolve(prs)
-      ).catch(
-        (err) => reject(err)
-      );
-    });
-
-    return promise;
-  }
-
 
   /**
    * @param {String} fullCmd
@@ -447,39 +375,71 @@ export default class UpdatesManager {
     return promise;
   }
 
+  /**
+   * @returns {Promise}
+   */
+  updateRepos() {
+
+    this._ensureReposFolderSync();
+
+    var promises = [];
+    var repo;
+    var self = this;
+
+    for (let repoUrl of this.repos) {
+
+      console.log('Updating repoUrl: ', repoUrl);
+
+      let localRepoPath = path.join(this.folderPath, UpdatesManager.getRepoName(repoUrl));
+      promises.push(
+        self.cloneRepo(repoUrl, localRepoPath, this.cloneOptions)
+          .then((repoResult) => {
+            repo = repoResult;
+          })
+          .then(() => {
+            return self.createDestinationBranch(repo, self.destBranchName);
+          })
+          .then(() => {
+            return self.changeDestinationBranch(repo, self.destBranchName);
+          })
+          .then(() => {
+            return self.updateBranch(localRepoPath);
+          })
+          .then(() => {
+            return self.pushChanges(localRepoPath, self.commitMessage, self.destBranchName);
+          })
+          .then(() => {
+            return self.gitHubPrSubmiter.createPullRequest(
+              UpdatesManager.getRepoUser(repoUrl),
+              UpdatesManager.getRepoName(repoUrl),
+              self.pullRequestMessage,
+              self.destBranchName,
+              self.sourceBranchName
+            )
+          })
+      );
+    }
+
+    var promise = new Promise((resolve, reject) => {
+      Promise.all(promises).then(
+        (data) => resolve('Done:', data)
+      ).catch(
+        (err) => reject(err)
+      );
+    });
+
+    return promise;
+  }
 }
 
-let UpdatesManager = new UpdatesManager();
-UpdatesManager.ensureReposFolderSync();
-UpdatesManager.copyRepos().then(
+Output.overwriteConsole().overwriteStdout();
+
+let updatesManager = new UpdatesManager();
+updatesManager.updateRepos()
+  .then(
   (result) => {
-    UpdatesManager.createDestBranches().then(
-      (result) => {
-        UpdatesManager.changeToDestBranches().then(
-          (result) => {
-            UpdatesManager.updateBranches().then(
-              (result) => {
-                UpdatesManager.commitChanges().then(
-                  (result) => {
-                    UpdatesManager.createPrs().then(
-                      (result) => {
-                        console.log('TOTAL DONE: ', result);
-                      }
-                    );
-                  }
-                ).catch(function (reason) {
-                    console.log(reason);
-                  });
-              }
-            );
-          }
-        );
-      }
-    );
+    console.log(result)
   },
-
-  (err) => console.error(err)
-);
-
-
-
+  (err) => {
+    console.error(err)
+  });

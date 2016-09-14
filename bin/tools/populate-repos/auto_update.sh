@@ -17,6 +17,6 @@ NPM_GLOBAL_NM=`npm root -g`
  ! [ -d ${NPM_GLOBAL_NM}/babel-preset-es2015 ] && npm install -g babel-preset-es2015;
  ! [ -d ${NPM_GLOBAL_NM}/babel-plugin-add-module-exports ] && npm install -g babel-plugin-add-module-exports;
 
-babel-node `dirname $0`/PullRequestManager.es6 --presets ${NPM_GLOBAL_NM}/babel-preset-es2015 --plugins ${NPM_GLOBAL_NM}/babel-plugin-add-module-exports $1
+babel-node `dirname $0`/UpdatesManager.es6 --presets ${NPM_GLOBAL_NM}/babel-preset-es2015 --plugins ${NPM_GLOBAL_NM}/babel-plugin-add-module-exports $1
 
 exit 0
