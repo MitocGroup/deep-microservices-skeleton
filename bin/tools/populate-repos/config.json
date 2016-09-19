@@ -1,11 +1,28 @@
 {
   "reposArray": [
+    "https://github.com/MitocGroup/deep-microservices-monitoring",
+    "https://github.com/MitocGroup/livebook",
+    "https://github.com/MitocGroup/deep-microservices-todomvc",
+    "https://github.com/MitocGroup/deep-microservices-root-angular",
+    "https://github.com/MitocGroup/deep-microservices-benchmarking",
     "https://github.com/MitocGroup/deep-microservices-core-registry",
-    "https://github.com/MitocGroup/deep-microservices-core-search"
+    "https://github.com/MitocGroup/deep-microservices-core-search",
+    "https://github.com/MitocGroup/deep-microservices-dynamic-image",
+    "https://github.com/MitocGroup/deep-microservices-root-vanilla",
+    "https://github.com/MitocGroup/deep-microservices-root-aurelia",
+    "https://github.com/MitocGroup/deep-microservices-root-react",
+    "https://github.com/MitocGroup/deep-microservices-helloworld",
+    "https://github.com/MitocGroup/deep-microservices-content",
+    "https://github.com/MitocGroup/deep-microservices-system",
+    "https://github.com/MitocGroup/deep-microservices-waf",
+    "https://github.com/MitocGroup/atm",
+    "https://github.com/MitocGroup/deep-microservices-blue-green",
+    "https://github.com/MitocGroup/deep-microservices-stripe",
+    "https://github.com/MitocGroup/deep-microservices-root-angular"
   ],
   "folderPath": "./repos",
   "sourceBranchName": "dev",
-  "destBranchName": "test_pr_update",
-  "commitMessage": "Test automatic repos update commit msg",
-  "pullRequestMessage": "Test automatic repos update pr"
+  "destBranchName": "node_v6_6",
+  "commitMessage": "Update node version",
+  "pullRequestMessage": "Update node version"
 }
