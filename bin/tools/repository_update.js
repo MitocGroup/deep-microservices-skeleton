@@ -119,6 +119,10 @@ function updateMicroservice(microserviceName, resources) {
       process.exit(0);
       break;
     case 'README.md':
+      if(microserviceName.indexOf('deep-microservices-root') !== -1 && global.NO_INTERACTION) {
+        callback();
+        return;
+      }
       updateReadme(microserviceName, callback);
       break;
 
