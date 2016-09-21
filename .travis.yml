@@ -18,9 +18,12 @@ branches:
     - dev
     - stage
     - test
+    - docs
 
 before_install:
   - cp bin/test/package.json .
+  - node -v
+  - npm -v
 
 after_success:
   - npm run coverage
