@@ -109,3 +109,37 @@ after_script:
   - npm run remove-coverage
 ```
 > Remove temporary coverage files
+
+### Environment variables
+```bash
+env:
+  global:
+    - NODE_RELEASE=4.x
+    - 'MAJOR_VERSIONS=master,stage'
+    - DEEP_NO_INTERACTION=1
+    - E2E_TESTING=none
+    - secure: 
+        NIH*********...***
+```
+> Used to setup global environment variables through all jobs.
+> `NODE_RELEASE=4.x` - stable verison of nodejs for PHP language
+> `DEEP_NO_INTERACTION=1` - use no interaction mode
+> `E2E_TESTING=none` - e2e testing mode, possible values: none, private, public
+> `MAJOR_VERSIONS=master,stage` - configure branches to run all tests
+
+### Parallelizing builds
+```
+env:
+  matrix:
+    - TEST_SUITE=backend
+    - TEST_SUITE=frontend
+```
+> Add parallelizing for backend and frontend. For [more details](https://docs.travis-ci.com/user/speeding-up-the-build/)
+
+### E2E testing with SauceLab
+```bash
+addons:
+  sauce_connect: true
+```
+> To allow multiple tunnels to be open simultaneously, [Travis CI opens a Sauce Connect Identified Tunnel](https://docs.travis-ci.com/user/sauce-connect/).
+> Note: Sometimes build sporadically getting error while bringing up tunnel VM. It is [known issue](https://github.com/travis-ci/travis-ci/issues/6222), so for this case travis job should be restarted.
