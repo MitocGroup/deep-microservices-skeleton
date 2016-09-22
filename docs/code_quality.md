@@ -122,7 +122,14 @@ eslint --fix path/to/file
 - Apply and Ok.
 
 ![TSLint WebStorm setup](https://github.com/MitocGroup/deep-microservices-skeleton/blob/master/docs/TSLint_WebStorm_setup.png)
-		
+
+### How to setup PHP Code Sniffer in PHPStorm
+- Navigate to PHP.
+- Add path to Code Sniffer package.
+- OK and Apply.
+
+![PHP Code Sniffer PHPStorm setup](https://github.com/MitocGroup/deep-microservices-skeleton/blob/master/docs/Code_Sniffer_PHPStorm_setup.png)
+
 ### How to run codeclimate on local
 
 ```bash
