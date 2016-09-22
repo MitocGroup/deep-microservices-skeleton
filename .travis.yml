@@ -18,7 +18,6 @@ branches:
     - dev
     - stage
     - test
-    - docs
 
 before_install:
   - cp bin/test/package.json .
@@ -28,3 +27,9 @@ after_success:
 
 after_script:
   - npm run remove-coverage
+
+env:
+  matrix:
+    # Parallelize backend and fronted test
+    - TEST_SUITE=backend
+    - TEST_SUITE=frontend
