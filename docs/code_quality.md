@@ -31,6 +31,12 @@ npm install tslint-eslint-rules
 > Install `tslint-eslint-rules` to improve your TSLint with the missing ESLint Rules
 
 ```bash
+composer install
+```
+
+> Install PHP coding styles (should be run from project root folder)
+
+```bash
 ./bin/install_precommit.sh
 ```
 
