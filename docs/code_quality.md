@@ -72,7 +72,15 @@ eslint path/to/file
 tslint path/to/file
 ```
 
-> Run ESLint/TSLint validation only for one file
+```bash
+./vendor/bin/phpcs --standard=WordPress path/to/file
+```
+
+```bash
+./vendor/bin/phpcs --standard=Drupal path/to/file
+```
+
+> Run ESLint/TSLint/Code Sniffer validation only for one file
 
 ### How to fix issues automatically by ESLint. 
 
@@ -84,6 +92,14 @@ eslint --fix .
 
 ```bash
 eslint --fix path/to/file
+```
+
+```bash
+./vendor/bin/phpcbf path/to/file --warning-severity=0 --standard=WordPress
+```
+
+```bash
+./vendor/bin/phpcbf path/to/file --warning-severity=0 --standard=Drupal
 ```
 
 > Fix code issues only for one file
@@ -127,16 +143,38 @@ codeclimate analyze  -e eslint -f json
 > Run only ESLint codeclimate analyzing on local with reporting results in json format 
 
 ```bash
+codeclimate analyze -e phpcodesniffer -f html > phpcodesniffer.html
+```
+
+>  Run codeclimate phpcodesniffer coding styles analyzing on local with reporting results in html format and store in phpcodesniffer.html file
+
+```bash
 CODECLIMATE_DEBUG=1 codeclimate analyze -f html > report.html 
 ```
 
->  Run codeclimate analyzing on local in debug mode with reporting results in html format	and store in report.html files
+>  Run codeclimate analyzing on local in debug mode with reporting results in html format and store in report.html file
 		
-		
-### Notes 
+### Notes for ESLint
 
 - [x] "off" or 0 - turn the rule off
 - [x] "warn" or 1 - turn the rule on as a warning (doesn’t affect exit code)html)
 - [x] "error" or 2 - turn the rule on as an error (exit code is 1 when triggered)
 
 > Please use only number values because codeclimate validation fails for string one
+
+### How to exclude third party css file from code style analyzing?
+```bash
+--exclude-list=path/to/file.css
+```
+> Need to add css file to `--exclude-list` in `.csslintrc` and `docs/.csslintrc`.
+
+### How to exclude third party php file from code style analyzing?
+> Need to add php file to `exclude_paths:` section in `.codeclimate.yml` and `docs/.codeclimate.yml`.
+
+### How to exclude third party js/es6 file from code style analyzing?
+> Need to add file to `exclude_paths:` section in `.codeclimate.yml` and `docs/.codeclimate.yml`.
+> Need to add file to to `.eslintignore` and `docs/.eslintignore`.
+
+### How to fix `fixme` issues with TODO keyword?
+> This engine check is used to avoid adding the unready code with BUG, TODO and etc. keywords in code.
+> If you are sure that `TODO` cases can be merged in dev/prod you can just rename then from `TODO` to `todo`.
