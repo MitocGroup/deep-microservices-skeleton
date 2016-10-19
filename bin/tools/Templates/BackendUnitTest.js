@@ -957,6 +957,8 @@ export class BackendUnitTest extends AbstractTemplate {
     content.push('');
     content.push('\'use strict\';');
     content.push('');
+    content.push('/*eslint no-eval: 0 */');
+    content.push('');
     content.push('import chai from \'chai\';');
     content.push('import dir from \'node-dir\';');
     content.push('import path from \'path\';');
