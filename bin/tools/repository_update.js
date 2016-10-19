@@ -195,7 +195,7 @@ if (!FS.existsSync(msPath) || !FS.statSync(msPath).isDirectory()) {
 }
 
 let resources = [
-  'README.md', '.travis.yml', '.hound.yml', 'bin/test',
+  'README.md', '.travis.yml', 'bin/test',
   '.codeclimate.yml', '.csslintrc', '.eslintignore', '.eslintrc', 'tslint.json',
   'pre-commit hook', 'backend unit test', 'frontend unit test',
 ];

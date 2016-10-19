@@ -143,3 +143,11 @@ addons:
 ```
 > To allow multiple tunnels to be open simultaneously, [Travis CI opens a Sauce Connect Identified Tunnel](https://docs.travis-ci.com/user/sauce-connect/).
 > Note: Sometimes build sporadically getting error while bringing up tunnel VM. It is [known issue](https://github.com/travis-ci/travis-ci/issues/6222), so for this case travis job should be restarted.
+
+### Slack notification
+```bash
+notifications:
+  slack: '<account>:<token>'
+```
+> The [simplest configuration](https://docs.travis-ci.com/user/notifications/#Slack-notifications) requires your slack account name and the token you just generated.
+> As always, it’s recommended to encrypt the credentials with our travis command line client. Use `travis encrypt "<account>:<token>" --add notifications.slack --append` to append, not replace the existed channels.
