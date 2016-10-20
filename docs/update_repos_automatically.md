@@ -26,6 +26,7 @@ Before updating automatically repos, please make sure that all dependencies is i
 ### Step 2. Update config file. 
 
 > Update `./bin/tools/populate-repos/config.json` config with details for specific updates. 
+
 ```json
 {
   "reposArray": [                        
