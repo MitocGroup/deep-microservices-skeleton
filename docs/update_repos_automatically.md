@@ -57,8 +57,3 @@ Before updating automatically repos, please make sure that all dependencies is i
 ### What do I need to do when getting the error: `[Error: Empty value for parameter 'owner': undefined]`?
 > This is known issue related new version of `github` node module.
 > To fix issue you need to install preffered `github` version by running `npm install github@3.1.0` from project root.
-
-
-		
-
-
