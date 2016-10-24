@@ -795,7 +795,9 @@ export class BackendUnitTest extends AbstractTemplate {
         posttest: 'bash node-bin/posttest.sh'
       },
       dependencies: {},
-      devDependencies: {},
+      devDependencies: {
+        joi: '5.x.x',
+      },
       repository: {
         type: 'git',
         url: 'https://github.com/MitocGroup/deep-microservices-skeleton.git',
