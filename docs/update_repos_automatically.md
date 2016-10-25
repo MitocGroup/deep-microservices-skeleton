@@ -6,6 +6,7 @@ Before updating automatically repos, please make sure that all dependencies is i
 ./bin/test/preinstall.sh && ./bin/tools/skeleton-install.sh
 ```
 > Run pre-install and skeleton install dependencies scripts. These command should be run from project root.
+> To update one repo you need to use: `./bin/tools/repository_update.sh ../path/to/project`
          
 ## Getting Started
 
