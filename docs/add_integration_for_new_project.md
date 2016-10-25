@@ -27,6 +27,3 @@ Adding integration with Codeclimate/Travis for new projects
 ###7. Update badges.
 
 ###8. Update new projects by skeleton update functionality.
-
-
-
