@@ -11,4 +11,5 @@
 (if [ ! -d "node_modules/deep-extend" ]; then npm install deep-extend; fi) &&\
 (if [ ! -d "node_modules/properties-reader" ]; then npm install properties-reader; fi) &&\
 (if [ ! -d "node_modules/nodegit" ]; then npm install nodegit; fi) &&\
+(if [ ! -d "node_modules/bluebird" ]; then npm install bluebird; fi) &&\
 (if [ ! -d "node_modules/twig" ]; then npm install twig; fi)
