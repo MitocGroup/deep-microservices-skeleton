@@ -9,6 +9,7 @@ import NodeGit from 'nodegit';
 import fsExtra from 'fs-extra';
 import path from 'path';
 import fs from 'fs';
+import BlueBirdPromise from 'bluebird';
 import ChildProcess from 'child_process';
 import {Output} from './../Helper/Output';
 
@@ -211,8 +212,8 @@ export default class UpdatesManager {
             repo.defaultSignature(),
             logMsg);
         }).done(function () {
-          resolve(branchName);
-        });
+        resolve(branchName);
+      });
     });
 
     return promise;
@@ -237,8 +238,8 @@ export default class UpdatesManager {
             });
 
         }).done(function () {
-          resolve(repoPath);
-        });
+        resolve(repoPath);
+      });
     });
 
     return promise;
@@ -259,8 +260,8 @@ export default class UpdatesManager {
           //checkout branch
           return repo.checkoutRef(reference);
         }).done(function () {
-          resolve(branchName);
-        });
+        resolve(branchName);
+      });
     });
 
     return promise;
@@ -302,27 +303,27 @@ export default class UpdatesManager {
           return repo.createCommitOnHead(
             paths, defSign, defSign, commitMsg);
         }).then(function (oid) {
-          return console.log('New Commit: ', oid);
-        })
-        /// PUSH
+        return console.log('New Commit: ', oid);
+      })
+      /// PUSH
         .then(function () {
           return repo.getRemote('origin');
         }).then(function (remoteResult) {
 
-          remote = remoteResult;
+        remote = remoteResult;
 
-          // Create the push object for this remote
-          return remote.push(
-            [`refs/heads/${destBranchName}:refs/heads/${destBranchName}`],
-            {
-              callbacks: {
-                credentials: function () {
-                  return NodeGit.Cred.userpassPlaintextNew(UpdatesManager.Auth0Token, 'x-oauth-basic');
-                }
+        // Create the push object for this remote
+        return remote.push(
+          [`refs/heads/${destBranchName}:refs/heads/${destBranchName}`],
+          {
+            callbacks: {
+              credentials: function () {
+                return NodeGit.Cred.userpassPlaintextNew(UpdatesManager.Auth0Token, 'x-oauth-basic');
               }
             }
-          );
-        })
+          }
+        );
+      })
         .catch(function (reason) {
           console.log(reason);
           reject(reason)
@@ -347,8 +348,8 @@ export default class UpdatesManager {
       let fullCmd = `${UpdatesManager.REPOSITORY_UPDATE} ${localRepoPath}`;
 
       this._exec(fullCmd, cwd).then(
-          cmdResult => resolve(cmdResult),
-          cmdError => reject(cmdError)
+        cmdResult => resolve(cmdResult),
+        cmdError => reject(cmdError)
       )
     });
 
@@ -379,69 +380,88 @@ export default class UpdatesManager {
   }
 
   /**
-   * @returns {Promise}
+   * @param {Function} condition - function with condition for loop, returns {Boolean}
+   * @param {Function} action - function with async action, returns {Promise}
+   * @returns {*}
+   */
+  static whilePromise(condition, action) {
+    var resolver = BlueBirdPromise.defer();
+
+    var loop = function () {
+      if (!condition()) return resolver.resolve();
+      return BlueBirdPromise.cast(action())
+        .then(loop)
+        .catch(resolver.reject);
+    };
+
+    process.nextTick(loop);
+
+    return resolver.promise;
+  }
+
+
+  /**
+   * Update all repos
    */
   updateRepos() {
 
     this._ensureReposFolderSync();
 
-    var promises = [];
     var repo;
     var self = this;
+    var i = 0;
+    var length = this.repos.length;
 
-    for (let repoUrl of this.repos) {
-
-      console.log('Updating repoUrl: ', repoUrl);
-
-      let localRepoPath = path.join(this.folderPath, UpdatesManager.getRepoName(repoUrl));
-      promises.push(
-        self.cloneRepo(repoUrl, localRepoPath, this.cloneOptions)
-          .then((repoResult) => {
-            repo = repoResult;
-          })
-          .then(() => {
-            return self.createDestinationBranch(repo, self.destBranchName);
-          })
-          .then(() => {
-            return self.changeDestinationBranch(repo, self.destBranchName);
-          })
-          .then(() => {
-            return self.updateBranch(localRepoPath);
-          })
-          .then(() => {
-            return self.pushChanges(localRepoPath, self.commitMessage, self.destBranchName);
-          })
-          .then(() => {
-            return self.gitHubPrSubmiter.createPullRequest(
-              UpdatesManager.getRepoUser(repoUrl),
-              UpdatesManager.getRepoName(repoUrl),
-              self.pullRequestMessage,
-              self.destBranchName,
-              self.sourceBranchName
-            )
-          })
-      );
+    /**
+     * @returns {boolean}
+     */
+    function hasNext() {
+      return i < length;
     }
 
-    var promise = new Promise((resolve, reject) => {
-      Promise.all(promises).then(
-        (data) => resolve('Done:', data)
-      ).catch(
-        (err) => reject(err)
-      );
-    });
+    /**
+     * @returns {Promise}
+     */
+    function updateRepo() {
+      var repoUrl = self.repos[i];
+      var localRepoPath = path.join(self.folderPath, UpdatesManager.getRepoName(repoUrl));
 
-    return promise;
+      var promise = self.cloneRepo(repoUrl, localRepoPath, self.cloneOptions)
+        .then((repoResult) => {
+          repo = repoResult;
+        })
+        .then(() => {
+          return self.createDestinationBranch(repo, self.destBranchName);
+        })
+        .then(() => {
+          return self.changeDestinationBranch(repo, self.destBranchName);
+        })
+        .then(() => {
+          return self.updateBranch(localRepoPath);
+        })
+        .then(() => {
+          return self.pushChanges(localRepoPath, self.commitMessage, self.destBranchName);
+        })
+        .then(() => {
+          i++;
+          return self.gitHubPrSubmiter.createPullRequest(
+            UpdatesManager.getRepoUser(repoUrl),
+            UpdatesManager.getRepoName(repoUrl),
+            self.pullRequestMessage,
+            self.destBranchName,
+            self.sourceBranchName
+          )
+        });
+
+      return promise;
+    }
+
+    UpdatesManager.whilePromise(hasNext, updateRepo).then(function () {
+      console.log("DONE! All repos updated");
+    });
   }
 }
 Output.overwriteConsole().overwriteStdout();
 
 let updatesManager = new UpdatesManager();
-updatesManager.updateRepos()
-  .then(
-  (result) => {
-    console.log(result)
-  },
-  (err) => {
-    console.error(err)
-  });
+updatesManager.updateRepos();
