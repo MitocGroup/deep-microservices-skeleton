@@ -458,7 +458,7 @@ export class FrontendUnitTest extends AbstractTemplate {
       let frameworkDestination = path.join(destination, FrontendUnitTest.FRAMEWORK_PATH);
       let stripeDestination = path.join(destination, FrontendUnitTest.STRIPE_PATH);
       let frameworkMockDestination = path.join(destination, FrontendUnitTest.FRAMEWORK_MOCK_PATH);
-      let name = profileDestination.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
+      let name = profileDestination.replace(/(?:.*\/)?src\/(.*)\/tests\/.*/gi, '$1');
       let healthCheckObj = this.getHealthCheckObjectByName(name);
 
       if (!FrontendUnitTest.accessSync(profileDestination)) {
@@ -470,7 +470,7 @@ export class FrontendUnitTest extends AbstractTemplate {
       }
 
       if (!FrontendUnitTest.accessSync(frameworkMockDestination)) {
-        let name = destination.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
+        let name = destination.replace(/(?:.*\/)?src\/(.*)\/tests\/.*/gi, '$1');
 
         fsExtra.copySync(FrontendUnitTest.FRAMEWORK_MOCK_SOURCE, frameworkMockDestination);
 
@@ -496,7 +496,7 @@ export class FrontendUnitTest extends AbstractTemplate {
 
       let karmaDestination = path.join(destination, FrontendUnitTest.KARMA_CONFIG);
       let jspmConfigDestination = path.join(destination, FrontendUnitTest.JSPM_CONFIG);
-      let name = karmaDestination.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
+      let name = karmaDestination.replace(/(?:.*\/)?src\/(.*)\/tests\/.*/gi, '$1');
       let healthCheckObj = this.getHealthCheckObjectByName(name);
       let hasStripeDependency = false;
 
@@ -556,7 +556,7 @@ export class FrontendUnitTest extends AbstractTemplate {
     for (let destination of destinations) {
 
       let packageJsonDestination = path.join(destination, FrontendUnitTest.PACKAGE_JSON);
-      let name = packageJsonDestination.replace(/.*\/src\/(.*)\/tests\/.*/gi, '$1');
+      let name = packageJsonDestination.replace(/(?:.*\/)?src\/(.*)\/tests\/.*/gi, '$1');
 
       this.updatePackageJson(name, packageJsonDestination);
     }
@@ -1047,7 +1047,7 @@ export class FrontendUnitTest extends AbstractTemplate {
   static getDirectiveName(pathToClass) {
 
     let fileContentString = fs.readFileSync(pathToClass, 'utf8');
-    let re = /.*angular\s*?\.module\([a-z0-9]+\)\s*?\.directive\(("|'|`)([a-z_]+)("|'|`).*/mi;
+    let re = /.*angular\s*?\.module\([a-z0-9]+\)\s*?\.directive\(("|'|`)(\w+)("|'|`)/mi;
 
     if (!re.test(fileContentString)) {
       return '';
