@@ -448,9 +448,24 @@ export class FrontendUnitTest extends AbstractTemplate {
   }
 
   /**
+   * Generate frontend tests paths if missing
+   */
+  generateFrontendTestsPaths() {
+    let paths = [];
+    let microAppFrontend = this._microAppFrontend || [];
+
+    for (let app of this._microAppFrontend) {
+      paths.push(path.join(app.path, FrontendUnitTest.TESTS_FRONTEND_FOLDER));
+    }
+
+    return paths;
+  }
+
+  /**
    * @param {String[]} destinations
    */
   prepareMocks(destinations) {
+    destinations = destinations.length ? destinations : this.generateFrontendTestsPaths();
 
     for (let destination of destinations) {
 
