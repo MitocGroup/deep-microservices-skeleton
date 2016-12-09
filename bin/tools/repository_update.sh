@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 babel=$(which babel)
 
+bash $(cd $(dirname $0); pwd -P)/framework.sh
+
 if [ -z ${babel} ]; then
     echo "Seems like babel is not installed! Installing babel v6 as default transpiler..."
     echo ""
