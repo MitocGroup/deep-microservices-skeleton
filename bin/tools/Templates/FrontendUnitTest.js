@@ -506,6 +506,7 @@ export class FrontendUnitTest extends AbstractTemplate {
    * @param {String[]} destinations
    */
   copyConfigs(destinations) {
+    destinations = destinations.length ? destinations : this.generateFrontendTestsPaths();
 
     for (let destination of destinations) {
 
