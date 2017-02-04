@@ -29,6 +29,7 @@ DeepFramework.Kernel.load({
   },
   'microserviceIdentifier': '{microserviceIdentifier}',
   'awsAccountId': 122435435456,
+  'apiVersion': 'v1',
   'propertyIdentifier': 'propertyIdentifier',
   'timestamp': 1441198970148,
   'buckets': {
