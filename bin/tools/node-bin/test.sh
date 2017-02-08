@@ -1,7 +1,8 @@
 #!/bin/bash
 
 RUN_TESTS() {
-  babel-node $(npm root -g)/istanbul/lib/cli.js cover `which _mocha` -- 'test/**/*.spec.js' \
+  node --max_old_space_size=4096 --optimize_for_size --max_executable_size=4096 --stack_size=4096 `which babel-node` \
+   $(npm root -g)/istanbul/lib/cli.js cover `which _mocha` -- 'test/**/*.spec.js' \
     --reporter spec --ui tdd --recursive --timeout 180s
 }
 
