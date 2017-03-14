@@ -71,7 +71,7 @@ export default class extends DeepFramework.Core.AWS.Lambda.Runtime {
      */
     return (Joi) => {
       return Joi.object().keys({
-        Id: Joi.string().required()
+        Id: Joi.string()
       });
     }
   }
