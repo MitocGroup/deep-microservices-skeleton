@@ -10,7 +10,7 @@ import {AbstractConfigTemplate} from './AbstractConfigTemplate';
 /**
  * Ignore Config
  */
-export class IngnoreConfig extends AbstractConfigTemplate {
+export class IgnoreConfig extends AbstractConfigTemplate {
   /**
    * @param {String} customPresetsFile
    * @param {String} templatePath

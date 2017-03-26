@@ -94,7 +94,7 @@ after_success:
   - npm run coverage
 ```
 > Send coverage to Codeclimate, AWS S3 if all environment variables configured
-> Should be configured env vars: GITHUB_OAUTH_TOKEN, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET_NAME, AWS_DEFAULT_REGION, CODECLIMATE_REPO_TOKEN_MASTER, CODECLIMATE_REPO_TOKEN_DEV
+> Should be configured env vars: GITHUB_OAUTH_TOKEN, CODECLIMATE_REPO_TOKEN_MASTER, CODECLIMATE_REPO_TOKEN_DEV, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, AWS_S3_BUCKET
 
 ### After build failure
 ```bash
