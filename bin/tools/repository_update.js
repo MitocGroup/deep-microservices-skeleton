@@ -10,7 +10,7 @@ import {ValidatorFactory} from './Helper/ValidatorFactory';
 import {Readme} from './Templates/Readme';
 import {Output} from './Helper/Output';
 import {YamlConfig} from './Templates/YamlConfig';
-import {IngnoreConfig} from './Templates/IngnoreConfig';
+import {IgnoreConfig} from './Templates/IgnoreConfig';
 import {JsonConfig} from './Templates/JsonConfig';
 import {BackendUnitTest} from './Templates/BackendUnitTest';
 import {FrontendUnitTest} from './Templates/FrontendUnitTest';
@@ -57,7 +57,7 @@ function updateYaml(configName, callback) {
  * @param {Function} callback
  */
 function updateConfig(configName, callback) {
-  let ignoreConfig = new IngnoreConfig(
+  let ignoreConfig = new IgnoreConfig(
     path.join(msPath, `docs/${configName}`), `../../../${configName}`
   );
 
